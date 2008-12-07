@@ -2,13 +2,24 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to PyKrylov's documentation!
-====================================
+======================
+PyKrylov Documentation
+======================
+
+:Release: |version|
+:Data: |today|
+
+.. module:: pykrylov
 
 Contents:
 
 .. toctree::
    :maxdepth: 2
+
+   Introduction <introduction>
+   Generic Template <generic>
+   Conjugate Gradient <cg>
+
 
 Indices and tables
 ==================
