@@ -5,6 +5,8 @@ import sys
 
 import numpy as np
 from math import sqrt, sin, pi
+
+from pykrylov.gallery import Poisson1dMatvec, Poisson2dMatvec
 from pykrylov.cg import CG
 
 def macheps():
@@ -29,13 +31,6 @@ class Poisson1dTestCase(unittest.TestCase):
     def tearDown(self):
         return
 
-    def Poisson1dMatvec(self, x):
-        # Matrix-vector product with a 1D Poisson matrix
-        y = 2*x
-        y[:-1] -= x[1:]
-        y[1:] -= x[:-1]
-        return y
-
     def testPoisson1D(self):
         # Solve 1D Poisson systems of various sizes
         for n in self.n:
@@ -46,8 +41,8 @@ class Poisson1dTestCase(unittest.TestCase):
             tol = cond * self.eps
 
             e = np.ones(n)
-            rhs = self.Poisson1dMatvec(e)
-            cg = CG(self.Poisson1dMatvec,
+            rhs = Poisson1dMatvec(e)
+            cg = CG(Poisson1dMatvec,
                     matvec_max=2*n,
                     outputStream=sys.stderr)
             cg.solve(rhs)
@@ -70,28 +65,6 @@ class Poisson2dTestCase(unittest.TestCase):
     def tearDown(self):
         return
 
-    def Poisson2dMatvec(self, x):
-        # Matrix-vector product with a 4D Poisson matrix
-        n = int(sqrt(x.shape[0]))
-        y = 4*x
-        # Contribution of first block row
-        y[:n-1] -= x[1:n]
-        y[1:n] -= x[:n-1]
-        y[:n] -= x[n:2*n]
-        # Contribution of intermediate block rows
-        for i in xrange(1,n-1):
-            xi = x[i*n:(i+1)*n]   # This a view of x, not a copy
-            yi = y[i*n:(i+1)*n]
-            yi[:-1] -= xi[1:]
-            yi[1:] -= xi[:-1]
-            yi -= x[(i+1)*n:(i+2)*n]
-            yi -= x[(i-1)*n:i*n]
-        # Contribution of last block row
-        y[(n-1)*n:] -= x[(n-2)*n:(n-1)*n]
-        y[(n-1)*n+1:] -= x[(n-1)*n:-1]
-        y[(n-1)*n:n*n-1] -= x[-n+1:]
-        return y
-
     def testPoisson2D(self):
         # Solve 1D Poisson systems of various sizes
         for n in self.n:
@@ -104,8 +77,8 @@ class Poisson2dTestCase(unittest.TestCase):
 
             n2 = n*n
             e = np.ones(n2)
-            rhs = self.Poisson2dMatvec(e)
-            cg = CG(self.Poisson2dMatvec,
+            rhs = Poisson2dMatvec(e)
+            cg = CG(Poisson2dMatvec,
                     matvec_max=2*n2,
                     outputStream=sys.stderr)
             cg.solve(rhs)

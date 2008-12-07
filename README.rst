@@ -41,6 +41,18 @@ those of `Pysparse <http://pysparse.sf.net>`_ and `Scipy
 <http://www.scipy.org>`_.
 
 
+Installing
+==========
+
+Type the usual Distutils stance::
+
+    python setup.py install
+
+To select the install location, use
+
+    python setup.py install --prefix=/some/other/place
+
+
 Documentation
 =============
 
@@ -60,8 +72,9 @@ as TeXLive, only issue the first two commands.
 Obtaining PyKrylov
 ==================
 
-PyKrylov is hosted on `GitHub <http://www.github.com>`_. Head to
-`http://github.com/dpo/pykrylov/tree/master`_ and hit the Download button.
+PyKrylov is hosted on `GitHub <http://www.github.com>`_. Head to the
+`PyKrylov GitHub page<http://github.com/dpo/pykrylov/tree/master>`_ and hit the
+Download button.
 
 To clone the Git repository::
 
