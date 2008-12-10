@@ -30,7 +30,7 @@ where A is a matrix and x and b are vectors of compatible dimension. Different
 Krylov methods are used depending on the properties of the matrix A. Typically,
 only matrix-vector products with A are required at each iteration. Some methods
 require matrix-vector products with the transpose of A when the latter is not
-symmetric. For more information on Krylov methods, see for instance [Kelley]_.
+symmetric. For more information on Krylov methods, see the references below.
 
 PyKrylov does not rely on any particular dense or sparse matrix package because 
 all matrix-vector products are handled as operators, i.e., the user supplies
@@ -48,7 +48,7 @@ Type the usual Distutils stance::
 
     python setup.py install
 
-To select the install location, use
+To select the install location, use ::
 
     python setup.py install --prefix=/some/other/place
 
@@ -73,7 +73,7 @@ Obtaining PyKrylov
 ==================
 
 PyKrylov is hosted on `GitHub <http://www.github.com>`_. Head to the
-`PyKrylov GitHub page<http://github.com/dpo/pykrylov/tree/master>`_ and hit the
+`PyKrylov GitHub page <http://github.com/dpo/pykrylov/tree/master>`_ and hit the
 Download button.
 
 To clone the Git repository::
@@ -84,6 +84,21 @@ To clone the Git repository::
 References
 ==========
 
+.. [Demmel] J. W. Demmel, *Applied Numerical Linear Algebra*, SIAM,
+            Philadelphia, 1997.
+
+.. [Greenbaum] A. Greenbaum, *Iterative Methods for Solving Linear Systems*,
+               number 17 in *Frontiers in Applied Mathematics*, SIAM,
+               Philadelphia, 1997.
+
 .. [Kelley] C. T. Kelley, *Iterative Methods for Linear and Nonlinear
             Equations*, number 16 in *Frontiers in Applied Mathematics*, SIAM,
             Philadelphia, 1995.
+
+.. [Saad] Y. Saad, *Iterative Methods for Sparse Linear Systems*, 2nd ed., SIAM,
+          Philadelphia, 2003.
+
+.. [Templates] R. Barrett, M. Berry, T. F. Chan, J. Demmel, J. M. Donato,
+               J. Dongarra, V. Eijkhout, R. Pozo, C. Romine and
+               H. Van der Vorst, *Templates for the Solution of Linear Systems:
+               Building Blocks for Iterative Methods*, SIAM, Philadelphia, 1993.

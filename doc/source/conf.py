@@ -19,6 +19,8 @@ import sys, os
 #sys.path.append(os.path.abspath('.'))
 sys.path.append(os.path.abspath('../../pykrylov/generic'))
 sys.path.append(os.path.abspath('../../pykrylov/cg'))
+sys.path.append(os.path.abspath('../../pykrylov/cgs'))
+sys.path.append(os.path.abspath('../../pykrylov/bicgstab'))
 sys.path.append('sphinxext')
 
 # Import support for ipython console session syntax highlighting (lives

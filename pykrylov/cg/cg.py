@@ -21,6 +21,12 @@ class CG( KrylovMethod ):
         minimize    -<b,x> + 1/2 <x, Ax>
 
     in the variable x.
+
+    CG performs 1 matrix-vector product, 2 dot products and 3 daxpys per
+    iteration.
+
+    If a preconditioner is supplied, it needs to solve one preconditioning
+    system per iteration.
     """
 
     def __init__(self, matvec, **kwargs):
@@ -35,26 +41,36 @@ class CG( KrylovMethod ):
 
     def solve(self, rhs, **kwargs):
         """
-        Solve a linear system with `rhs` as right-hand side. The vector rhs`
-        should be a Numpy array.
+        Solve a linear system with `rhs` as right-hand side by the CG method.
+        The vector `rhs` should be a Numpy array. An optional argument `guess`
+        may be supplied, with an initial guess as a Numpy array. By default,
+        the initial guess is the vector of zeros.
         """
         n = rhs.shape[0]
         nMatvec = 0
         definite = True
 
-        x = np.zeros(n)
-        r = -rhs  # Initial residual vector
+        # Initial guess
+        guess_supplied = 'guess' in kwargs.keys()
+        x = kwargs.get('guess', np.zeros(n))
 
+        # Initial residual vector
+        r = -rhs
+        if guess_supplied:
+            r += self.matvec(x)
+            nMatvec += 1
+
+        # Initial preconditioned residual vector
         if self.precon is not None:
             y = self.precon(r)
         else:
-            y = r     # Initial preconditioned residual vector
+            y = r
 
         ry = np.dot(r,y)
         self.residNorm0 = residNorm = sqrt(ry)
         threshold = max( self.abstol, self.reltol * self.residNorm0 )
 
-        p = -r   # Initial search direction (copy so as not to overwrite rhs)
+        p = -r   # Initial search direction (copy not to overwrite rhs if x=0)
         
         while residNorm > threshold and nMatvec < self.matvec_max and definite:
 
