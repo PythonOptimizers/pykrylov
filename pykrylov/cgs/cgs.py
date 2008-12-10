@@ -82,7 +82,7 @@ class CGS( KrylovMethod ):
             # Update solution and residual
             x += alpha * z
             Az = self.matvec(z) ; nMatvec += 1
-            r -= alpha * Ax
+            r -= alpha * Az
 
             # Update residual norm and check convergence
             residNorm = sqrt(np.dot(r,r))
