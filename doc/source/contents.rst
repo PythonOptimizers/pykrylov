@@ -19,6 +19,8 @@ Contents:
    Introduction <introduction>
    Generic Template <generic>
    Conjugate Gradient <cg>
+   Conjugate Gradient Squared <cgs>
+   Bi-Conjugate Gradient Stabilized <bicgstab>
 
 
 Indices and tables

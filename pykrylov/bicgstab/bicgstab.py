@@ -16,7 +16,11 @@ class BiCGSTAB( KrylovMethod ):
 
     where the matrix A is unsymmetric and nonsingular.
 
-    Bi-CGSTAB requires 2 matrix-vector products, 6 dot products and 
+    Bi-CGSTAB requires 2 matrix-vector products, 6 dot products and 6 daxpys
+    per iteration.
+
+    In addition, if a preconditioner is supplied, it needs to solve 2
+    preconditioning systems per iteration.
 
     This implementation is a preconditioned version of that given in [Kelley].
 
