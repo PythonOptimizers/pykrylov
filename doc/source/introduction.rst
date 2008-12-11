@@ -9,8 +9,9 @@ method for solving systems of linear equations in pure Python. The sole
 requirement is Numpy for fast array operations.
 
 PyKyrlov is in the *very early* stages of development. If you give it a whirl,
-please let me know what you think at `dominique.orban@gmail.com
-<mailto:dominique.orban@gmail.com>`_.
+please let me know what you think at the `LightHouse PyKrylov page
+<http://pykrylov.lighthouseapp.com/projects/21441-pykrylov>`_. Feel free to post
+bug reports, feature requests and praises.
 
 Example
 =======
