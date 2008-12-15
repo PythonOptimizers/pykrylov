@@ -26,8 +26,9 @@ class CGS( KrylovMethod ):
     def __init__(self, matvec, **kwargs):
         KrylovMethod.__init__(self, matvec, **kwargs)
 
-        self.prefix = 'CGS: '
         self.name = 'Conjugate Gradient Squared'
+        self.acronym = 'CGS'
+        self.prefix = self.acronym + ': '
 
     def solve(self, rhs, **kwargs):
         """

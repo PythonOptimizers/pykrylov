@@ -32,8 +32,9 @@ class CG( KrylovMethod ):
     def __init__(self, matvec, **kwargs):
         KrylovMethod.__init__(self, matvec, **kwargs)
 
-        self.prefix = 'CG: '
         self.name = 'Conjugate Gradient'
+        self.acronym = 'CG'
+        self.prefix = self.acronym + ': '
 
         # Direction of nonconvexity if A is not positive definite
         self.infiniteDescent = None

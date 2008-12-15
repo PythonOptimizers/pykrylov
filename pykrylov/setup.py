@@ -9,6 +9,7 @@ def configuration(parent_package='',top_path=None):
     config.add_subpackage('generic')
     config.add_subpackage('cg')
     config.add_subpackage('cgs')
+    config.add_subpackage('tfqmr')
     config.add_subpackage('bicgstab')
     config.add_subpackage('gallery')
 

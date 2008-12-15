@@ -18,9 +18,10 @@ import sys, os
 # absolute, like shown here.
 #sys.path.append(os.path.abspath('.'))
 sys.path.append(os.path.abspath('../../pykrylov/generic'))
+sys.path.append(os.path.abspath('../../pykrylov/bicgstab'))
 sys.path.append(os.path.abspath('../../pykrylov/cg'))
 sys.path.append(os.path.abspath('../../pykrylov/cgs'))
-sys.path.append(os.path.abspath('../../pykrylov/bicgstab'))
+sys.path.append(os.path.abspath('../../pykrylov/tfqmr'))
 sys.path.append('sphinxext')
 
 # Import support for ipython console session syntax highlighting (lives
@@ -95,6 +96,7 @@ exclude_trees = []
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
 
+todo_include_todos = True
 
 # Options for HTML output
 # -----------------------

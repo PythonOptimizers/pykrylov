@@ -33,8 +33,9 @@ class BiCGSTAB( KrylovMethod ):
     def __init__(self, matvec, **kwargs):
         KrylovMethod.__init__(self, matvec, **kwargs)
 
-        self.prefix = 'Bi-CGSTAB: '
-        self.name = 'Bi-CGSTAB'
+        self.name = 'Bi-Conjugate Gradient Stabilized'
+        self.acronym = 'Bi-CGSTAB'
+        self.prefix = self.acronym + ': '
 
     def solve(self, rhs, **kwargs):
         """
