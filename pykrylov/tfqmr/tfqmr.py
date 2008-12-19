@@ -21,7 +21,14 @@ class TFQMR( KrylovMethod ):
     of `A`.
 
     If a preconditioner is supplied, TFQMR needs to solve 2 preconditioning
-    systems per iteration.
+    systems per iteration. Our implementation is inspired by the original
+    description in [Freund]_ and that of [Kelley]_.
+
+    References:
+
+    .. [Freund] R. W. Freund, *A Transpose-Free Quasi-Minimal Residual Method
+                for Non-Hermitian Linear Systems*, SIAM Journal on Scientific
+                Computing, **14** (2), pp. 470--482, 1993.
     """
 
     def __init__(self, matvec, **kwargs):

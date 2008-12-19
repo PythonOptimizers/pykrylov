@@ -23,7 +23,7 @@ Some examples use the efficient `Pysparse <http://pysparse.sf.net>`_ sparse
 matrix library to simulate functions that return matrix-vector products.
 
 Comments on this document or the software package should be posted on the
-`LightHouse PyKrylov page
+`Lighthouse PyKrylov page
 <http://pykrylov.lighthouseapp.com/projects/21441-pykrylov>`_.
 
 
@@ -41,10 +41,10 @@ Contents:
    Benchmarking Solvers <bmark>
 
 
-TODO List
-=========
+.. TODO List
+.. =========
 
-.. todolist::
+.. .. todolist::
 
 
 Indices and tables

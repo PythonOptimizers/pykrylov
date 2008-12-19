@@ -26,7 +26,8 @@ class CG( KrylovMethod ):
     iteration.
 
     If a preconditioner is supplied, it needs to solve one preconditioning
-    system per iteration.
+    system per iteration. Our implementation is standard and follows [Kelley]_
+    and [Templates]_.
     """
 
     def __init__(self, matvec, **kwargs):

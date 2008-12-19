@@ -20,7 +20,15 @@ class CGS( KrylovMethod ):
     per iteration. It does not require products with the transpose of A.
 
     If a preconditioner is supplied, CGS needs to solve two preconditioning
-    systems per iteration.
+    systems per iteration. The original description appears in [Sonn89]_, which
+    our implementation roughly follows.
+
+
+    Reference:
+
+    .. [Sonn89] P. Sonneveld, *CGS, A Fast Lanczos-Type Solver for Nonsymmetric
+                Linear Systems*, SIAM Journal on Scientific and Statistical
+                Computing **10** (1), pp. 36--52, 1989.
     """
 
     def __init__(self, matvec, **kwargs):

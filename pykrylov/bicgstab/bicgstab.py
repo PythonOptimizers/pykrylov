@@ -22,12 +22,15 @@ class BiCGSTAB( KrylovMethod ):
     In addition, if a preconditioner is supplied, it needs to solve 2
     preconditioning systems per iteration.
 
-    This implementation is a preconditioned version of that given in [Kelley].
+    The original description appears in [VdVorst92]_. Our implementation is a
+    preconditioned version of that given in [Kelley]_.
 
+    Reference:
 
-    .. [Kelley] C. T. Kelley, *Iterative Methods for Linear and Nonlinear
-                Equations*, number 16 in *Frontiers in Applied Mathematics*,
-                SIAM, Philadelphia, 1995.
+    .. [VdVorst92] H. Van der Vorst, *Bi-CGSTAB: A Fast and Smoothly Convergent
+                   Variant of Bi-CG for the Solution of Nonsymmetric Linear
+                   Systems*, SIAM Journal on Scientific and Statistical
+                   Computing **13** (2), pp. 631--644, 1992.
     """
 
     def __init__(self, matvec, **kwargs):

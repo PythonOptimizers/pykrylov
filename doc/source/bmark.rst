@@ -26,8 +26,8 @@ Consider the script::
 
     from math import sqrt
 
-    hdr = '%10s  %6s  %8s  %8s' % ('Name', 'Matvec', 'Resid', 'Error')
-    fmt = '%10s  %6d  %8.2e  %8.2e'
+    hdr = '%10s  %6s  %8s  %8s  %8s' % ('Name', 'Matvec', 'Resid0', 'Resid', 'Error')
+    fmt = '%10s  %6d  %8.2e  %8.2e  %8.2e'
     print hdr
 
     A = sp(matrix=spmatrix.ll_mat_from_mtx('jpwh_991.mtx'))
@@ -36,21 +36,21 @@ Consider the script::
     e = np.ones(n)
     rhs = A*e
 
-    # Loop through solvers using default stopping tolerance
+    # Loop through solvers using tighter stopping tolerance
     for KSolver in [CGS, TFQMR, BiCGSTAB]:
-        ks = KSolver(lambda v: A*v, matvec_max=2*n)
+        ks = KSolver(lambda v: A*v, matvec_max=2*n, reltol=1.0e-8)
         ks.solve(rhs, guess = 1+np.arange(n, dtype=np.float))
 
         err = np.linalg.norm(ks.bestSolution-e)/sqrt(n)
-        print fmt % (ks.acronym, ks.nMatvec, ks.residNorm, err)
+        print fmt % (ks.acronym, ks.nMatvec, ks.residNorm0, ks.residNorm, err)
 
 
 Executing the script above produces the formatted output::
 
-          Name  Matvec     Resid     Error
-           CGS      64  4.72e-03  1.47e-04
-         TFQMR      70  6.23e-04  2.77e-05
-     Bi-CGSTAB      62  6.34e-03  4.05e-04
+         Name  Matvec    Resid0     Resid     Error
+          CGS      82  8.64e+03  3.25e-05  2.35e-06
+        TFQMR      84  8.64e+03  8.97e-06  1.22e-06
+    Bi-CGSTAB      84  8.64e+03  5.57e-05  4.04e-06
 
 
 Example with Preconditioning
@@ -71,8 +71,8 @@ modifying the benchmarking script as::
 
     from math import sqrt
 
-    hdr = '%10s  %6s  %8s  %8s' % ('Name', 'Matvec', 'Resid', 'Error')
-    fmt = '%10s  %6d  %8.2e  %8.2e'
+    hdr = '%10s  %6s  %8s  %8s  %8s' % ('Name', 'Matvec', 'Resid0', 'Resid', 'Error')
+    fmt = '%10s  %6d  %8.2e  %8.2e  %8.2e'
     print hdr
 
     A = sp(matrix=spmatrix.ll_mat_from_mtx('jpwh_991.mtx'))
@@ -88,7 +88,8 @@ modifying the benchmarking script as::
     for KSolver in [CGS, TFQMR, BiCGSTAB]:
         ks = KSolver(lambda v: A*v,
                      matvec_max=2*n,
-                     precon = lambda u: u/diagA)
+                     precon=lambda u: u/diagA,
+                     reltol=1.0e-8)
         ks.solve(rhs, guess = 1+np.arange(n, dtype=np.float))
 
         err = np.linalg.norm(ks.bestSolution-e)/sqrt(n)
@@ -96,10 +97,10 @@ modifying the benchmarking script as::
 
 This time, the output is a bit better than before::
 
-          Name  Matvec     Resid     Error
-           CGS      56  3.77e-03  7.42e-05
-         TFQMR      59  1.07e-03  6.03e-05
-     Bi-CGSTAB      54  4.62e-03  3.02e-04
+          Name  Matvec    Resid0     Resid     Error
+           CGS      70  8.64e+03  7.84e-06  2.33e-07
+         TFQMR      70  8.64e+03  7.61e-06  2.47e-07
+     Bi-CGSTAB      64  8.64e+03  8.54e-05  4.93e-06
 
 
 Much in the same way, a modification of the script above could be used to loop
@@ -127,5 +128,5 @@ appropriate size, one solves preconditioning systems by simply calling
     # Create diagonal preconditioner
     dp = DiagonalPrec(A)
 
-    ks = KSolver(lambda v: A*v, matvec_max=2*n, precon=dp)
+    ks = KSolver(lambda v: A*v, matvec_max=2*n, precon=dp, reltol=1.0e-8)
 

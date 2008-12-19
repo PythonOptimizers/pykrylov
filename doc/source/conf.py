@@ -96,7 +96,7 @@ exclude_trees = []
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
 
-todo_include_todos = True
+#todo_include_todos = True
 
 # Options for HTML output
 # -----------------------
