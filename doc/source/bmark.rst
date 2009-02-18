@@ -5,9 +5,9 @@
 Benchmarking Solvers
 ====================
 
-You may have noticed that in the examples of
-sections :ref:`cg-page`, :ref:`cgs-page` and :ref:`bicgstab-page`, the only line
-that differs in the example scripts has the form ::
+You may have noticed that in the examples of sections :ref:`cg-page`,
+:ref:`cgs-page`, :ref:`bicgstab-page` and :ref:`tfqmr-page`, the only line that
+differs in the example scripts has the form ::
 
     from pykrylov.tfqmr import TFQMR as KSolver
 

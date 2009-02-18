@@ -31,14 +31,15 @@ gradient algorithm is used::
         y[1:] -= x[:-1]
         return y
 
-    e = np.ones(100)
+    n = 100
+    e = np.ones(n)
     rhs = Poisson1dMatvec(e)
     cg = CG(Poisson1dMatvec, matvec_max=200)
     cg.solve(rhs)
 
-    print 'Number of matrix-vector products: ', CG.nMatvec
-    print 'Residual: %8.2e' % CG.residNorm
-    print 'Error: %8.2e' % np.linalg.norm(e - CG.bestSolution)/sqrt(n)
+    print 'Number of matrix-vector products: ', cg.nMatvec
+    print 'Residual: %8.2e' % cg.residNorm
+    print 'Error: %8.2e' % (np.linalg.norm(e - CG.bestSolution)/sqrt(n))
 
 On my machine, the above script produces::
 
