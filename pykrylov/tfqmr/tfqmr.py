@@ -41,9 +41,15 @@ class TFQMR( KrylovMethod ):
     def solve(self, rhs, **kwargs):
         """
         Solve a linear system with `rhs` as right-hand side by the TFQMR method.
-        The vector `rhs` should be a Numpy array. An optional argument `guess`
-        may be supplied, with an initial guess as a Numpy array. By default,
-        the initial guess is the vector of zeros.
+        The vector `rhs` should be a Numpy array.
+
+        :Keyword arguments and default values:
+
+        +--------------+--------------------------------------+----+
+        | `guess`      | Initial guess (Numpy array)          |  0 |
+        +--------------+--------------------------------------+----+
+        | `matvec_max` | Max. number of matrix-vector produts | 2n |
+        +--------------+--------------------------------------+----+
         """
         n = rhs.shape[0]
         nMatvec = 0
@@ -51,6 +57,7 @@ class TFQMR( KrylovMethod ):
         # Initial guess is zero unless one is supplied
         guess_supplied = 'guess' in kwargs.keys()
         x = kwargs.get('guess', np.zeros(n))
+        matvec_max = kwargs.get('matvec_max', 2*n)
 
         r0 = rhs  # Fixed vector throughout
         if guess_supplied:
@@ -64,7 +71,7 @@ class TFQMR( KrylovMethod ):
             self._write('Initial residual = %8.2e\n' % self.residNorm0)
             self._write('Threshold = %8.2e\n' % threshold)
 
-        finished = (residNorm <= threshold or nMatvec >= self.matvec_max)
+        finished = (residNorm <= threshold or nMatvec >= matvec_max)
 
         if not finished:
             y = r0.copy()   # Initial residual vector
@@ -97,7 +104,7 @@ class TFQMR( KrylovMethod ):
             eta = c * c * alpha
             x += eta * d
             m = 2.0 * k - 1.0
-            if residNorm * sqrt(m+1) < threshold or nMatvec >= self.matvec_max:
+            if residNorm * sqrt(m+1) < threshold or nMatvec >= matvec_max:
                 finished = True
                 continue
 
@@ -119,7 +126,7 @@ class TFQMR( KrylovMethod ):
             residNorm *= theta * c
             eta = c * c * alpha
             x += eta * d
-            if residNorm * sqrt(m+1) < threshold or nMatvec >= self.matvec_max:
+            if residNorm * sqrt(m+1) < threshold or nMatvec >= matvec_max:
                 finished = True
                 continue
 

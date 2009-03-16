@@ -43,11 +43,10 @@ if __name__ == '__main__':
     for KSolver in [CGS, TFQMR, BiCGSTAB]:
         ks = KSolver( lambda v: A*v,
                       #precon = dp,
-                      matvec_max=2*n,
                       #verbose=False,
                       reltol = 1.0e-8
                       )
-        ks.solve(rhs, guess = 1+np.arange(n, dtype=np.float))
+        ks.solve(rhs, guess = 1+np.arange(n, dtype=np.float), matvec_max=2*n)
 
         err = np.linalg.norm(ks.bestSolution-e)/sqrt(n)
         print fmt % (ks.acronym, ks.nMatvec, ks.residNorm0, ks.residNorm, err)

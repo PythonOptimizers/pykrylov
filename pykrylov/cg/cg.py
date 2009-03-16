@@ -44,9 +44,15 @@ class CG( KrylovMethod ):
     def solve(self, rhs, **kwargs):
         """
         Solve a linear system with `rhs` as right-hand side by the CG method.
-        The vector `rhs` should be a Numpy array. An optional argument `guess`
-        may be supplied, with an initial guess as a Numpy array. By default,
-        the initial guess is the vector of zeros.
+        The vector `rhs` should be a Numpy array.
+
+        :Keyword arguments and default values:
+
+        +--------------+--------------------------------------+----+
+        | `guess`      | Initial guess (Numpy array)          |  0 |
+        +--------------+--------------------------------------+----+
+        | `matvec_max` | Max. number of matrix-vector produts | 2n |
+        +--------------+--------------------------------------+----+
         """
         n = rhs.shape[0]
         nMatvec = 0
@@ -55,6 +61,7 @@ class CG( KrylovMethod ):
         # Initial guess
         guess_supplied = 'guess' in kwargs.keys()
         x = kwargs.get('guess', np.zeros(n))
+        matvec_max = kwargs.get('matvec_max', 2*n)
 
         # Initial residual vector
         r = -rhs
@@ -74,7 +81,7 @@ class CG( KrylovMethod ):
 
         p = -r   # Initial search direction (copy not to overwrite rhs if x=0)
         
-        while residNorm > threshold and nMatvec < self.matvec_max and definite:
+        while residNorm > threshold and nMatvec < matvec_max and definite:
 
             Ap  = self.matvec(p)
             nMatvec += 1

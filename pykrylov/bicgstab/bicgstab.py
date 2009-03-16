@@ -43,9 +43,15 @@ class BiCGSTAB( KrylovMethod ):
     def solve(self, rhs, **kwargs):
         """
         Solve a linear system with `rhs` as right-hand side by the Bi-CGSTAB
-        method. The vector `rhs` should be a Numpy array. An optional argument
-        `guess` may be supplied, with an initial guess as a Numpy array. By
-        default, the initial guess is the vector of zeros.
+        method. The vector `rhs` should be a Numpy array.
+
+        :Keyword arguments and default values:
+
+        +--------------+--------------------------------------+----+
+        | `guess`      | Initial guess (Numpy array)          |  0 |
+        +--------------+--------------------------------------+----+
+        | `matvec_max` | Max. number of matrix-vector produts | 2n |
+        +--------------+--------------------------------------+----+
         """
         n = rhs.shape[0]
         nMatvec = 0
@@ -53,6 +59,7 @@ class BiCGSTAB( KrylovMethod ):
         # Initial guess is zero unless one is supplied
         guess_supplied = 'guess' in kwargs.keys()
         x = kwargs.get('guess', np.zeros(n))
+        matvec_max = kwargs.get('matvec_max', 2*n)
 
         # Initial residual is the fixed vector
         r0 = rhs
@@ -65,7 +72,7 @@ class BiCGSTAB( KrylovMethod ):
         residNorm = self.residNorm0 = sqrt(rho_next)
         threshold = max( self.abstol, self.reltol * self.residNorm0 )
 
-        finished = (residNorm <= threshold or nMatvec >= self.matvec_max)
+        finished = (residNorm <= threshold or nMatvec >= matvec_max)
 
         if self.verbose:
             self._write('Initial residual = %8.2e\n' % self.residNorm0)
@@ -111,7 +118,7 @@ class BiCGSTAB( KrylovMethod ):
                 finished = True
                 continue
 
-            if nMatvec >= self.matvec_max:
+            if nMatvec >= matvec_max:
                 finished = True
                 continue
 
@@ -139,7 +146,7 @@ class BiCGSTAB( KrylovMethod ):
             if self.verbose:
                 self._write('%6d  %8.2e\n' % (nMatvec, residNorm))
 
-            if residNorm <= threshold or nMatvec >= self.matvec_max:
+            if residNorm <= threshold or nMatvec >= matvec_max:
                 finished = True
                 continue
 

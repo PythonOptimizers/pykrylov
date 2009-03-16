@@ -38,8 +38,8 @@ Consider the script::
 
     # Loop through solvers using tighter stopping tolerance
     for KSolver in [CGS, TFQMR, BiCGSTAB]:
-        ks = KSolver(lambda v: A*v, matvec_max=2*n, reltol=1.0e-8)
-        ks.solve(rhs, guess = 1+np.arange(n, dtype=np.float))
+        ks = KSolver(lambda v: A*v, reltol=1.0e-8)
+        ks.solve(rhs, guess = 1+np.arange(n, dtype=np.float), matvec_max=2*n)
 
         err = np.linalg.norm(ks.bestSolution-e)/sqrt(n)
         print fmt % (ks.acronym, ks.nMatvec, ks.residNorm0, ks.residNorm, err)
@@ -87,10 +87,9 @@ modifying the benchmarking script as::
     # Loop through solvers using default stopping tolerance
     for KSolver in [CGS, TFQMR, BiCGSTAB]:
         ks = KSolver(lambda v: A*v,
-                     matvec_max=2*n,
                      precon=lambda u: u/diagA,
                      reltol=1.0e-8)
-        ks.solve(rhs, guess = 1+np.arange(n, dtype=np.float))
+        ks.solve(rhs, guess = 1+np.arange(n, dtype=np.float), matvec_max=2*n)
 
         err = np.linalg.norm(ks.bestSolution-e)/sqrt(n)
         print fmt % (ks.acronym, ks.nMatvec, ks.residNorm, err)
@@ -128,5 +127,5 @@ appropriate size, one solves preconditioning systems by simply calling
     # Create diagonal preconditioner
     dp = DiagonalPrec(A)
 
-    ks = KSolver(lambda v: A*v, matvec_max=2*n, precon=dp, reltol=1.0e-8)
+    ks = KSolver(lambda v: A*v, precon=dp, reltol=1.0e-8)
 

@@ -46,7 +46,7 @@ class KrylovMethod:
         self.abstol = kwargs.get('abstol', 1.0e-8)
         self.reltol = kwargs.get('reltol', 1.0e-6)
         self.precon = kwargs.get('precon', None)
-        self.matvec_max = kwargs.get('matvec_max', None)
+        #self.matvec_max = kwargs.get('matvec_max', None)
         self.outputStream = kwargs.get('outputStream', None)
 
         self.residNorm  = None
