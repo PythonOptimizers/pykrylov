@@ -7,6 +7,25 @@ class KrylovMethod:
     defines the `KrylovMethod` generic class. Other modules subclass
     `KrylovMethod` to implement specific algorithms.
 
+    :parameters:
+
+        :matvec:  an operator describing the coefficient matrix :math:`A`.
+                  `y = matvec(x)` must return the matrix-vector product
+                  :math:`y = Ax` for any given vector `x`.
+
+    :keywords:
+
+        :atol:    absolute stopping tolerance. Default: 1.0e-8.
+
+        :rtol:    relative stopping tolerance. Default: 1.0e-6.
+
+        :verbose: verbosity flag. Default: False.
+
+        :precon:  optional preconditioner. If not `None`, `y = precon(x)`
+                  returns the vector `y` solution of the linear system
+                  :math:`M y = x`.
+
+
     For general references on Krylov methods, see [Demmel]_, [Greenbaum]_,
     [Kelley]_, [Saad]_ and [Templates]_.
 
