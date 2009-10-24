@@ -34,14 +34,12 @@ class SYMMLQ( KrylovMethod ) :
                   `y = matvec(x)` must return the matrix-vector product
                   :math:`y = Ax` for any given vector `x`.
 
+    :keywords:
+
         :precon:  optional preconditioner. If not `None`, `y = precon(x)`
                   returns the vector `y` solution of the linear system
                   :math:`M y = x`. The preconditioner must be symmetric and
                   positive definite.
-
-    :keywords:
-
-        :maxit:   maximum number of iterations. Default: 2n.
 
         :rtol:    relative stopping tolerance. Default: 1.0e-9.
 
@@ -111,10 +109,10 @@ class SYMMLQ( KrylovMethod ) :
         if verbose:
             self._write('\n' + first + 'Solution of symmetric Ax = b')
             fmt = 'n     =  %3g    precon =  %5s           '
-            self._write(fmt % (n, repr(precon is None)))
+            self._write(fmt % (n, repr(self.precon is None)))
             if shift is not None: self._write('shift  =  %23.14e' % shift)
             fmt = 'maxit =  %3g     eps    =  %11.2e    rtol   =  %11.2e\n'
-            self._write(fmt % (maxit,eps,rtol))
+            self._write(fmt % (int((matvec_max-2.0)/2),eps,rtol))
     
         istop  = 0 ; ynorm  = 0 ; w = np.zeros(n) ; acond = 0
         itn    = 0 ; xnorm  = 0 ; x = np.zeros(n) ; done=False 
@@ -124,17 +122,17 @@ class SYMMLQ( KrylovMethod ) :
         # y is really beta1 * P * v1  where  P = C^(-1).
         # y and beta1 will be zero if b = 0.
 
-        r1 = b.copy()
-        if precon is not None:
-            y = precon(r1)
+        r1 = rhs.copy()
+        if self.precon is not None:
+            y = self.precon(r1)
         else:
-            y = b.copy()
+            y = rhs.copy()
         b1 = y[0] ; beta1 = np.dot(r1, y)
 
         # Ensure preconditioner is symmetric.
 
-        if check and precon is not None:
-            r2 = precon(y)
+        if check and self.precon is not None:
+            r2 = self.precon(y)
             s = np.dot(y,y)
             t = np.dot(r1,r2)
             z = abs(s-t)
@@ -145,7 +143,7 @@ class SYMMLQ( KrylovMethod ) :
                 done = True
 
         # Test for an indefinite preconditioner.
-        # If b = 0 exactly, stop with x = 0.
+        # If rhs = 0 exactly, stop with x = 0.
 
         if beta1 <  0:
             istop = 8
@@ -160,9 +158,9 @@ class SYMMLQ( KrylovMethod ) :
             s     = 1.0 / beta1
             v     = s * y
         
-            y = matvec(v) ; nMatvec += 1
+            y = self.matvec(v) ; nMatvec += 1
             if check:
-                r2 = matvec(y)  # Do not count this matrix-vector product
+                r2 = self.matvec(y)  # Do not count this matrix-vector product
                 s = np.dot(y,y)
                 t = np.dot(v,r2)
                 z = abs(s-t)
@@ -187,7 +185,7 @@ class SYMMLQ( KrylovMethod ) :
             y -= (z / s) * v
             r2 = y.copy()
 
-            if precon is not None: y = precon(r2)
+            if self.precon is not None: y = self.precon(r2)
             oldb   = beta1
             beta   = np.dot(r2, y)
             if beta < 0:
@@ -238,7 +236,7 @@ class SYMMLQ( KrylovMethod ) :
         # Estimate various norms and test for convergence.
     
         if not done:
-            while itn < maxit:
+            while nMatvec < matvec_max: #itn < maxit:
                 itn    = itn  +  1
                 anorm  = sqrt(tnorm)
                 ynorm  = sqrt(ynorm2)
@@ -275,21 +273,21 @@ class SYMMLQ( KrylovMethod ) :
                 # (Abar = const * I).
 
                 if istop == 0:
-                    if itn    >= maxit  : istop = 5
-                    if acond  >= 0.1/eps: istop = 4
-                    if epsx   >= beta1  : istop = 3
-                    if cgnorm <= epsx   : istop = 2
-                    if cgnorm <= epsr   : istop = 1
+                    if nMatvec >= matvec_max : istop = 5
+                    if acond   >= 0.1/eps    : istop = 4
+                    if epsx    >= beta1      : istop = 3
+                    if cgnorm  <= epsx       : istop = 2
+                    if cgnorm  <= epsr       : istop = 1
 
                 prnt = False
-                if n      <= 40         :   prnt = True
-                if itn    <= 10         :   prnt = True
-                if itn    >= maxit - 10 :   prnt = True
-                if itn%10 == 0          :   prnt = True
-                if cgnorm <= 10.0*epsx  :   prnt = True
-                if cgnorm <= 10.0*epsr  :   prnt = True
-                if acond  >= 0.01/eps   :   prnt = True
-                if istop  != 0          :   prnt = True
+                if n       <= 40              :   prnt = True
+                if nMatvec <= 20              :   prnt = True
+                if nMatvec >= matvec_max - 10 :   prnt = True
+                if itn%10 == 0                :   prnt = True
+                if cgnorm <= 10.0*epsx        :   prnt = True
+                if cgnorm <= 10.0*epsr        :   prnt = True
+                if acond  >= 0.01/eps         :   prnt = True
+                if istop  != 0                :   prnt = True
 
                 if verbose and prnt:
                     str1 =  '%6g %12.5e %10.3e' % (itn, x1cg, cgnorm)
@@ -305,14 +303,14 @@ class SYMMLQ( KrylovMethod ) :
 
                 s = 1/beta
                 v = s * y
-                y = matvec(v) ; nMatvec += 1
+                y = self.matvec(v) ; nMatvec += 1
                 if shift is not None: y -= shift * v
                 y -= (beta / oldb) * r1
                 alfa = np.dot(v, y)
                 y -= (alfa / beta) * r2
                 r1 = r2.copy()
                 r2 = y.copy()
-                if precon is not None: y = precon(r2)
+                if self.precon is not None: y = self.precon(r2)
                 oldb = beta
                 beta = np.dot(r2, y)
             
@@ -341,7 +339,7 @@ class SYMMLQ( KrylovMethod ) :
                 x += s*w + t*v
                 w *= sn ; w -= cs*v
 
-                # Accumulate the step along the direction  b, and go round again
+                # Accumulate the step along the direction b, and go round again.
 
                 bstep  = snprod * cs * z  +  bstep
                 snprod = snprod * sn
@@ -367,20 +365,20 @@ class SYMMLQ( KrylovMethod ) :
             ynorm  = sqrt(ynorm2 + zbar**2)
             x     += zbar * w
 
-        # Add the step along  b.
+        # Add the step along b.
 
         bstep  = bstep / beta1
-        if precon is not None:
-            y = precon(b)
+        if self.precon is not None:
+            y = self.precon(rhs)
         else:
-            y = b.copy()
+            y = rhs.copy()
         x += bstep * y
 
         # Compute the final residual,  r1 = b - (A - shift*I)*x.
 
-        y = matvec(x) ; nMatvec += 1
+        y = self.matvec(x) ; nMatvec += 1
         if shift is not None: y -= shift * x
-        r1 = b - y
+        r1 = rhs - y
         rnorm = np.linalg.norm(r1)
         xnorm = np.linalg.norm(x)
 
