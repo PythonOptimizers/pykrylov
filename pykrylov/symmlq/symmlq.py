@@ -30,15 +30,15 @@ class SYMMLQ( KrylovMethod ) :
 
     :parameters:
 
-        :matvec:  an operator describing the coefficient matrix :math:`A`.
+        :matvec:  an operator describing the coefficient matrix `A`.
                   `y = matvec(x)` must return the matrix-vector product
-                  :math:`y = Ax` for any given vector `x`.
+                  `y = Ax` for any given vector `x`.
 
     :keywords:
 
         :precon:  optional preconditioner. If not `None`, `y = precon(x)`
                   returns the vector `y` solution of the linear system
-                  :math:`M y = x`. The preconditioner must be symmetric and
+                  `M y = x`. The preconditioner must be symmetric and
                   positive definite.
 
 

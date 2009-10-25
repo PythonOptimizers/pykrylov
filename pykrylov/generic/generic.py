@@ -9,9 +9,9 @@ class KrylovMethod:
 
     :parameters:
 
-        :matvec:  an operator describing the coefficient matrix :math:`A`.
+        :matvec:  an operator describing the coefficient matrix `A`.
                   `y = matvec(x)` must return the matrix-vector product
-                  :math:`y = Ax` for any given vector `x`.
+                  `y = Ax` for any given vector `x`.
 
     :keywords:
 
@@ -23,7 +23,7 @@ class KrylovMethod:
 
         :precon:  optional preconditioner. If not `None`, `y = precon(x)`
                   returns the vector `y` solution of the linear system
-                  :math:`M y = x`.
+                  `M y = x`.
 
 
     For general references on Krylov methods, see [Demmel]_, [Greenbaum]_,

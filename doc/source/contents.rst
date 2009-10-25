@@ -38,6 +38,7 @@ Contents:
    Conjugate Gradient Squared <cgs>
    Bi-Conjugate Gradient Stabilized <bicgstab>
    Transpose-Free Quasi-Minimum Residual <tfqmr>
+   Symmetric Indefinite Method with Orthogonal Factorization <symmlq>
    Benchmarking Solvers <bmark>
 
 

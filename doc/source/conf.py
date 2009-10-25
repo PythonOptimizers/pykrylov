@@ -22,6 +22,7 @@ sys.path.append(os.path.abspath('../../pykrylov/bicgstab'))
 sys.path.append(os.path.abspath('../../pykrylov/cg'))
 sys.path.append(os.path.abspath('../../pykrylov/cgs'))
 sys.path.append(os.path.abspath('../../pykrylov/tfqmr'))
+sys.path.append(os.path.abspath('../../pykrylov/symmlq'))
 sys.path.append('sphinxext')
 
 # Import support for ipython console session syntax highlighting (lives
