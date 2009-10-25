@@ -17,9 +17,9 @@ class SYMMLQ( KrylovMethod ) :
     SYMMLQ is designed to solve the system of linear equations A x = b
     where A is an n by n symmetric matrix and b is a given vector.
 
-    If shift is nonzero, SYMMLQ solves (A + shift I) x = b.
+    If shift is nonzero, SYMMLQ solves (A - shift I) x = b.
 
-    SYMMLQ requires 2 matrix-vector products with `A`, 2 dot products and
+    SYMMLQ requires one matrix-vector products with `A`, 2 dot products and
     4 daxpys per iteration.
 
     If a preconditioner is supplied, SYMMLQ needs to solve one preconditioning
@@ -41,16 +41,8 @@ class SYMMLQ( KrylovMethod ) :
                   :math:`M y = x`. The preconditioner must be symmetric and
                   positive definite.
 
-        :rtol:    relative stopping tolerance. Default: 1.0e-9.
 
-        :shift:   optional shift value. Default: 0.
-
-        :verbose: verbosity flag. Default: False.
-
-        :check:   specify whether or not to check that `matvec` indeed
-                  describes a symmetric matrix and that `precon` indeed
-                  describes a symmetric and positive-definite preconditioner.
-
+    Note: `atol` has no effect in this method.
 
     References:
 
@@ -66,6 +58,7 @@ class SYMMLQ( KrylovMethod ) :
         self.acronym = 'SYMMLQ'
         self.prefix = self.acronym + ': '
 
+
     def solve(self, rhs, **kwargs):
         """
         Solve a linear system with `rhs` as right-hand side by the SYMMLQ
@@ -77,16 +70,26 @@ class SYMMLQ( KrylovMethod ) :
 
         :keywords:
 
-            :matvec_max: Max. number of matrix-vector produts. Default: 4n+2.
+            :matvec_max: Max. number of matrix-vector produts. Default: 2n+2.
+
+            :rtol:    relative stopping tolerance. Default: 1.0e-9.
+
+            :shift:   optional shift value. Default: 0.
+
+            :verbose: verbosity flag. Default: False.
+
+            :check:   specify whether or not to check that `matvec` indeed
+                      describes a symmetric matrix and that `precon` indeed
+                      describes a symmetric positive-definite preconditioner.
         """
 
         # Set parameters
         n = rhs.shape[0]
         nMatvec = 0
 
-        matvec_max = kwargs.get('matvec_max', 4*n + 2)
+        matvec_max = kwargs.get('matvec_max', 2*n+2)
         rtol = kwargs.get('rtol', 1.0e-9)
-        verbose = kwargs.get('verbose', False)
+        verbose = kwargs.get('verbose', self.verbose)
         check = kwargs.get('check', False)
         shift = kwargs.get('shift', None)
         if shift == 0.0: shift = None
@@ -107,10 +110,11 @@ class SYMMLQ( KrylovMethod ) :
              7:' msolve does not define a symmetric matrix',
              8:' msolve does not define a pos-def preconditioner'}
         if verbose:
-            self._write('\n' + first + 'Solution of symmetric Ax = b')
+            self._write('\n' + first + 'Solution of symmetric Ax = b\n')
             fmt = 'n     =  %3g    precon =  %5s           '
             self._write(fmt % (n, repr(self.precon is None)))
             if shift is not None: self._write('shift  =  %23.14e' % shift)
+            self._write('\n')
             fmt = 'maxit =  %3g     eps    =  %11.2e    rtol   =  %11.2e\n'
             self._write(fmt % (int((matvec_max-2.0)/2),eps,rtol))
     
@@ -208,9 +212,9 @@ class SYMMLQ( KrylovMethod ) :
 
             if verbose:
                 print
-                self._write('beta1 =  %10.2e   alpha1 =  %9.2e' % (beta1, alfa))
-                self._write('(v1, v2) before and after  %14.2e' % s)
-                self._write('local reorthogonalization  %14.2e' % t)
+                self._write('beta1 =  %10.2e   alpha1 =  %9.2e\n'% (beta1,alfa))
+                self._write('(v1, v2) before and after  %14.2e\n' % s)
+                self._write('local reorthogonalization  %14.2e\n' % t)
  
             #  Initialize other quantities.
             cgnorm = beta1 ; rhs2   = 0 ; tnorm  = alfa**2 + beta**2
@@ -224,11 +228,11 @@ class SYMMLQ( KrylovMethod ) :
         if verbose:
             head1 = '   Itn     x(1)(cg)  normr(cg)  r(minres)'
             head2 = '    bstep    anorm    acond'
-            self._write(head1 + head2)
+            self._write(head1 + head2 + '\n')
 
             str1 = '%6g %12.5e %10.3e' % (itn, x1cg, cgnorm)
             str2 = ' %10.3e  %8.1e' %    (qrnorm, bstep/beta1)
-            self._write(str1 + str2)
+            self._write(str1 + str2 + '\n')
     
         # ------------------------------------------------------------------
         # Main iteration loop.
@@ -293,7 +297,7 @@ class SYMMLQ( KrylovMethod ) :
                     str1 =  '%6g %12.5e %10.3e' % (itn, x1cg, cgnorm)
                     str2 =  ' %10.3e  %8.1e' %    (qrnorm, bstep/beta1)
                     str3 =  ' %8.1e %8.1e' %      (anorm, acond)
-                    self._write(str1 + str2 + str3)
+                    self._write(str1 + str2 + str3 + '\n')
 
                 if istop !=0:
                     break
@@ -388,17 +392,15 @@ class SYMMLQ( KrylovMethod ) :
 
         if verbose:
             self._write('\n')
-            fmt = ' istop   =  %3g               itn   =  %5g'
+            fmt = ' istop   =  %3g               itn   =   %5g\n'
             self._write(last + fmt % (istop, itn))
-            fmt = ' anorm   =  %12.4e      acond =  %12.4e'
+            fmt = ' anorm   =  %12.4e      acond =  %12.4e\n'
             self._write(last + fmt % (anorm, acond))
-            fmt = ' rnorm   =  %12.4e      xnorm =  %12.4e'
+            fmt = ' rnorm   =  %12.4e      xnorm =  %12.4e\n'
             self._write(last + fmt % (rnorm, xnorm))
-            self._write(last + msg[istop])
+            self._write(last + msg[istop] + '\n')
 
         self.nMatvec = nMatvec
         self.bestSolution = x ; self.solutionNorm = xnorm
         self.residNorm = rnorm
         self.acond = acond ; self.anorm = anorm
-
-        #return x, istop, itn, anorm, acond, rnorm, xnorm

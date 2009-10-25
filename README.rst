@@ -2,20 +2,21 @@
 PyKrylov
 ========
 
-PyKrylov is a Python package implementing common Krylov methods in pure Python.
+PyKrylov is a pure Python package implementing common Krylov methods in pure Python.
 
 
 Requirements
 ============
 
-1. `Python <http://www.python.org>`_ 2.3, 2.4 or 2.5. We are not sure about
-   Python 2.6 compatibility and are pretty sure about incompatibility with
-   Python 3.0.
+1. `Python <http://www.python.org>`_ 2.3, 2.4, 2.5 or 2.6. We are pretty sure
+   Python 3.0 will not be compatible.
 2. `NumPy <http://www.scipy.org/NumPy>`_
 
 If you are working under Linux, OS/X or Windows, prebuilt packages are
 available. Remember that for efficiency, it is recommended to compile Numpy
-against optimized LAPACK and BLAS libraries.
+against optimized LAPACK and BLAS libraries. Under OS/X efficient implementations
+of BLAS and LAPACK are available from Xcode. Specify ``-framework Accelerate`` when
+installing NumPy.
 
 
 Krylov Methods
