@@ -87,11 +87,11 @@ class CG( KrylovMethod ):
             nMatvec += 1
             pAp = np.dot(p, Ap)
             
-            if pAp <= 0:
-                self._write('Coefficient matrix is not positive definite\n')
-                self.infiniteDescent = p
-                definite = False
-                continue
+            #if pAp <= 0:
+            #    self._write('Coefficient matrix is not positive definite\n')
+            #    self.infiniteDescent = p
+            #    definite = False
+            #    continue
 
             # Compute step length
             alpha = ry/pAp
