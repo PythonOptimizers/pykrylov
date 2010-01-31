@@ -70,6 +70,7 @@ class KrylovMethod:
 
         self.residNorm  = None
         self.residNorm0 = None
+        self.residHistory = []
 
         self.nMatvec = 0
         self.nIter = 0

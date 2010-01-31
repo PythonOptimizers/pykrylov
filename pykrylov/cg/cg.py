@@ -46,17 +46,17 @@ class CG( KrylovMethod ):
         Solve a linear system with `rhs` as right-hand side by the CG method.
         The vector `rhs` should be a Numpy array.
 
-        :Keyword arguments and default values:
+        :Keywords:
 
-        +--------------+--------------------------------------+----+
-        | `guess`      | Initial guess (Numpy array)          |  0 |
-        +--------------+--------------------------------------+----+
-        | `matvec_max` | Max. number of matrix-vector produts | 2n |
-        +--------------+--------------------------------------+----+
+           :guess:           Initial guess (Numpy array). Default: 0.
+           :matvec_max:      Max. number of matrix-vector produts. Default: 2n.
+           :check_curvature: Ensure matrix is positive definte. Default: True.
+
         """
         n = rhs.shape[0]
         nMatvec = 0
         definite = True
+        check_curvature = kwargs.get('check_curvature', True)
 
         # Initial guess
         guess_supplied = 'guess' in kwargs.keys()
@@ -77,21 +77,32 @@ class CG( KrylovMethod ):
 
         ry = np.dot(r,y)
         self.residNorm0 = residNorm = sqrt(ry)
-        threshold = max( self.abstol, self.reltol * self.residNorm0 )
+        self.residHistory.append(self.residNorm0)
+        threshold = max(self.abstol, self.reltol * self.residNorm0)
 
         p = -r   # Initial search direction (copy not to overwrite rhs if x=0)
+
+        if self.verbose:
+            hdr_fmt = '%6s  %7s  %8s'
+            hdr = hdr_fmt % ('Matvec', 'Resid', 'Curv')
+            self._write(hdr + '\n')
+            self._write('-' * len(hdr) + '\n')
+            info = '%6d  %7.1e' % (nMatvec, residNorm)
+            self._write(info + '\n')
         
         while residNorm > threshold and nMatvec < matvec_max and definite:
 
             Ap  = self.matvec(p)
             nMatvec += 1
             pAp = np.dot(p, Ap)
-            
-            #if pAp <= 0:
-            #    self._write('Coefficient matrix is not positive definite\n')
-            #    self.infiniteDescent = p
-            #    definite = False
-            #    continue
+
+            if check_curvature:
+                if pAp <= 0:
+                    self._write('Coefficient matrix is not positive definite')
+                    self._write('\n')
+                    self.infiniteDescent = p
+                    definite = False
+                    continue
 
             # Compute step length
             alpha = ry/pAp
@@ -99,7 +110,7 @@ class CG( KrylovMethod ):
             # Update estimate and residual
             x += alpha * p
             r += alpha * Ap
-            
+
             # Compute preconditioned residual
             if self.precon is not None:
                 y = self.precon(r)
@@ -116,6 +127,11 @@ class CG( KrylovMethod ):
 
             ry = ry_next
             residNorm = sqrt(ry)
+            self.residHistory.append(residNorm)
+
+            if self.verbose:
+                info = '%6d  %7.1e  %8.1e' % (nMatvec, residNorm, pAp)
+                self._write(info + '\n')
 
 
         self.nMatvec = nMatvec
