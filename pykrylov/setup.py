@@ -12,6 +12,7 @@ def configuration(parent_package='',top_path=None):
     config.add_subpackage('tfqmr')
     config.add_subpackage('bicgstab')
     config.add_subpackage('symmlq')
+    config.add_subpackage('minres')
     config.add_subpackage('gallery')
     config.add_subpackage('tools')
 
