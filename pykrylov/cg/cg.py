@@ -36,6 +36,7 @@ class CG( KrylovMethod ):
         self.name = 'Conjugate Gradient'
         self.acronym = 'CG'
         self.prefix = self.acronym + ': '
+        self.resids = []
 
         # Direction of nonconvexity if A is not positive definite
         self.infiniteDescent = None
@@ -51,12 +52,14 @@ class CG( KrylovMethod ):
            :guess:           Initial guess (Numpy array). Default: 0.
            :matvec_max:      Max. number of matrix-vector produts. Default: 2n.
            :check_curvature: Ensure matrix is positive definte. Default: True.
+           :store_resids:    Store full residual vector history. Default: False.
 
         """
         n = rhs.shape[0]
         nMatvec = 0
         definite = True
         check_curvature = kwargs.get('check_curvature', True)
+        store_resids = kwargs.get('store_resids', False)
 
         # Initial guess
         guess_supplied = 'guess' in kwargs.keys()
@@ -75,6 +78,9 @@ class CG( KrylovMethod ):
         else:
             y = r
 
+        if store_resids:
+            self.resids.append(y.copy())
+
         ry = np.dot(r,y)
         self.residNorm0 = residNorm = sqrt(ry)
         self.residHistory.append(self.residNorm0)
@@ -89,7 +95,7 @@ class CG( KrylovMethod ):
             self._write('-' * len(hdr) + '\n')
             info = '%6d  %7.1e' % (nMatvec, residNorm)
             self._write(info + '\n')
-        
+
         while residNorm > threshold and nMatvec < matvec_max and definite:
 
             Ap  = self.matvec(p)
@@ -116,6 +122,9 @@ class CG( KrylovMethod ):
                 y = self.precon(r)
             else:
                 y = r
+
+            if store_resids:
+                self.resids.append(y.copy())
 
             # Update preconditioned residual norm
             ry_next = np.dot(r,y)
