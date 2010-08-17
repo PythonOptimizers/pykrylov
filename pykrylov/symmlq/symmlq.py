@@ -402,5 +402,6 @@ class SYMMLQ( KrylovMethod ) :
 
         self.nMatvec = nMatvec
         self.bestSolution = x ; self.solutionNorm = xnorm
+        self.x = self.bestSolution ; self.xNorm = xnorm
         self.residNorm = rnorm
         self.acond = acond ; self.anorm = anorm

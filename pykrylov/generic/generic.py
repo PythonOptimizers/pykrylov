@@ -76,6 +76,7 @@ class KrylovMethod:
         self.nIter = 0
         self.converged = False
         self.bestSolution = None
+        self.x = self.bestSolution
 
     def _write(self, msg):
         if self.outputStream is not None:

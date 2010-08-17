@@ -162,4 +162,5 @@ class TFQMR( KrylovMethod ):
 
         self.nMatvec = nMatvec
         self.bestSolution = x
+        self.x = self.bestSolution
         self.residNorm = residNorm

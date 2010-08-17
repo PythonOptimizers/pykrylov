@@ -403,7 +403,8 @@ class Minres:
             print last+' Arnorm  =  %12.4e' % Arnorm
             print last+self.msg[istop+1]
 
-        self.x = x
+        self.bestSolution = x
+        self.x = self.bestSolution
         self.istop = istop
         self.itn = itn
         self.rnorm = rnorm
