@@ -7,7 +7,7 @@ from pykrylov.cgs import CGS
 from pykrylov.tfqmr import TFQMR
 from pykrylov.bicgstab import BiCGSTAB
 from pysparse import spmatrix
-from pysparse.pysparseMatrix import PysparseMatrix as sp
+from pysparse.sparse.pysparseMatrix import PysparseMatrix as sp
 from math import sqrt
 
 class DiagonalPrec:
@@ -24,7 +24,8 @@ class DiagonalPrec:
 
 if __name__ == '__main__':
 
-    hdr = '%10s  %6s  %8s  %8s  %8s' % ('Name', 'Matvec', 'Resid0', 'Resid', 'Error')
+    hdr_fmt = '%10s  %6s  %8s  %8s  %8s'
+    hdr = hdr_fmt % ('Name', 'Matvec', 'Resid0', 'Resid', 'Error')
     fmt = '%10s  %6d  %8.2e  %8.2e  %8.2e'
     print hdr
     print '-' * len(hdr)
