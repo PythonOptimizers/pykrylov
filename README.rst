@@ -14,9 +14,9 @@ Requirements
 
 If you are working under Linux, OS/X or Windows, prebuilt packages are
 available. Remember that for efficiency, it is recommended to compile Numpy
-against optimized LAPACK and BLAS libraries. Under OS/X efficient implementations
-of BLAS and LAPACK are available from Xcode. Specify ``-framework Accelerate`` when
-installing NumPy.
+against optimized LAPACK and BLAS libraries. Under OS/X efficient
+implementations of BLAS and LAPACK are available from Xcode. Specify
+``-framework Accelerate`` when installing NumPy.
 
 
 Krylov Methods
