@@ -2,7 +2,7 @@
 PyKrylov
 ========
 
-PyKrylov is a pure Python package implementing common Krylov methods in pure Python.
+PyKrylov is a pure Python package implementing common Krylov methods.
 
 
 Requirements
@@ -33,7 +33,7 @@ only matrix-vector products with A are required at each iteration. Some methods
 require matrix-vector products with the transpose of A when the latter is not
 symmetric. For more information on Krylov methods, see the references below.
 
-PyKrylov does not rely on any particular dense or sparse matrix package because 
+PyKrylov does not rely on any particular dense or sparse matrix package because
 all matrix-vector products are handled as operators, i.e., the user supplies
 a function to perform such products. Similarly, preconditioners are handled as
 operators and are not held explicitly. As a result, PyKrylov should be easy to
