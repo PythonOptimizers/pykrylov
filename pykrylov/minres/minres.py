@@ -14,7 +14,6 @@ available at http://www.stanford.edu/group/SOL/software/minres.htm.
 """
 
 from numpy import zeros, dot, empty
-from types import FunctionType
 from math import sqrt
 
 class Minres:
@@ -26,15 +25,11 @@ class Minres:
     or the least squares problem           min ||Ax - b||_2^2,
     where A is a symmetric matrix (possibly indefinite or singular)
     and b is a given vector.
-   
-    A may be given explicitly as a matrix or be a function such that
 
-        `A(x, y)`
+    ``A`` should be given as a ``LinearOperator`` or as an explicit matrix such
+    that ``y = A * x`` returns in ``y`` the result of applying the linear
+    operator ``A`` to the vector ``x``.
 
-    stores in y the product Ax for any given vector x.
-    If A is an instance of some matrix class, it should have a 'matvec' method
-    such that A.matvec(x, y) has the behaviour described above.
- 
     Optional keyword arguments are:
 
         precon    optional preconditioner, given as an operator        (None)
@@ -45,12 +40,12 @@ class Minres:
         rtol      relative stopping tolerance                          (1.0e-12)
 
     If precon is given, it must define a positive-definite preconditioner
-    M = C C'. The precon operator must be such that
+    M = C*C'. The precon operator must be such that
 
         `x = precon(y)`
 
-    returns the solution x to the linear system M x = y, for any given y.
- 
+    returns the solution x to the linear system M*x = y, for any given y.
+
     If shift != 0, minres really solves (A - shift*I)x = b
     or the corresponding least squares problem if shift is an eigenvalue of A.
 
@@ -70,11 +65,11 @@ class Minres:
     See also http://www.stanford.edu/group/SOL/software/minres.html
     """
 
-#    02 Sep 2003: Date of Fortran 77 version, based on 
+#    02 Sep 2003: Date of Fortran 77 version, based on
 #                 C. C. Paige and M. A. Saunders (1975),
 #                 Solution of sparse indefinite systems of linear equations,
 #                 SIAM J. Numer. Anal. 12(4), pp. 617-629.
-# 
+#
 #    02 Sep 2003: ||Ar|| now estimated as Arnorm.
 #    17 Oct 2003: f77 version converted to MATLAB.
 #    11 Jan 2008: MATLAB version converted to Python.
@@ -83,12 +78,6 @@ class Minres:
 
         self.A = A
         self.x = None
-
-        # Read keyword arguments
-        self.precon = kwargs.get('precon', None)
-        self.shift  = kwargs.get('shift',  0.0)
-        self.show   = kwargs.get('show',   True)
-        self.check  = kwargs.get('check',  True)
 
         #  Initialize
         self.first = 'Enter minres.   '
@@ -105,20 +94,6 @@ class Minres:
                     ' Aname  does not define a symmetric matrix         ',  # 7
                     ' Mname  does not define a symmetric matrix         ',  # 8
                     ' Mname  does not define a pos-def preconditioner   ' ] # 9
- 
-        #---------------------------------------------------------------------
-        # See if A is explicit or an operator
-        #---------------------------------------------------------------------
-        self.explicitA = hasattr(A,'matvec') #not isinstance(self.A, FunctionType)
-
-        if self.explicitA:            # assume Aname is an explicit matrix A.
-            if hasattr(A,'nnz'):
-                nnzA   = self.A.nnz
-                print 'A is an explicit matrix with %d nonzeros.' % nnzA
-            else:
-                print 'A is an explicit matrix'
-        else:
-            print 'A is an operator.'
 
         self.eps = self._Epsilon()
 
@@ -133,33 +108,33 @@ class Minres:
             eps = eps / 2.0
         return eps*2.0
 
-    def applyA(self, x, y):
-        """
-        Given x, compute the matrix-vector product y = Ax
-        """
-        if self.explicitA:
-            self.A.matvec(x,y)
-        else:
-            self.A(x,y)
-        return
+
+    def normof2(self, x,y):
+        return sqrt(x**2 + y**2)
+
 
     def solve(self, b, **kwargs):
 
+        A = self.A
         n = b.shape[0]
         x = zeros(n)
 
+        # Read keyword arguments
+        precon = kwargs.get('precon', None)
+        shift  = kwargs.get('shift',  0.0)
+        show   = kwargs.get('show',   True)
+        check  = kwargs.get('check',  True)
         itnlim = kwargs.get('itnlim', 5*n)
         rtol   = kwargs.get('rtol',   1.0e-12)
 
         # Transfer some pointers for readability
-        shift = self.shift
         eps = self.eps
 
-        if self.show:
+        if show:
             print self.space
             print self.first + 'Solution of symmetric Ax = b'
             print 'n      =  %3d     precon =  %4s           shift  =  %23.14e'\
-                % (n, str(self.precon != None), self.shift)
+                % (n, (precon != None), shift)
             print 'itnlim =  %3d     rtol   =  %11.2e\n' % (itnlim, rtol)
 
         istop = 0;   itn = 0;     Anorm = 0.0;    Acond = 0.0;
@@ -171,8 +146,8 @@ class Minres:
         # v is really P' v1.
         #------------------------------------------------------------------
         r1 = b
-        if self.precon is not None:
-            y = self.precon(b)
+        if precon is not None:
+            y = precon(b)
         else:
             y = b.copy()
         beta1 = dot(b,y)
@@ -192,13 +167,11 @@ class Minres:
             beta1 = sqrt(beta1);       # Normalize y to get v1 later.
 
         # See if A is symmetric.
-        if self.check:
-            w = empty(n)
-            r2 = empty(n)
-            self.applyA(y,w)
-            self.applyA(w,r2)
-            s    = dot(w,w)
-            t    = dot(y,r2)
+        if check:
+            w  = A * y
+            r2 = A * w
+            s  = dot(w,w)
+            t  = dot(y,r2)
             print 's = ', s, ', t = ', t
             z    = abs(s - t)
             epsa = (s + eps) * eps**(1.0/3)
@@ -209,15 +182,15 @@ class Minres:
                 self.show = True
 
         # See if preconditioner is symmetric.
-        if self.check and self.precon is not None:
-            r2 = self.precon(y)
+        if check and (precon is not None):
+            r2   = precon(y)
             s    = dot(y,y)
             t    = dot(r1,r2)
             z    = abs(s - t)
             epsa = (s + eps) * eps**(1.0/3)
             if z > epsa:
                 istop = 7
-                self.show = True
+                show = True
                 done = True
 
         # -------------------------------------------------------------------
@@ -231,7 +204,7 @@ class Minres:
         w2 = zeros(n)
         r2 = r1.copy()
 
-        if self.show:
+        if show:
             print ' '*2
             head1 = '   Itn     x[0]     Compatible    LS'
             head2 = '       norm(A)  cond(A) gbar/|A|'   ###### Check gbar
@@ -240,10 +213,9 @@ class Minres:
         # ---------------------------------------------------------------------
         # Main iteration loop.
         # --------------------------------------------------------------------
-        print 'done = ', done
         if not done:                          # k = itn = 1 first time through
             while itn < itnlim:
-                itn    = itn  +  1
+                itn = itn  +  1
 
                 # -------------------------------------------------------------
                 # Obtain quantities for the next Lanczos vector vk+1, k=1,2,...
@@ -261,8 +233,8 @@ class Minres:
                 s = 1.0/beta                # Normalize previous vector (in y).
                 v = s*y                     # v = vk if P = I
 
-                self.applyA(v,y)
-                y      = (- shift)*v + y
+                y = A * v   #self.applyA(v,y)
+                y -= shift*v  #y = (- shift)*v + y
 
                 if itn >= 2:
                     y = y - (beta/oldb)*r1
@@ -271,7 +243,7 @@ class Minres:
                 y    = (- alfa/beta)*r2 + y
                 r1   = r2.copy()
                 r2   = y.copy()
-                if self.precon is not None: y = self.precon(r2)
+                if precon is not None: y = precon(r2)
                 oldb   = beta               # oldb = betak
                 beta   = dot(r2,y)          # beta = betak+1^2
                 if beta < 0:
@@ -303,7 +275,7 @@ class Minres:
                 dbar   =            -  cs * beta  # dbar 2 = beta2     dbar k+1
                 root   = self.normof2(gbar, dbar)
                 Arnorm = phibar * root
-                
+
                 # Compute the next plane rotation Qk
 
                 gamma  = self.normof2(gbar, beta)       # gammak
@@ -319,7 +291,7 @@ class Minres:
                 w1    = w2.copy()
                 w2    = w.copy()
                 w     = (v - oldeps*w1 - delta*w2) * denom
-                x     = x  +  phi*w
+                x    += phi*w  #x     = x  +  phi*w
 
                 # Go round again.
 
@@ -361,7 +333,7 @@ class Minres:
                     t2 = 1 + test2
                     if t2 <= 1: istop = 2
                     if t1 <= 1: istop = 1
-      
+
                     if itn >= itnlim: istop = 6
                     if Acond >= 0.1/eps: istop = 4
                     if epsx >= beta1: istop = 3
@@ -382,7 +354,7 @@ class Minres:
                 if Acond <= 1e-2/eps: prnt = True
                 if istop !=  0: prnt = True
 
-                if self.show and prnt:
+                if show and prnt:
                     str1 = '%6g %12.5e %10.3e' % (itn, x[0], test1)
                     str2 = ' %10.3e' % test2
                     str3 = ' %8.1e %8.1e %8.1e' % (Anorm, Acond, gbar/Anorm)
@@ -394,7 +366,7 @@ class Minres:
 
         # Display final status.
 
-        if self.show:
+        if show:
             print self.space
             last = self.last
             print last+' istop   =  %3g               itn   =%5g' % (istop,itn)
@@ -403,8 +375,7 @@ class Minres:
             print last+' Arnorm  =  %12.4e' % Arnorm
             print last+self.msg[istop+1]
 
-        self.bestSolution = x
-        self.x = self.bestSolution
+        self.x = x
         self.istop = istop
         self.itn = itn
         self.rnorm = rnorm
@@ -417,6 +388,3 @@ class Minres:
     # -----------------------------------------------------------------------
     # End function minres
     # -----------------------------------------------------------------------
-
-    def normof2(self, x,y):
-        return sqrt(x**2 + y**2)
