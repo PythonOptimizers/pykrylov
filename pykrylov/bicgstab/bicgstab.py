@@ -133,7 +133,7 @@ class BiCGSTAB( KrylovMethod ):
 
             # Update residual
             r = s - omega * t
-            
+
             # Update solution in-place-ish. Note that 'z *= omega' alters s if
             # precon = None. That's ok since s is no longer needed in this iter.
             # 'q *= alpha' would alter p.
@@ -151,7 +151,7 @@ class BiCGSTAB( KrylovMethod ):
                 continue
 
 
+        self.converged = residNorm <= threshold
         self.nMatvec = nMatvec
-        self.bestSolution = x
-        self.x = self.bestSolution
+        self.bestSolution = self.x = x
         self.residNorm = residNorm
