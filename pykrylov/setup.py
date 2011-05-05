@@ -15,6 +15,7 @@ def configuration(parent_package='',top_path=None):
     config.add_subpackage('minres')
     config.add_subpackage('gallery')
     config.add_subpackage('tools')
+    config.add_subpackage('linop')
 
     #config.add_data_dir('tests')
 
