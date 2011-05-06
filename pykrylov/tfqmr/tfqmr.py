@@ -93,7 +93,7 @@ class TFQMR( KrylovMethod ):
             k += 1
             sigma = np.dot(r0,v)
             alpha = rho/sigma
-            
+
             # First pass
             w -= alpha * u
             d *= theta * theta * eta / alpha
