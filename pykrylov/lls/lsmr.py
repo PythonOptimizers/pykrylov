@@ -271,7 +271,7 @@ class LSMRFramework(KrylovMethod):
 
         if store_resids:
             self.resids.append(normr)
-            self.normal_eqns_resids.append(test2)
+            self.normal_eqns_resids.append(normar)
 
         # Main iteration loop.
         while itn < itnlim:
@@ -389,7 +389,7 @@ class LSMRFramework(KrylovMethod):
 
             if store_resids:
                 self.resids.append(normr)
-                self.normal_eqns_resids.append(test2)
+                self.normal_eqns_resids.append(normar)
 
             # The following tests guard against extremely small values of
             # atol, btol or ctol.  (The user may have set any or all of
