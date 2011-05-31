@@ -143,7 +143,8 @@ class CG( KrylovMethod ):
                 self._write(info + '\n')
 
 
+        self.converged = residNorm <= threshold
+        self.definite = definite
         self.nMatvec = nMatvec
-        self.bestSolution = x
-        self.x = self.bestSolution
+        self.bestSolution = self.x = x
         self.residNorm = residNorm

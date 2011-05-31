@@ -89,7 +89,7 @@ class CGS( KrylovMethod ):
             sigma = np.dot(r0,v)
             alpha = rho/sigma
             q = u - alpha * v
-            
+
             if self.precon is not None:
                 z = self.precon(u+q)
             else:
@@ -111,7 +111,7 @@ class CGS( KrylovMethod ):
             beta = rho_next/rho
             rho = rho_next
             u = r + beta * q
-            
+
             # Update p in-place
             p *= beta
             p += q
@@ -123,7 +123,7 @@ class CGS( KrylovMethod ):
                 self._write('%5d  %8.2e\n' % (nMatvec, residNorm))
 
 
+        self.converged = residNorm <= threshold
         self.nMatvec = nMatvec
-        self.bestSolution = x
-        self.x = self.bestSolution
+        self.bestSolution = self.x = x
         self.residNorm = residNorm

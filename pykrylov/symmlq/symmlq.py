@@ -26,7 +26,7 @@ class SYMMLQ( KrylovMethod ) :
     system per iteration. This is a Pythonized line-by-line translation of
     Michael Saunders' original SYMMLQ implementation in Matlab from
     `http://www.stanford.edu/group/SOL/software/symmlq.html`_
-    
+
 
     :parameters:
 
@@ -117,9 +117,9 @@ class SYMMLQ( KrylovMethod ) :
             self._write('\n')
             fmt = 'maxit =  %3g     eps    =  %11.2e    rtol   =  %11.2e\n'
             self._write(fmt % (int((matvec_max-2.0)/2),eps,rtol))
-    
+
         istop  = 0 ; ynorm  = 0 ; w = np.zeros(n) ; acond = 0
-        itn    = 0 ; xnorm  = 0 ; x = np.zeros(n) ; done=False 
+        itn    = 0 ; xnorm  = 0 ; x = np.zeros(n) ; done=False
         anorm  = 0 ; rnorm  = 0 ; v = np.zeros(n)
 
         # Set up y for the first Lanczos vector v1.
@@ -161,7 +161,7 @@ class SYMMLQ( KrylovMethod ) :
             beta1 = sqrt(beta1)
             s     = 1.0 / beta1
             v     = s * y
-        
+
             y = self.matvec(v) ; nMatvec += 1
             if check:
                 r2 = self.matvec(y)  # Do not count this matrix-vector product
@@ -215,7 +215,7 @@ class SYMMLQ( KrylovMethod ) :
                 self._write('beta1 =  %10.2e   alpha1 =  %9.2e\n'% (beta1,alfa))
                 self._write('(v1, v2) before and after  %14.2e\n' % s)
                 self._write('local reorthogonalization  %14.2e\n' % t)
- 
+
             #  Initialize other quantities.
             cgnorm = beta1 ; rhs2   = 0 ; tnorm  = alfa**2 + beta**2
             gbar   = alfa  ; bstep  = 0 ; ynorm2 = 0
@@ -233,12 +233,12 @@ class SYMMLQ( KrylovMethod ) :
             str1 = '%6g %12.5e %10.3e' % (itn, x1cg, cgnorm)
             str2 = ' %10.3e  %8.1e' %    (qrnorm, bstep/beta1)
             self._write(str1 + str2 + '\n')
-    
+
         # ------------------------------------------------------------------
         # Main iteration loop.
         # ------------------------------------------------------------------
         # Estimate various norms and test for convergence.
-    
+
         if not done:
             while nMatvec < matvec_max: #itn < maxit:
                 itn    = itn  +  1
@@ -317,7 +317,7 @@ class SYMMLQ( KrylovMethod ) :
                 if self.precon is not None: y = self.precon(r2)
                 oldb = beta
                 beta = np.dot(r2, y)
-            
+
                 if beta < 0:
                     istop = 6
                     break
@@ -357,7 +357,7 @@ class SYMMLQ( KrylovMethod ) :
         # ------------------------------------------------------------------
         # End of main iteration loop.
         # ------------------------------------------------------------------
-    
+
         # Move to the CG point if it seems better.
         # In this version of SYMMLQ, the convergence tests involve
         # only cgnorm, so we're unlikely to stop at an LQ point,

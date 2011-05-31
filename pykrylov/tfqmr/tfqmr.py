@@ -160,7 +160,7 @@ class TFQMR( KrylovMethod ):
                 self._write('%5d  %8.2e\n' % (nMatvec, residNorm))
 
 
+        self.converged = residNorm * sqrt(m+1) < threshold
         self.nMatvec = nMatvec
-        self.bestSolution = x
-        self.x = self.bestSolution
+        self.bestSolution = self.x = x
         self.residNorm = residNorm
