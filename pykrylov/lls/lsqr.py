@@ -216,8 +216,8 @@ class LSQRFramework(KrylovMethod):
             print str1+str2+str3
 
         if store_resids:
-            self.resids.append(r1norm)
-            self.normal_eqns_resids.append(test2)
+            self.resids.append(r2norm)
+            self.normal_eqns_resids.append(Arnorm)
 
         # ------------------------------------------------------------------
         #     Main iteration loop.
@@ -340,8 +340,8 @@ class LSQRFramework(KrylovMethod):
             rtol  = btol  +  atol *  Anorm * xnorm / bnorm
 
             if store_resids:
-                self.resids.append(r1norm)
-                self.normal_eqns_resids.append(test2)
+                self.resids.append(r2norm)
+                self.normal_eqns_resids.append(Arnorm)
 
             # The following tests guard against extremely small values of
             # atol, btol  or  ctol.  (The user may have set any or all of
