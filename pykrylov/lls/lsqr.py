@@ -209,7 +209,8 @@ class LSQRFramework(KrylovMethod):
         if show:
             print ' '
             print head1+head2
-            test1  = 1.0;       test2  = alpha / beta
+            test1  = 1.0
+            test2  = alpha / beta if not x_is_zero else 1.0
             str1   = '%6g %12.5e'     % (itn,    x[0])
             str2   = ' %10.3e %10.3e' % (r1norm, r2norm)
             str3   = '  %8.1e %8.1e'  % (test1,  test2)
