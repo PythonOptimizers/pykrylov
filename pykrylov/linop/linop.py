@@ -3,7 +3,7 @@ import numpy as np
 __docformat__ = 'restructuredtext'
 
 
-class LinearOperator:
+class LinearOperator(object):
     """
     A linear operator is a linear mapping x -> A(x) such that the size of the
     input vector x is `nargin` and the size of the output is `nargout`. It can
@@ -84,7 +84,8 @@ class SimpleLinearOperator(LinearOperator):
 
     def __init__(self, nargin, nargout, matvec,
                  matvec_transp=None, symmetric=False, **kwargs):
-        LinearOperator.__init__(self, nargin, nargout, **kwargs)
+
+        super(SimpleLinearOperator, self).__init__(nargin, nargout, **kwargs)
         self.symmetric = symmetric
         self.transposed = kwargs.get('transposed', False)
         transpose_of = kwargs.get('transpose_of', None)
@@ -131,6 +132,7 @@ class PysparseLinearOperator(LinearOperator):
     """
 
     def __init__(self, A, symmetric=False, **kwargs):
+
         m, n = A.shape
         self.A = A
         self.symmetric = symmetric
@@ -139,13 +141,11 @@ class PysparseLinearOperator(LinearOperator):
 
         if self.transposed:
 
-            LinearOperator.__init__(self, m, n, **kwargs)
-            self.__mul__ = self._rmul
+            super(PysparseLinearOperator, self).__init__(m, n, **kwargs)
 
         else:
 
-            LinearOperator.__init__(self, n, m, **kwargs)
-            self.__mul__ = self._mul
+            super(PysparseLinearOperator, self).__init__(n, m, **kwargs)
 
         if self.logger is not None:
             self.logger.info('New linop has transposed='+str(self.transposed))
@@ -205,6 +205,12 @@ class PysparseLinearOperator(LinearOperator):
         self.A.matvec_transp(y, ATy)
         return ATy
 
+    def __mul__(self, other):
+        if self.transposed:
+            return self._rmul(other)
+        return self._mul(other)
+
+
 
 # It would be much better if we could add and multiply linear operators.
 # In the meantime, here is a patch.
@@ -226,22 +232,21 @@ class SquaredLinearOperator(LinearOperator):
     """
 
     def __init__(self, A, **kwargs):
+
         transposed = kwargs.get('transposed', False)
         nargout, nargin = A.shape
         if transposed:
-            LinearOperator.__init__(self, nargout, nargout, **kwargs)
+            super(SquaredLinearOperator, self).__init__(nargout, nargout,
+                    **kwargs)
         else:
-            LinearOperator.__init__(self, nargin, nargin, **kwargs)
+            super(SquaredLinearOperator, self).__init__(nargin, nargin,
+                    **kwargs)
         self.transposed = transposed
         if isinstance(A, LinearOperator):
             self.A = A
         else:
             self.A = PysparseLinearOperator(A, transposed=False)
         self.symmetric = True
-        if self.transposed:
-            self.__mul__ = self._rmul
-        else:
-            self.__mul__ = self._mul
         if self.logger is not None:
             self.logger.info('New squared operator with shape '+str(self.shape))
         self.T = self
@@ -257,7 +262,13 @@ class SquaredLinearOperator(LinearOperator):
         return self.A * (self.A.T * x)
 
 
-class ReducedLinearOperator:
+    def __mul__(self, other):
+        if self.transposed:
+            return self._rmul(other)
+        return self._mul(other)
+
+
+class ReducedLinearOperator(object):
     """
     Given a linear operator A, implement the linear operator equivalent of
     the matrix notation A[I,J] where I and J and index sets of rows and
@@ -265,6 +276,7 @@ class ReducedLinearOperator:
     """
 
     def __init__(self, A, row_indices, col_indices, **kwargs):
+
         self.op = A             # A linear operator.
         self.row_indices = row_indices
         self.col_indices = col_indices
@@ -283,7 +295,9 @@ class ReducedLinearOperator:
 
 class SymmetricallyReducedLinearOperator(ReducedLinearOperator):
     def __init__(self, A, row_indices, **kwargs):
-        ReducedLinearOperator.__init__(self, A, row_indices, row_indices, **kwargs)
+
+        super(SymmetricallyReducedLinearOperator, self).__init__(A,
+                row_indices, row_indices, **kwargs)
         self.symmetric = self.op.symmetric
 
 
@@ -301,6 +315,7 @@ if __name__ == '__main__':
     #J = nlp.jac(nlp.x0)
     e1 = np.ones(J.shape[0])
     e2 = np.ones(J.shape[1])
+    print 'J.shape = ', J.getShape()
 
     #print 'Explicitly:'
     #print 'J*e2 = ', J*e2
