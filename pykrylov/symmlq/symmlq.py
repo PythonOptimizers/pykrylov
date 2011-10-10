@@ -24,8 +24,8 @@ class SYMMLQ( KrylovMethod ) :
 
     If a preconditioner is supplied, SYMMLQ needs to solve one preconditioning
     system per iteration. This is a Pythonized line-by-line translation of
-    Michael Saunders' original SYMMLQ implementation in Matlab from
-    `http://www.stanford.edu/group/SOL/software/symmlq.html`_
+    Michael Saunders' `original SYMMLQ implementation in Matlab
+    <http://www.stanford.edu/group/SOL/software/symmlq.htm>`_
 
 
     :parameters:

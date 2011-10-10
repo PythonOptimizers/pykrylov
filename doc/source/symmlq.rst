@@ -6,7 +6,7 @@ The Symmetric Indefinite Method with Orthogonal Factorization
 =============================================================
 
 The :mod:`symmlq` Module
-=======================
+========================
 
 .. automodule:: symmlq
 
