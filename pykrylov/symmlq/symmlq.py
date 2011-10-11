@@ -76,8 +76,6 @@ class SYMMLQ( KrylovMethod ) :
 
             :shift:   optional shift value. Default: 0.
 
-            :verbose: verbosity flag. Default: False.
-
             :check:   specify whether or not to check that `matvec` indeed
                       describes a symmetric matrix and that `precon` indeed
                       describes a symmetric positive-definite preconditioner.
@@ -89,7 +87,6 @@ class SYMMLQ( KrylovMethod ) :
 
         matvec_max = kwargs.get('matvec_max', 2*n+2)
         rtol = kwargs.get('rtol', 1.0e-9)
-        verbose = kwargs.get('verbose', self.verbose)
         check = kwargs.get('check', False)
         shift = kwargs.get('shift', None)
         if shift == 0.0: shift = None
@@ -109,14 +106,13 @@ class SYMMLQ( KrylovMethod ) :
              6:' aprod  does not define a symmetric matrix',
              7:' msolve does not define a symmetric matrix',
              8:' msolve does not define a pos-def preconditioner'}
-        if verbose:
-            self._write('\n' + first + 'Solution of symmetric Ax = b\n')
-            fmt = 'n     =  %3g    precon =  %5s           '
-            self._write(fmt % (n, repr(self.precon is None)))
-            if shift is not None: self._write('shift  =  %23.14e' % shift)
-            self._write('\n')
-            fmt = 'maxit =  %3g     eps    =  %11.2e    rtol   =  %11.2e\n'
-            self._write(fmt % (int((matvec_max-2.0)/2),eps,rtol))
+
+        self.logger.info(first + 'Solution of symmetric Ax = b')
+        fmt = 'n     =  %3g    precon =  %5s           '
+        self.logger.info(fmt % (n, repr(self.precon is None)))
+        if shift is not None: self.logger.info('shift  =  %23.14e' % shift)
+        fmt = 'maxit =  %3g     eps    =  %11.2e    rtol   =  %11.2e'
+        self.logger.info(fmt % (int((matvec_max-2.0)/2),eps,rtol))
 
         istop  = 0 ; ynorm  = 0 ; w = np.zeros(n) ; acond = 0
         itn    = 0 ; xnorm  = 0 ; x = np.zeros(n) ; done=False
@@ -143,7 +139,6 @@ class SYMMLQ( KrylovMethod ) :
             epsa = (s+eps) * eps**(1.0/3)
             if z > epsa:
                 istop = 7
-                verbose = True
                 done = True
 
         # Test for an indefinite preconditioner.
@@ -151,10 +146,8 @@ class SYMMLQ( KrylovMethod ) :
 
         if beta1 <  0:
             istop = 8
-            verbose = True
             done = True
         if beta1 == 0:
-            verbose = True
             done = True
 
         if beta1 > 0:
@@ -172,7 +165,6 @@ class SYMMLQ( KrylovMethod ) :
                 if z > epsa:
                     istop = 6
                     done = True
-                    verbose = True
 
             # Set up y for the second Lanczos vector.
             # Again, y is beta * P * v2  where  P = C^(-1).
@@ -194,7 +186,6 @@ class SYMMLQ( KrylovMethod ) :
             beta   = np.dot(r2, y)
             if beta < 0:
                 istop = 8
-                verbose = True
                 done = True
 
             #  Cause termination (later) if beta is essentially zero.
@@ -210,11 +201,9 @@ class SYMMLQ( KrylovMethod ) :
             t = np.dot(v, r2)
             t = t / denom
 
-            if verbose:
-                print
-                self._write('beta1 =  %10.2e   alpha1 =  %9.2e\n'% (beta1,alfa))
-                self._write('(v1, v2) before and after  %14.2e\n' % s)
-                self._write('local reorthogonalization  %14.2e\n' % t)
+            self.logger.info('beta1 =  %10.2e   alpha1 =  %9.2e'% (beta1,alfa))
+            self.logger.info('(v1, v2) before and after  %14.2e' % s)
+            self.logger.info('local reorthogonalization  %14.2e' % t)
 
             #  Initialize other quantities.
             cgnorm = beta1 ; rhs2   = 0 ; tnorm  = alfa**2 + beta**2
@@ -225,14 +214,13 @@ class SYMMLQ( KrylovMethod ) :
 
         # end  if beta1 > 0
 
-        if verbose:
-            head1 = '   Itn     x(1)(cg)  normr(cg)  r(minres)'
-            head2 = '    bstep    anorm    acond'
-            self._write(head1 + head2 + '\n')
+        head1 = '   Itn     x(1)(cg)  normr(cg)  r(minres)'
+        head2 = '    bstep    anorm    acond'
+        self.logger.info(head1 + head2)
 
-            str1 = '%6g %12.5e %10.3e' % (itn, x1cg, cgnorm)
-            str2 = ' %10.3e  %8.1e' %    (qrnorm, bstep/beta1)
-            self._write(str1 + str2 + '\n')
+        str1 = '%6g %12.5e %10.3e' % (itn, x1cg, cgnorm)
+        str2 = ' %10.3e  %8.1e' %    (qrnorm, bstep/beta1)
+        self.logger.info(str1 + str2)
 
         # ------------------------------------------------------------------
         # Main iteration loop.
@@ -293,11 +281,11 @@ class SYMMLQ( KrylovMethod ) :
                 if acond  >= 0.01/eps         :   prnt = True
                 if istop  != 0                :   prnt = True
 
-                if verbose and prnt:
+                if prnt:
                     str1 =  '%6g %12.5e %10.3e' % (itn, x1cg, cgnorm)
                     str2 =  ' %10.3e  %8.1e' %    (qrnorm, bstep/beta1)
                     str3 =  ' %8.1e %8.1e' %      (anorm, acond)
-                    self._write(str1 + str2 + str3 + '\n')
+                    self.logger.info(str1 + str2 + str3)
 
                 if istop !=0:
                     break
@@ -390,15 +378,13 @@ class SYMMLQ( KrylovMethod ) :
         # Display final status.
         # ==================================================================
 
-        if verbose:
-            self._write('\n')
-            fmt = ' istop   =  %3g               itn   =   %5g\n'
-            self._write(last + fmt % (istop, itn))
-            fmt = ' anorm   =  %12.4e      acond =  %12.4e\n'
-            self._write(last + fmt % (anorm, acond))
-            fmt = ' rnorm   =  %12.4e      xnorm =  %12.4e\n'
-            self._write(last + fmt % (rnorm, xnorm))
-            self._write(last + msg[istop] + '\n')
+        fmt = ' istop   =  %3g               itn   =   %5g'
+        self.logger.info(last + fmt % (istop, itn))
+        fmt = ' anorm   =  %12.4e      acond =  %12.4e'
+        self.logger.info(last + fmt % (anorm, acond))
+        fmt = ' rnorm   =  %12.4e      xnorm =  %12.4e'
+        self.logger.info(last + fmt % (rnorm, xnorm))
+        self.logger.info(last + msg[istop])
 
         self.nMatvec = nMatvec
         self.bestSolution = x ; self.solutionNorm = xnorm
