@@ -30,14 +30,14 @@ class Minres:
     that ``y = A * x`` returns in ``y`` the result of applying the linear
     operator ``A`` to the vector ``x``.
 
-    Optional keyword arguments are:
+    :keywords:
 
-        precon    optional preconditioner, given as an operator        (None)
-        shift     optional shift value                                 (0.0)
-        show      display information along the iterations             (True)
-        check     perform some argument checks                         (True)
-        itnlim    maximum number of iterations                         (5n)
-        rtol      relative stopping tolerance                          (1.0e-12)
+        :precon: optional preconditioner, given as an operator (None)
+        :shift:  optional shift value                          (0.0)
+        :show:   display information along the iterations      (True)
+        :check:  perform some argument checks                  (True)
+        :itnlim: maximum number of iterations                  (5n)
+        :rtol:   relative stopping tolerance                   (1.0e-12)
 
     If precon is given, it must define a positive-definite preconditioner
     M = C*C'. The precon operator must be such that

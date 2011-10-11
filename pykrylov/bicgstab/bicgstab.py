@@ -45,13 +45,9 @@ class BiCGSTAB( KrylovMethod ):
         Solve a linear system with `rhs` as right-hand side by the Bi-CGSTAB
         method. The vector `rhs` should be a Numpy array.
 
-        :Keyword arguments and default values:
-
-        +--------------+--------------------------------------+----+
-        | `guess`      | Initial guess (Numpy array)          |  0 |
-        +--------------+--------------------------------------+----+
-        | `matvec_max` | Max. number of matrix-vector produts | 2n |
-        +--------------+--------------------------------------+----+
+        :keywords:
+            :guess:      Initial guess (Numpy array, default: 0)
+            :matvec_max: Max. number of matrix-vector produts (2n)
         """
         n = rhs.shape[0]
         nMatvec = 0
