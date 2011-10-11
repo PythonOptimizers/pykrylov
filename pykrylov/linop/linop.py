@@ -311,6 +311,16 @@ class SymmetricallyReducedLinearOperator(ReducedLinearOperator):
         self.symmetric = self.op.symmetric
 
 
+class ShapeError(Exception):
+    """
+    Exception raised when defining a linear operator of the wrong shape or
+    multiplying a linear operator with a vector of the wrong shape.
+    """
+    def __init__(self):
+        pass
+
+
+
 if __name__ == '__main__':
     from pysparse.sparse.pysparseMatrix import PysparseMatrix as sp
     from nlpy.model import AmplModel
