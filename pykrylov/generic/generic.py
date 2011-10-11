@@ -1,5 +1,14 @@
+import logging
+
 
 __docformat__ = 'restructuredtext'
+
+
+# Default (null) logger.
+null_log = logging.getLogger('krylov')
+null_log.setLevel(logging.INFO)
+null_log.addHandler(logging.NullHandler())
+
 
 class KrylovMethod:
     """
@@ -19,11 +28,12 @@ class KrylovMethod:
 
         :rtol:    relative stopping tolerance. Default: 1.0e-6.
 
-        :verbose: verbosity flag. Default: False.
-
         :precon:  optional preconditioner. If not `None`, `y = precon(x)`
                   returns the vector `y` solution of the linear system
                   `M y = x`.
+
+        :logger:  a `logging.logger` instance. If none is supplied, a default
+                  null logger will be used.
 
 
     For general references on Krylov methods, see [Demmel]_, [Greenbaum]_,
@@ -61,12 +71,11 @@ class KrylovMethod:
         self.matvec = matvec
 
         # Optional keyword arguments
-        self.verbose = kwargs.get('verbose', False)
         self.abstol = kwargs.get('abstol', 1.0e-8)
         self.reltol = kwargs.get('reltol', 1.0e-6)
         self.precon = kwargs.get('precon', None)
         #self.matvec_max = kwargs.get('matvec_max', None)
-        self.outputStream = kwargs.get('outputStream', None)
+        self.logger = kwargs.get('logger', null_log)
 
         self.residNorm  = None
         self.residNorm0 = None
@@ -79,9 +88,8 @@ class KrylovMethod:
         self.x = self.bestSolution
 
     def _write(self, msg):
-        if self.outputStream is not None:
-            self.outputStream.write(self.prefix + msg)
-        return None
+        # If levels other than info are needed they should be used explicitly.
+        self.logger.info(msg)
 
     def solve(self, rhs, **kwargs):
         """
