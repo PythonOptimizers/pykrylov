@@ -74,12 +74,11 @@ class BiCGSTAB( KrylovMethod ):
 
         finished = (residNorm <= threshold or nMatvec >= matvec_max)
 
-        if self.verbose:
-            self._write('Initial residual = %8.2e\n' % self.residNorm0)
-            self._write('Threshold = %8.2e\n' % threshold)
-            hdr = '%6s  %8s' % ('Matvec', 'Residual')
-            self._write(hdr + '\n')
-            self._write('-' * len(hdr) + '\n')
+        self.logger.info('Initial residual = %8.2e' % self.residNorm0)
+        self.logger.info('Threshold = %8.2e' % threshold)
+        hdr = '%6s  %8s' % ('Matvec', 'Residual')
+        self.logger.info(hdr)
+        self.logger.info('-' * len(hdr)
 
         if not finished:
             r = r0.copy()
@@ -110,8 +109,7 @@ class BiCGSTAB( KrylovMethod ):
             # Check for CGS termination
             residNorm = sqrt(np.dot(s,s))
 
-            if self.verbose:
-                self._write('%6d  %8.2e\n' % (nMatvec, residNorm))
+            self.logger.info('%6d  %8.2e' % (nMatvec, residNorm))
 
             if residNorm <= threshold:
                 x += alpha * q
@@ -143,8 +141,7 @@ class BiCGSTAB( KrylovMethod ):
 
             residNorm = sqrt(np.dot(r,r))
 
-            if self.verbose:
-                self._write('%6d  %8.2e\n' % (nMatvec, residNorm))
+            self.logger.info('%6d  %8.2e' % (nMatvec, residNorm))
 
             if residNorm <= threshold or nMatvec >= matvec_max:
                 finished = True
