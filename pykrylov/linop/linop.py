@@ -18,9 +18,10 @@ class LinearOperator(object):
     be visualized as a matrix of shape (`nargout`, `nargin`).
     """
 
-    def __init__(self, nargin, nargout, **kwargs):
+    def __init__(self, nargin, nargout, symmetric=False, **kwargs):
         self.nargin = nargin
         self.nargout = nargout
+        self.symmetric = symmetric
         self.shape = (nargout, nargin)
         self.nMatvec = 0
         self.nMatvecTransp = 0
