@@ -1,6 +1,14 @@
 import numpy as np
+import logging
+#import inspect
 
 __docformat__ = 'restructuredtext'
+
+
+# Default (null) logger.
+null_log = logging.getLogger('linop')
+null_log.setLevel(logging.INFO)
+null_log.addHandler(logging.NullHandler())
 
 
 class LinearOperator(object):
@@ -18,9 +26,8 @@ class LinearOperator(object):
         self.nMatvecTransp = 0
 
         # Log activity.
-        self.logger = kwargs.get('logger', None)
-        if self.logger is not None:
-            self.logger.info('New linear operator with shape ' + str(self.shape))
+        self.logger = kwargs.get('logger', null_log)
+        self.logger.info('New linear operator with shape ' + str(self.shape))
         return
 
 
@@ -56,10 +63,9 @@ class LinearOperator(object):
                 z = abs(s - t)
                 epsa = (s + eps) * eps**(1.0/3)
 
-                if self.logger is not None:
-                    self.logger.debug("y'*A'*A*y    = %g" % s)
-                    self.logger.debug("y'*(A*(A*y)) = %g" % t)
-                    self.logger.debug('z = %g, epsa = %g' % (z,epsa))
+                self.logger.debug("y'*A'*A*y    = %g" % s)
+                self.logger.debug("y'*(A*(A*y)) = %g" % t)
+                self.logger.debug('z = %g, epsa = %g' % (z,epsa))
 
                 if z > epsa:
                     return False
@@ -103,7 +109,7 @@ class SimpleLinearOperator(LinearOperator):
                                                   matvec_transp=matvec,
                                                   transposed=not self.transposed,
                                                   transpose_of=self,
-                                                  logger=kwargs.get('logger',None))
+                                                  **kwargs)
                 else:
                     self.T = None
             else:
@@ -147,8 +153,7 @@ class PysparseLinearOperator(LinearOperator):
 
             super(PysparseLinearOperator, self).__init__(n, m, **kwargs)
 
-        if self.logger is not None:
-            self.logger.info('New linop has transposed='+str(self.transposed))
+        self.logger.info('New linop has transposed='+str(self.transposed))
 
         if symmetric:
             self.T = self
@@ -247,8 +252,7 @@ class SquaredLinearOperator(LinearOperator):
         else:
             self.A = PysparseLinearOperator(A, transposed=False)
         self.symmetric = True
-        if self.logger is not None:
-            self.logger.info('New squared operator with shape '+str(self.shape))
+        self.logger.info('New squared operator with shape '+str(self.shape))
         self.T = self
 
 
