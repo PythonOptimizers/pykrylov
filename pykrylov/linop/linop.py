@@ -32,6 +32,11 @@ class LinearOperator(object):
         return
 
 
+    def reset_counters(self):
+        self.nMatvec = 0
+        self.nMatvecTransp = 0
+
+
     def get_shape(self):
         return self.shape
 
