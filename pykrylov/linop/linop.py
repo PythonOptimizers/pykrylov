@@ -148,8 +148,8 @@ class PysparseLinearOperator(LinearOperator):
         m, n = A.shape
         self.A = A
         self.symmetric = symmetric
-        self.transposed = kwargs.get('transposed', False)
-        transpose_of = kwargs.get('transpose_of', None)
+        self.transposed = kwargs.pop('transposed', False)
+        transpose_of = kwargs.pop('transpose_of', None)
 
         if self.transposed:
 
