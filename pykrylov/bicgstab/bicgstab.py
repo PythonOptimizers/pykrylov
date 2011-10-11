@@ -78,7 +78,7 @@ class BiCGSTAB( KrylovMethod ):
         self.logger.info('Threshold = %8.2e' % threshold)
         hdr = '%6s  %8s' % ('Matvec', 'Residual')
         self.logger.info(hdr)
-        self.logger.info('-' * len(hdr)
+        self.logger.info('-' * len(hdr))
 
         if not finished:
             r = r0.copy()
