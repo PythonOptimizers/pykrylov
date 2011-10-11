@@ -88,13 +88,12 @@ class CG( KrylovMethod ):
 
         p = -r   # Initial search direction (copy not to overwrite rhs if x=0)
 
-        if self.verbose:
-            hdr_fmt = '%6s  %7s  %8s'
-            hdr = hdr_fmt % ('Matvec', 'Resid', 'Curv')
-            self._write(hdr + '\n')
-            self._write('-' * len(hdr) + '\n')
-            info = '%6d  %7.1e' % (nMatvec, residNorm)
-            self._write(info + '\n')
+        hdr_fmt = '%6s  %7s  %8s'
+        hdr = hdr_fmt % ('Matvec', 'Resid', 'Curv')
+        self.logger.info(hdr)
+        self.logger.info('-' * len(hdr))
+        info = '%6d  %7.1e' % (nMatvec, residNorm)
+        self.logger.info(info)
 
         while residNorm > threshold and nMatvec < matvec_max and definite:
 
@@ -104,8 +103,7 @@ class CG( KrylovMethod ):
 
             if check_curvature:
                 if pAp <= 0:
-                    self._write('Coefficient matrix is not positive definite')
-                    self._write('\n')
+                    self.logger.info('Coefficient matrix is not positive definite')
                     self.infiniteDescent = p
                     definite = False
                     continue
@@ -138,9 +136,8 @@ class CG( KrylovMethod ):
             residNorm = sqrt(ry)
             self.residHistory.append(residNorm)
 
-            if self.verbose:
-                info = '%6d  %7.1e  %8.1e' % (nMatvec, residNorm, pAp)
-                self._write(info + '\n')
+            info = '%6d  %7.1e  %8.1e' % (nMatvec, residNorm, pAp)
+            self.logger.info(info)
 
 
         self.converged = residNorm <= threshold
