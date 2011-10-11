@@ -67,9 +67,8 @@ class TFQMR( KrylovMethod ):
         residNorm = sqrt(rho)
         self.residNorm0 = residNorm
         threshold = max( self.abstol, self.reltol * self.residNorm0 )
-        if self.verbose:
-            self._write('Initial residual = %8.2e\n' % self.residNorm0)
-            self._write('Threshold = %8.2e\n' % threshold)
+        self.logger.info('Initial residual = %8.2e' % self.residNorm0)
+        self.logger.info('Threshold = %8.2e' % threshold)
 
         finished = (residNorm <= threshold or nMatvec >= matvec_max)
 
@@ -156,8 +155,7 @@ class TFQMR( KrylovMethod ):
             v += u
 
             # Display current info if requested
-            if self.verbose:
-                self._write('%5d  %8.2e\n' % (nMatvec, residNorm))
+            self.logger.info('%5d  %8.2e' % (nMatvec, residNorm))
 
 
         self.converged = residNorm * sqrt(m+1) < threshold
