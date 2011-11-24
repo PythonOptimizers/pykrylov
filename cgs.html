@@ -1,0 +1,213 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>The Conjugate Gradient Squared Method &mdash; PyKrylov 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="PyKrylov 0.1 documentation" href="index.html" />
+    <link rel="next" title="The Bi-Conjugate Gradient Stabilized Method" href="bicgstab.html" />
+    <link rel="prev" title="The Conjugate Gradient Method" href="cg.html" /> 
+  </head>
+  <body>
+    <div class="header-wrapper">
+      <div class="header">
+        <div class="headertitle"><a
+          href="contents.html">PyKrylov 0.1 documentation</a></div>
+        <div class="rel">
+          <a href="cg.html" title="The Conjugate Gradient Method"
+             accesskey="P">previous</a> |
+          <a href="bicgstab.html" title="The Bi-Conjugate Gradient Stabilized Method"
+             accesskey="N">next</a> |
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a>
+        </div>
+       </div>
+    </div>
+
+    <div class="content-wrapper">
+      <div class="content">
+        <div class="document">
+            
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="the-conjugate-gradient-squared-method">
+<span id="cgs-page"></span><h1>The Conjugate Gradient Squared Method<a class="headerlink" href="#the-conjugate-gradient-squared-method" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-cgs">
+<span id="the-cgs-module"></span><h2>The <a class="reference internal" href="#module-cgs" title="cgs"><tt class="xref py py-mod docutils literal"><span class="pre">cgs</span></tt></a> Module<a class="headerlink" href="#module-cgs" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="cgs.CGS">
+<em class="property">class </em><tt class="descclassname">cgs.</tt><tt class="descname">CGS</tt><big>(</big><em>matvec</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#cgs.CGS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">pykrylov.generic.generic.KrylovMethod</span></tt></p>
+<p>A pure Python implementation of the conjugate gradient squared (CGS)
+algorithm. CGS may be used to solve unsymmetric systems of linear equations,
+i.e., systems of the form</p>
+<blockquote>
+<div>A x = b</div></blockquote>
+<p>where the matrix A may be unsymmetric.</p>
+<p>CGS requires 2 matrix-vector products with A, 3 dot products and 7 daxpys
+per iteration. It does not require products with the transpose of A.</p>
+<p>If a preconditioner is supplied, CGS needs to solve two preconditioning
+systems per iteration. The original description appears in <a class="reference internal" href="#sonn89">[Sonn89]</a>, which
+our implementation roughly follows.</p>
+<p>Reference:</p>
+<table class="docutils citation" frame="void" id="sonn89" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[Sonn89]</a></td><td>P. Sonneveld, <em>CGS, A Fast Lanczos-Type Solver for Nonsymmetric
+Linear Systems</em>, SIAM Journal on Scientific and Statistical
+Computing <strong>10</strong> (1), pp. 36&#8211;52, 1989.</td></tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="cgs.CGS.solve">
+<tt class="descname">solve</tt><big>(</big><em>rhs</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#cgs.CGS.solve" title="Permalink to this definition">¶</a></dt>
+<dd><p>Solve a linear system with <cite>rhs</cite> as right-hand side by the CGS method.
+The vector <cite>rhs</cite> should be a Numpy array.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Keywords :</th><td class="field-body"><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">guess:</th><td class="field-body">Initial guess (Numpy array, default: 0)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">matvec_max:</th><td class="field-body">Max. number of matrix-vector produts (2n)</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="example">
+<h2>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h2>
+<p>Here is an example using CGS on a linear system. The coefficient matrix is read
+from file in Matrix Market format:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">pykrylov.cgs</span> <span class="kn">import</span> <span class="n">CGS</span> <span class="k">as</span> <span class="n">KSolver</span>
+<span class="kn">from</span> <span class="nn">pysparse</span> <span class="kn">import</span> <span class="n">spmatrix</span>
+<span class="kn">from</span> <span class="nn">pysparse.pysparseMatrix</span> <span class="kn">import</span> <span class="n">PysparseMatrix</span> <span class="k">as</span> <span class="n">sp</span>
+
+<span class="n">A</span> <span class="o">=</span> <span class="n">sp</span><span class="p">(</span><span class="n">matrix</span><span class="o">=</span><span class="n">spmatrix</span><span class="o">.</span><span class="n">ll_mat_from_mtx</span><span class="p">(</span><span class="s">&#39;jpwh_991.mtx&#39;</span><span class="p">))</span>
+<span class="n">n</span> <span class="o">=</span> <span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">e</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+<span class="n">rhs</span> <span class="o">=</span> <span class="n">A</span><span class="o">*</span><span class="n">e</span>
+
+<span class="n">ks</span> <span class="o">=</span> <span class="n">KSolver</span><span class="p">(</span> <span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="n">A</span><span class="o">*</span><span class="n">v</span><span class="p">,</span>
+              <span class="n">matvec_max</span><span class="o">=</span><span class="mi">2</span><span class="o">*</span><span class="n">n</span><span class="p">,</span>
+              <span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+              <span class="n">outputStream</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">,</span>
+              <span class="n">reltol</span> <span class="o">=</span> <span class="mf">1.0e-5</span> <span class="p">)</span>
+<span class="n">ks</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">rhs</span><span class="p">,</span> <span class="n">guess</span> <span class="o">=</span> <span class="mi">1</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">))</span>
+
+<span class="k">print</span> <span class="s">&#39;Number of matvecs: &#39;</span><span class="p">,</span> <span class="n">ks</span><span class="o">.</span><span class="n">nMatvec</span>
+<span class="k">print</span> <span class="s">&#39;Initial/final res: </span><span class="si">%8.2e</span><span class="s">/</span><span class="si">%8.2e</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ks</span><span class="o">.</span><span class="n">residNorm0</span><span class="p">,</span> <span class="n">ks</span><span class="o">.</span><span class="n">residNorm</span><span class="p">)</span>
+<span class="k">print</span> <span class="s">&#39;Direct error: </span><span class="si">%8.2e</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">ks</span><span class="o">.</span><span class="n">bestSolution</span><span class="o">-</span><span class="n">e</span><span class="p">)</span><span class="o">/</span><span class="n">sqrt</span><span class="p">(</span><span class="n">n</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Running this script produces the following output:</p>
+<div class="highlight-python"><pre>Number of matvecs:  64
+Initial/final res: 8.64e+03/4.72e-03
+Direct error: 1.47e-04</pre>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+        </div>
+        <div class="sidebar">
+          <h3>Table Of Contents</h3>
+          <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generic.html">Generic Template</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cg.html">Conjugate Gradient</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">Conjugate Gradient Squared</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-cgs">The <tt class="docutils literal"><span class="pre">cgs</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#example">Example</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="bicgstab.html">Bi-Conjugate Gradient Stabilized</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tfqmr.html">Transpose-Free Quasi-Minimum Residual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="symmlq.html">Symmetric Indefinite Method with Orthogonal Factorization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bmark.html">Benchmarking Solvers</a></li>
+</ul>
+
+          <h3 style="margin-top: 1.5em;">Search</h3>
+          <form class="search" action="search.html" method="get">
+            <input type="text" name="q" />
+            <input type="submit" value="Go" />
+            <input type="hidden" name="check_keywords" value="yes" />
+            <input type="hidden" name="area" value="default" />
+          </form>
+          <p class="searchtip" style="font-size: 90%">
+            Enter search terms or a module, class or function name.
+          </p>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+    <div class="footer-wrapper">
+      <div class="footer">
+        <div class="left">
+          <a href="cg.html" title="The Conjugate Gradient Method"
+             >previous</a> |
+          <a href="bicgstab.html" title="The Bi-Conjugate Gradient Stabilized Method"
+             >next</a> |
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |
+          <a href="genindex.html" title="General Index"
+             >index</a>
+            <br/>
+            <a href="_sources/cgs.txt"
+               rel="nofollow">Show Source</a>
+        </div>
+
+        <div class="right">
+          
+    <div class="footer">
+        &copy; Copyright 2008, D. Orban.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+  </body>
+</html>

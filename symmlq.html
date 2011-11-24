@@ -1,0 +1,255 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>The Symmetric Indefinite Method with Orthogonal Factorization &mdash; PyKrylov 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="PyKrylov 0.1 documentation" href="index.html" />
+    <link rel="next" title="Benchmarking Solvers" href="bmark.html" />
+    <link rel="prev" title="The Transpose-Free Quasi-Minimum Residual Method" href="tfqmr.html" /> 
+  </head>
+  <body>
+    <div class="header-wrapper">
+      <div class="header">
+        <div class="headertitle"><a
+          href="contents.html">PyKrylov 0.1 documentation</a></div>
+        <div class="rel">
+          <a href="tfqmr.html" title="The Transpose-Free Quasi-Minimum Residual Method"
+             accesskey="P">previous</a> |
+          <a href="bmark.html" title="Benchmarking Solvers"
+             accesskey="N">next</a> |
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a>
+        </div>
+       </div>
+    </div>
+
+    <div class="content-wrapper">
+      <div class="content">
+        <div class="document">
+            
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="the-symmetric-indefinite-method-with-orthogonal-factorization">
+<span id="symmlq-page"></span><h1>The Symmetric Indefinite Method with Orthogonal Factorization<a class="headerlink" href="#the-symmetric-indefinite-method-with-orthogonal-factorization" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-symmlq">
+<span id="the-symmlq-module"></span><h2>The <a class="reference internal" href="#module-symmlq" title="symmlq"><tt class="xref py py-mod docutils literal"><span class="pre">symmlq</span></tt></a> Module<a class="headerlink" href="#module-symmlq" title="Permalink to this headline">¶</a></h2>
+<p>A Python implementation of SYMMLQ.</p>
+<dl class="class">
+<dt id="symmlq.SYMMLQ">
+<em class="property">class </em><tt class="descclassname">symmlq.</tt><tt class="descname">SYMMLQ</tt><big>(</big><em>matvec</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#symmlq.SYMMLQ" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">pykrylov.generic.generic.KrylovMethod</span></tt></p>
+<p>SYMMLQ is designed to solve the system of linear equations A x = b
+where A is an n by n symmetric matrix and b is a given vector.</p>
+<p>If shift is nonzero, SYMMLQ solves (A - shift I) x = b.</p>
+<p>SYMMLQ requires one matrix-vector products with <cite>A</cite>, 2 dot products and
+4 daxpys per iteration.</p>
+<p>If a preconditioner is supplied, SYMMLQ needs to solve one preconditioning
+system per iteration. This is a Pythonized line-by-line translation of
+Michael Saunders&#8217; <a class="reference external" href="http://www.stanford.edu/group/SOL/software/symmlq.htm">original SYMMLQ implementation in Matlab</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><table class="first docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">matvec:</th><td class="field-body">an operator describing the coefficient matrix <cite>A</cite>.
+<cite>y = matvec(x)</cite> must return the matrix-vector product
+<cite>y = Ax</cite> for any given vector <cite>x</cite>.</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Keywords :</th><td class="field-body"><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">precon:</th><td class="field-body">optional preconditioner. If not <cite>None</cite>, <cite>y = precon(x)</cite>
+returns the vector <cite>y</cite> solution of the linear system
+<cite>M y = x</cite>. The preconditioner must be symmetric and
+positive definite.</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Note: <cite>atol</cite> has no effect in this method.</p>
+<p>References:</p>
+<table class="docutils citation" frame="void" id="paisau75" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[PaiSau75]</td><td>C. C. Paige and M. A. Saunders, <em>Solution of Sparse Indefinite
+Systems of Linear Equations</em>, SIAM Journal on Numerical
+Analysis, <strong>12</strong> (4), pp. 617&#8211;629, 1975.</td></tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="symmlq.SYMMLQ.solve">
+<tt class="descname">solve</tt><big>(</big><em>rhs</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#symmlq.SYMMLQ.solve" title="Permalink to this definition">¶</a></dt>
+<dd><p>Solve a linear system with <cite>rhs</cite> as right-hand side by the SYMMLQ
+method.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><table class="first docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">rhs:</th><td class="field-body">right-hand side vector b. Should be a Numpy array.</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Keywords :</th><td class="field-body"><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">matvec_max:</th><td class="field-body">Max. number of matrix-vector produts. Default: 2n+2.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">rtol:</th><td class="field-body">relative stopping tolerance. Default: 1.0e-9.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">shift:</th><td class="field-body">optional shift value. Default: 0.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">check:</th><td class="field-body">specify whether or not to check that <cite>matvec</cite> indeed
+describes a symmetric matrix and that <cite>precon</cite> indeed
+describes a symmetric positive-definite preconditioner.</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="example">
+<h2>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h2>
+<p>Here is an example using SYMMLQ on a linear system. The coefficient matrix is
+read from file in Matrix Market format:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">pykrylov.symmlq</span> <span class="kn">import</span> <span class="n">SYMMLQ</span> <span class="k">as</span> <span class="n">KSolver</span>
+<span class="kn">from</span> <span class="nn">pysparse</span> <span class="kn">import</span> <span class="n">spmatrix</span>
+<span class="kn">from</span> <span class="nn">pysparse.pysparseMatrix</span> <span class="kn">import</span> <span class="n">PysparseMatrix</span> <span class="k">as</span> <span class="n">sp</span>
+
+<span class="n">A</span> <span class="o">=</span> <span class="n">sp</span><span class="p">(</span><span class="n">matrix</span><span class="o">=</span><span class="n">spmatrix</span><span class="o">.</span><span class="n">ll_mat_from_mtx</span><span class="p">(</span><span class="s">&#39;lund_a.mtx&#39;</span><span class="p">))</span>
+<span class="n">n</span> <span class="o">=</span> <span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">e</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+<span class="n">rhs</span> <span class="o">=</span> <span class="n">A</span><span class="o">*</span><span class="n">e</span>
+
+<span class="n">ks</span> <span class="o">=</span> <span class="n">KSolver</span><span class="p">(</span> <span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="n">A</span><span class="o">*</span><span class="n">v</span><span class="p">,</span> <span class="n">outputStream</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+<span class="n">ks</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">rhs</span><span class="p">,</span> <span class="n">matvec_max</span><span class="o">=</span><span class="mi">2</span><span class="o">*</span><span class="n">n</span><span class="p">)</span>
+
+<span class="k">print</span> <span class="s">&#39;Number of matvecs: &#39;</span><span class="p">,</span> <span class="n">ks</span><span class="o">.</span><span class="n">nMatvec</span>
+<span class="k">print</span> <span class="s">&#39;Initial/final res: </span><span class="si">%8.2e</span><span class="s">/</span><span class="si">%8.2e</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ks</span><span class="o">.</span><span class="n">residNorm0</span><span class="p">,</span> <span class="n">ks</span><span class="o">.</span><span class="n">residNorm</span><span class="p">)</span>
+<span class="k">print</span> <span class="s">&#39;Direct error: </span><span class="si">%8.2e</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">ks</span><span class="o">.</span><span class="n">bestSolution</span><span class="o">-</span><span class="n">e</span><span class="p">)</span><span class="o">/</span><span class="n">sqrt</span><span class="p">(</span><span class="n">n</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Running this script produces the following output:</p>
+<div class="highlight-python"><pre>Number of matvecs:  308
+Initial/final res: 1.98e+09/2.83e+01
+Direct error: 2.02e-04</pre>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+        </div>
+        <div class="sidebar">
+          <h3>Table Of Contents</h3>
+          <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generic.html">Generic Template</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cg.html">Conjugate Gradient</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cgs.html">Conjugate Gradient Squared</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bicgstab.html">Bi-Conjugate Gradient Stabilized</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tfqmr.html">Transpose-Free Quasi-Minimum Residual</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">Symmetric Indefinite Method with Orthogonal Factorization</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-symmlq">The <tt class="docutils literal"><span class="pre">symmlq</span></tt> Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#example">Example</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="bmark.html">Benchmarking Solvers</a></li>
+</ul>
+
+          <h3 style="margin-top: 1.5em;">Search</h3>
+          <form class="search" action="search.html" method="get">
+            <input type="text" name="q" />
+            <input type="submit" value="Go" />
+            <input type="hidden" name="check_keywords" value="yes" />
+            <input type="hidden" name="area" value="default" />
+          </form>
+          <p class="searchtip" style="font-size: 90%">
+            Enter search terms or a module, class or function name.
+          </p>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+    <div class="footer-wrapper">
+      <div class="footer">
+        <div class="left">
+          <a href="tfqmr.html" title="The Transpose-Free Quasi-Minimum Residual Method"
+             >previous</a> |
+          <a href="bmark.html" title="Benchmarking Solvers"
+             >next</a> |
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |
+          <a href="genindex.html" title="General Index"
+             >index</a>
+            <br/>
+            <a href="_sources/symmlq.txt"
+               rel="nofollow">Show Source</a>
+        </div>
+
+        <div class="right">
+          
+    <div class="footer">
+        &copy; Copyright 2008, D. Orban.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+  </body>
+</html>
