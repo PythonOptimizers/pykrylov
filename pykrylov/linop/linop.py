@@ -87,6 +87,63 @@ class LinearOperator(object):
         raise NotImplementedError, 'Please subclass to implement __mul__.'
 
 
+    #def __neg__(self):
+    #    # From http://goo.gl/y2feG
+    #    # It feels like there should be a better design.
+    #    class NegLinearOperator(self.__class__):
+    #        def __call__(*args, **kwargs):
+    #            Args = args[1:]
+    #            return -self(*Args, **kwargs)
+    #    neg = LinearOperator.__new__(NegLinearOperator)
+    #    neg.__dict__ = self.__dict__.copy()
+    #    return neg
+
+
+    #def __neg__(self):
+    #    # Implements -A for an operator A.
+    #    def call(*args, **kwargs):
+    #        return -self.__call__(*args, **kwargs)
+
+    #    nLinOp = type('nLinearOperator', (LinearOperator,), {'__call__': call})
+    #    new = nLinOp(self.nargin, self.nargout)
+
+    #    for n, v in inspect.getmembers(self):
+    #        if n != '__call__':
+    #            print 'Copying ', n
+    #            try:
+    #                setattr(new, n, v)
+    #            except:
+    #                print 'Cannot copy ', n
+    #                print '  ' + `v`
+    #                pass
+
+    #    new.reset_counters()
+
+    #    return new
+
+
+class IdentityOperator(LinearOperator):
+
+    def __init__(self, nargin, **kwargs):
+        kwargs.pop('symmetric')
+
+        super(IdentityOperator, self).__init__(nargin, nargin,
+                                               symmetric=True, **kwargs)
+
+
+    def __mul__(self, other):
+        if len(other) != self.nargin:
+            raise ShapeError, 'Multiplying with vector of wrong shape.'
+        return other[:]
+
+
+class ZeroOperator(LinearOperator):
+
+    def __mul__(self, other):
+        if len(other) != self.nargin:
+            raise ShapeError, 'Multiplying with vector of wrong shape.'
+        return np.zeros(self.nargout)
+
 
 class SimpleLinearOperator(LinearOperator):
     """
@@ -368,10 +425,10 @@ if __name__ == '__main__':
     print 'op.T(e1) = ', op.T(e1)
     print 'op.T.T is op : ', (op.T.T is op)
     print
-    print 'Solving a constrained least-squares problem with LSQR:'
-    lsqr = LSQRFramework(op)
-    lsqr.solve(np.random.random(nlp.m), show=True)
-    print
+    #print 'Solving a constrained least-squares problem with LSQR:'
+    #lsqr = LSQRFramework(op)
+    #lsqr.solve(np.random.random(nlp.m), show=True)
+    #print
     print 'Building a SquaredLinearOperator:'
     op2 = SquaredLinearOperator(J, log=True)
     print 'op2 * e2 = ', op2 * e2
@@ -380,3 +437,9 @@ if __name__ == '__main__':
     print 'op3 * e1 = ', op3 * e1
     print 'op * (op.T * e1) = ', op * (op.T * e1)
     print 'op3 is symmetric: ', op3.check_symmetric()
+
+    #print
+    #print 'Testing negative operator:'
+    #nop = -op
+    #print op*e2
+    #print nop*e2
