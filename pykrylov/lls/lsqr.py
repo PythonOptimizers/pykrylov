@@ -66,7 +66,7 @@ class LSQRFramework(KrylovMethod):
                   'The least-squares solution is good enough for this machine',
                   'Cond(Abar) seems to be too large for this machine         ',
                   'The iteration limit has been reached                      ',
-                  'The trust-region boundary has been hit                    ']
+                  'The truncated direct error is small enough, given etol    ']
 
         self.A = A
         self.x = None ; self.var = None
@@ -100,6 +100,7 @@ class LSQRFramework(KrylovMethod):
                    the final residual norm should be accurate to about 9 digits.
                    (The final x will usually have fewer correct digits,
                    depending on `cond(A)` and the size of `damp`.)
+           :etol:  stopping tolerance based on direct error (default 1.0e-6).
            :conlim: is also a stopping tolerance.  lsqr terminates if an
                     estimate of `cond(A)` exceeds `conlim`.  For compatible
                     systems `Ax = b`, `conlim` could be as large as 1.0e+12
@@ -130,7 +131,9 @@ class LSQRFramework(KrylovMethod):
                    (Not sure what var means if rank(A) < n and damp = 0.)
         """
 
+        etol = kwargs.get('etol', 1.0e-6)
         store_resids = kwargs.get('store_resids', False)
+        window = kwargs.get('window', 5)
 
         A = self.A
         m, n = A.shape
@@ -167,6 +170,9 @@ class LSQRFramework(KrylovMethod):
         # These satisfy  beta*M*u = b,  alpha*N*v = A'u.
 
         x = zeros(n)
+        xNrgNorm2 = 0.0          # Squared energy norm of final solution.
+        dErr = zeros(window)     # Truncated direct error terms.
+        trncDirErr = 0           # Truncated direct error.
 
         Mu = rhs[:m].copy()
         if M is not None:
@@ -267,8 +273,8 @@ class LSQRFramework(KrylovMethod):
             # of the lower-bidiagonal matrix, giving an upper-bidiagonal matrix.
 
             rho     =   normof2(rhobar1, beta)
-            cs      =   rhobar1/ rho
-            sn      =   beta   / rho
+            cs      =   rhobar1 / rho
+            sn      =   beta    / rho
             theta   =   sn * alpha
             rhobar  = - cs * alpha
             phi     =   cs * phibar
@@ -277,14 +283,22 @@ class LSQRFramework(KrylovMethod):
 
             # Update x and w.
 
-            t1      =   phi  /rho;
-            t2      = - theta/rho;
+            t1      =   phi   / rho;
+            t2      = - theta / rho;
             dk      =   (1.0/rho)*w;
 
             x      += t1*w
             w      *= t2 ; w += v
             ddnorm  = ddnorm + norm(dk)**2
             if wantvar: var += dk*dk
+
+            # Update energy norm of x.
+            xNrgNorm2 += phi*phi
+            dErr[itn % window] = phi
+            if itn > window:
+                trncDirErr = norm(dErr)
+                if trncDirErr < etol * sqrt(xNrgNorm2):
+                    istop = 8
 
             # Use a plane rotation on the right to eliminate the
             # super-diagonal element (theta) of the upper-bidiagonal matrix.
@@ -395,16 +409,20 @@ class LSQRFramework(KrylovMethod):
             str3 = 'itn   =%8g   r2norm =%8.1e'   % ( itn, r2norm)
             str4 = 'Acond =%8.1e   xnorm  =%8.1e' % (Acond, xnorm )
             str5 = '                  bnorm  =%8.1e'    % bnorm
+            str6 = 'xNrgNorm2 = %7.1e   trnDirErr = %7.1e' % \
+                    (xNrgNorm2, trncDirErr)
             print str1 + '   ' + str2
             print str3 + '   ' + str4
             print str5
+            print str6
             print ' '
 
         if istop == 0: self.status = 'solution is zero'
         if istop in [1,2,4,5]: self.status = 'residual small'
         if istop in [3,6]: self.status = 'ill-conditioned operator'
         if istop == 7: self.status = 'max iterations'
-        self.optimal = istop in [1,2,4,5]
+        if istop == 8: self.status = 'direct error small'
+        self.optimal = istop in [1,2,4,5,8]
         self.x = self.bestSolution = x
         self.istop = istop
         self.itn = itn
