@@ -13,10 +13,12 @@ available at http://www.stanford.edu/group/SOL/software/minres.htm.
 .. moduleauthor:: D. Orban <dominique.orban@gerad.ca>
 """
 
+from pykrylov.generic import KrylovMethod
 from numpy import zeros, dot, empty
 from math import sqrt
 
-class Minres:
+
+class Minres(KrylovMethod):
     """
     `K = Minres(A) ; K.solve(b)`
 
@@ -74,15 +76,11 @@ class Minres:
 #    17 Oct 2003: f77 version converted to MATLAB.
 #    11 Jan 2008: MATLAB version converted to Python.
 
-    def __init__(self, A, **kwargs):
-
-        self.A = A
-        self.x = None
+    def __init__(self, matvec, **kwargs):
 
         #  Initialize
         self.first = 'Enter minres.   '
         self.last  = 'Exit  minres.   '
-        self.space = ' '
         self.msg = [' beta2 = 0.  If M = I, b and x are eigenvectors    ',  #-1
                     ' beta1 = 0.  The exact solution is  x = 0          ',  # 0
                     ' A solution to Ax = b was found, given rtol        ',  # 1
@@ -97,6 +95,13 @@ class Minres:
 
         self.eps = self._Epsilon()
 
+        KrylovMethod.__init__(self, matvec, **kwargs)
+
+        self.name = 'Minimum Residual'
+        self.acronym = 'MINRES'
+        self.prefix = self.acronym + ': '
+        self.residHistory = []     # Residual norms.
+        self.resids = []           # Residual vectors.
 
     def _Epsilon(self):
         """
@@ -108,14 +113,12 @@ class Minres:
             eps = eps / 2.0
         return eps*2.0
 
-
     def normof2(self, x,y):
         return sqrt(x**2 + y**2)
 
-
     def solve(self, b, **kwargs):
 
-        A = self.A
+        A = self.matvec
         n = b.shape[0]
         x = zeros(n)
 
@@ -126,12 +129,12 @@ class Minres:
         check  = kwargs.get('check',  True)
         itnlim = kwargs.get('itnlim', 5*n)
         rtol   = kwargs.get('rtol',   1.0e-12)
+        store_resids = kwargs.get('store_resids', False)
 
         # Transfer some pointers for readability
         eps = self.eps
 
         if show:
-            print self.space
             print self.first + 'Solution of symmetric Ax = b'
             print 'n      =  %3d     precon =  %4s           shift  =  %23.14e'\
                 % (n, (precon != None), shift)
@@ -165,6 +168,8 @@ class Minres:
 
         if beta1 > 0:
             beta1 = sqrt(beta1);       # Normalize y to get v1 later.
+
+        self.residNorm0 = beta1        # Initial residual norm.
 
         # See if A is symmetric.
         if check:
@@ -317,6 +322,8 @@ class Minres:
                 test1  = rnorm / (Anorm*ynorm)     #  ||r|| / (||A|| ||x||)
                 test2  = root  /  Anorm            # ||Ar|| / (||A|| ||r||)
 
+                self.residHistory.append(rnorm)
+
                 # Estimate  cond(A).
                 # In this version we look at the diagonals of  R  in the
                 # factorization of the lower Hessenberg matrix,  Q * H = R,
@@ -367,7 +374,6 @@ class Minres:
         # Display final status.
 
         if show:
-            print self.space
             last = self.last
             print last+' istop   =  %3g               itn   =%5g' % (istop,itn)
             print last+' Anorm   =  %12.4e      Acond =  %12.4e' %(Anorm,Acond)
@@ -375,16 +381,14 @@ class Minres:
             print last+' Arnorm  =  %12.4e' % Arnorm
             print last+self.msg[istop+1]
 
-        self.x = x
+        self.converged = istop in [1,2,3,4]
+        self.bestSolution = self.x = x
         self.istop = istop
         self.itn = itn
-        self.rnorm = rnorm
+        self.residNorm = self.rnorm = rnorm
         self.Arnorm = Arnorm
         self.Anorm = Anorm
         self.Acond = Acond
         self.ynorm = ynorm
 
         return
-    # -----------------------------------------------------------------------
-    # End function minres
-    # -----------------------------------------------------------------------
