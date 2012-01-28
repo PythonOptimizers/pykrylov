@@ -1,8 +1,6 @@
 import logging
 
-
 __docformat__ = 'restructuredtext'
-
 
 # Default (null) logger.
 null_log = logging.getLogger('krylov')
@@ -10,7 +8,7 @@ null_log.setLevel(logging.INFO)
 null_log.addHandler(logging.NullHandler())
 
 
-class KrylovMethod:
+class KrylovMethod(object):
     """
     A general template for implementing iterative Krylov methods. This module
     defines the `KrylovMethod` generic class. Other modules subclass
