@@ -94,4 +94,4 @@ class KrylovMethod(object):
         This is the :meth:`solve` method of the abstract `KrylovMethod` class.
         The class must be specialized and this method overridden.
         """
-        raise NotImplementedError, 'This method must be subclassed'
+        raise NotImplementedError('This method must be subclassed')
