@@ -205,16 +205,18 @@ class CRAIGFramework(KrylovMethod):
         #    x_is_zero = True
         #    istop = 0
 
+        bnorm = beta
         delta = 1.
         rho   = normof2(alpha, 1)
         c     = alpha / rho
         s     = 1 / rho
         zeta  = s * beta
         eta   = c * zeta
+        #xi    = s * zeta
         w     = c * v
         wbar  = s * v
         x     = zeta * w
-        #rnorm  = beta
+        #rnorm  = abs(eta * beta)
         #r1norm = rnorm
         #r2norm = rnorm
         head1  = '   Itn      x(1)       r1norm     r2norm '
@@ -252,6 +254,10 @@ class CRAIGFramework(KrylovMethod):
             else:
                 u = Mu
             beta = sqrt(dot(u,Mu))   # norm(u)
+
+            # Update residual of CRAIG's "other" normal equations.
+            Arnorm = abs(alpha * beta * s * zeta)
+
             if beta > 0:
                 u /= beta
                 if M is not None: Mu /= beta
@@ -283,10 +289,14 @@ class CRAIGFramework(KrylovMethod):
             c         = alpha / alpha_hat
             s         = delta / alpha_hat
 
+            # Update residual of SQD system estimate.
+            rnorm   = abs(eta * beta)
+
             # Update x, w and wbar.
 
             zeta = - beta_hat * zeta / alpha_hat
             eta  = c * zeta
+            #xi   = s * zeta
 
             wbar *= s2
             w     = c * v + s * wbar
@@ -327,7 +337,6 @@ class CRAIGFramework(KrylovMethod):
             #Acond   =   Anorm * sqrt(ddnorm)
             #res1    =   phibar**2
             #res2    =   res2  +  psi**2
-            #rnorm   =   sqrt(res1 + res2)
             #Arnorm  =   alpha * abs(tau)
 
             # 07 Aug 2002:
@@ -342,12 +351,12 @@ class CRAIGFramework(KrylovMethod):
             #r1sq    =   rnorm**2  -  dampsq * xxnorm
             #r1norm  =   sqrt(abs(r1sq))
             #if r1sq < 0: r1norm = - r1norm
-            #r2norm  =   rnorm
+            r2norm  =   rnorm
 
             # Now use these norms to estimate certain other quantities,
             # some of which will be small near a solution.
 
-            #test1 = rnorm / bnorm
+            test1 = rnorm / bnorm
             #if Anorm == 0. or rnorm == 0.:
             #    test2 = inf
             #else:
@@ -356,12 +365,12 @@ class CRAIGFramework(KrylovMethod):
             #    test3 = inf
             #else:
             #    test3 = 1.0 / Acond
-            #t1    = test1 / (1    +  Anorm * xnorm / bnorm)
-            #rtol  = btol  +  atol *  Anorm * xnorm / bnorm
+            t1    = test1 #/ (1    +  Anorm * xnorm / bnorm)
+            rtol  = btol  #+  atol *  Anorm * xnorm / bnorm
 
-            #if store_resids:
+            if store_resids:
             #    self.resids.append(r2norm)
-            #    self.normal_eqns_resids.append(Arnorm)
+                self.normal_eqns_resids.append(Arnorm)
 
             # The following tests guard against extremely small values of
             # atol, btol  or  ctol.  (The user may have set any or all of
@@ -372,13 +381,13 @@ class CRAIGFramework(KrylovMethod):
             if itn >= itnlim:  istop = 7
             #if 1 + test3 <= 1: istop = 6
             #if 1 + test2 <= 1: istop = 5
-            #if 1 + t1    <= 1: istop = 4
+            if 1 + t1    <= 1: istop = 4
 
             # Allow for tolerances set by the user.
 
             #if test3 <= ctol: istop = 3
             #if test2 <= atol: istop = 2
-            #if test1 <= rtol: istop = 1
+            if test1 <= rtol: istop = 1
 
             # See if it is time to print something.
 
@@ -411,13 +420,13 @@ class CRAIGFramework(KrylovMethod):
             #print ' '
             #str1 = 'istop =%8g   r1norm =%8.1e'   % (istop, r1norm)
             #str2 = 'Anorm =%8.1e   Arnorm =%8.1e' % (Anorm, Arnorm)
-            #str3 = 'itn   =%8g   r2norm =%8.1e'   % ( itn, r2norm)
+            str3 = 'itn   =%8g   r2norm =%8.1e'   % ( itn, r2norm)
             #str4 = 'Acond =%8.1e   xnorm  =%8.1e' % (Acond, xnorm )
             #str5 = '                  bnorm  =%8.1e'    % bnorm
             str6 = 'xNrgNorm2 = %7.1e   trnDirErr = %7.1e' % \
                     (xNrgNorm2, trncDirErr)
             #print str1 + '   ' + str2
-            #print str3 + '   ' + str4
+            print str3 #+ '   ' + str4
             #print str5
             print str6
             print ' '
@@ -437,7 +446,7 @@ class CRAIGFramework(KrylovMethod):
         #self.residNorm = r2norm
         #self.Anorm = Anorm
         #self.Acond = Acond
-        #self.Arnorm = Arnorm
+        self.Arnorm = Arnorm
         #self.xnorm = xnorm
         #self.var = var
         return
