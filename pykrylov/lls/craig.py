@@ -4,13 +4,15 @@ Solve the least-squares problem
 
   minimize ||Ax-b||
 
-or the regularized least-squares problem
+using CRAIG, or the regularized least-squares problem
 
-  minimize ||Ax-b||^2 + ||Dx||^2
+  minimize ||Ax-b||^2_D + ||Dx||^2_N
 
-using CRAIG.
+using the generalized CRAIG method, where D and N are symmetric and positive
+definite operators.
 
-Dominique Orban, Ecole Polytechnique de Montreal
+Dominique Orban, GERAD and Ecole Polytechnique de Montreal
+dominique.orban@gerad.ca
 """
 
 from pykrylov.generic import KrylovMethod
@@ -30,6 +32,19 @@ class CRAIGFramework(KrylovMethod):
     CRAIG solves  `Ax = b`  or  `minimize |b - Ax|` in Euclidian norm  if
     `damp = 0`, or `minimize |b - Ax| + damp * |x|` in Euclidian norm if
     `damp > 0`.
+
+    The generalized CRAIG method solves the regularized linear least-squares
+    problem
+
+    minimize |b - Ax|^2_D + |x|^2_N
+
+    for given positive definite matrices D and N of appropriate size.
+    Equivalently, solve the symmetric and quasi-definite linear system
+
+    [ M   A ] [ r ]   [ b ]
+    [ A' -C ] [ x ] = [ 0 ]
+
+    where M := inv(D).
 
     `A`  is an (m x n) linear operator defined by  `y = A * x` (or `y = A(x)`),
     where `y` is the result of applying the linear operator to `x`. Application
@@ -77,8 +92,9 @@ class CRAIGFramework(KrylovMethod):
         self.xnorm = 0.;
         self.r1norm = 0.; self.r2norm = 0.
         self.optimal = False
-        self.resids = []             # Least-squares objective function values.
-        self.normal_eqns_resids = [] # Residuals of normal equations.
+        self.norms  = []    # Iterates SQUARED energy norm.
+        self.resids = []    # SQUARED least-squares objective function values.
+        self.normal_eqns_resids = [] # Resids of normal equations (not squared).
         return
 
     def solve(self, rhs, itnlim=0, damp=0.0, M=None, N=None, atol=1.0e-9,
@@ -93,6 +109,9 @@ class CRAIGFramework(KrylovMethod):
            :rhs:    right-hand side vector.
            :itnlim: is an explicit limit on iterations (for safety).
            :damp:   damping/regularization parameter.
+           :M:      inv(D) as a linear operator if not the identity operator.
+           :N:      inv(C) as a linear operator if nonzero. If specified,
+                    `damp` is automatically reset to 1.
 
         :keywords:
 
@@ -157,6 +176,7 @@ class CRAIGFramework(KrylovMethod):
         #Anorm = Acond = 0.
         #z = xnorm = xxnorm = ddnorm = res2 = 0.
         #cs2 = -1. ; sn2 = 0.
+        #xnorm = 0.0
 
         if show:
             print ' '
@@ -201,9 +221,10 @@ class CRAIGFramework(KrylovMethod):
         x_is_zero = False   # Is x=0 the solution to the least-squares prob?
         #Arnorm = alpha * beta
         #if Arnorm == 0.0:
-        #    if show: print self.msg[0]
-        #    x_is_zero = True
-        #    istop = 0
+        if beta == 0.0:
+            if show: print self.msg[0]
+            x_is_zero = True
+            istop = 0
 
         bnorm = beta
         delta = 1.
@@ -211,14 +232,15 @@ class CRAIGFramework(KrylovMethod):
         c     = alpha / rho
         s     = 1 / rho
         zeta  = s * beta
-        eta   = c * zeta
-        #xi    = s * zeta
+        eta   = c * zeta    # Most recently computed component of \bar{y}.
+        xi    = s * zeta    # Most recently computed component of \bar{x}.
         w     = c * v
         wbar  = s * v
         x     = zeta * w
-        #rnorm  = abs(eta * beta)
-        #r1norm = rnorm
-        #r2norm = rnorm
+        xnorm = eta * eta
+        rnorm  = zeta * zeta    # = ||b - Ax||^2_M + \|x\|^2_N.
+        r1norm = xi * xi        # = ||b - Ax||^2_M.
+        r2norm = rnorm
         head1  = '   Itn      x(1)       r1norm     r2norm '
         head2  = ' Compatible   LS      Norm A   Cond A'
 
@@ -232,8 +254,9 @@ class CRAIGFramework(KrylovMethod):
         #    str3   = '  %8.1e %8.1e'  % (test1,  test2)
         #    print str1+str2+str3
 
-        #if store_resids:
-        #    self.resids.append(r2norm)
+        if store_resids:
+            self.norms.append(xNrgNorm2)
+            self.resids.append(r2norm)
         #    self.normal_eqns_resids.append(Arnorm)
 
         # ------------------------------------------------------------------
@@ -257,6 +280,9 @@ class CRAIGFramework(KrylovMethod):
 
             # Update residual of CRAIG's "other" normal equations.
             Arnorm = abs(alpha * beta * s * zeta)
+
+            # Update residual of SQD system estimate.
+            sqd_resid = beta * c * zeta
 
             if beta > 0:
                 u /= beta
@@ -289,14 +315,11 @@ class CRAIGFramework(KrylovMethod):
             c         = alpha / alpha_hat
             s         = delta / alpha_hat
 
-            # Update residual of SQD system estimate.
-            rnorm   = abs(eta * beta)
-
             # Update x, w and wbar.
 
             zeta = - beta_hat * zeta / alpha_hat
             eta  = c * zeta
-            #xi   = s * zeta
+            xi   = s * zeta
 
             wbar *= s2
             w     = c * v + s * wbar
@@ -308,7 +331,7 @@ class CRAIGFramework(KrylovMethod):
             #if wantvar: var += dk*dk
 
             # Update energy norm of x.
-            xNrgNorm2 += zeta * zeta
+            xNrgNorm2 += zeta * zeta             # (A + B*inv(C)*B')-norm of x.
             dErr[itn % window] = zeta
             if itn > window:
                 trncDirErr = norm(dErr)
@@ -324,6 +347,8 @@ class CRAIGFramework(KrylovMethod):
             #rhs     =   phi  -  delta * z
             #zbar    =   rhs / gambar
             #xnorm   =   sqrt(xxnorm + zbar**2)
+            rnorm   += zeta * zeta               # inv(A)-norm of ||b-Ax||.
+            xnorm   += eta * eta                 # C-norm of x.
             #gamma   =   normof2(gambar, theta)
             #cs2     =   gambar / gamma
             #sn2     =   theta  / gamma
@@ -349,14 +374,14 @@ class CRAIGFramework(KrylovMethod):
             # Although there is cancellation, it might be accurate enough.
 
             #r1sq    =   rnorm**2  -  dampsq * xxnorm
-            #r1norm  =   sqrt(abs(r1sq))
+            r1norm += xi * xi
             #if r1sq < 0: r1norm = - r1norm
-            r2norm  =   rnorm
+            r2norm = rnorm
 
             # Now use these norms to estimate certain other quantities,
             # some of which will be small near a solution.
 
-            test1 = rnorm / bnorm
+            test1 = sqrt(rnorm) / bnorm
             #if Anorm == 0. or rnorm == 0.:
             #    test2 = inf
             #else:
@@ -369,7 +394,8 @@ class CRAIGFramework(KrylovMethod):
             rtol  = btol  #+  atol *  Anorm * xnorm / bnorm
 
             if store_resids:
-            #    self.resids.append(r2norm)
+                self.norms.append(xNrgNorm2)
+                self.resids.append(r2norm)
                 self.normal_eqns_resids.append(Arnorm)
 
             # The following tests guard against extremely small values of
@@ -416,18 +442,18 @@ class CRAIGFramework(KrylovMethod):
         if show:
             print ' '
             print 'CRAIG finished'
-            #print self.msg[istop]
-            #print ' '
-            #str1 = 'istop =%8g   r1norm =%8.1e'   % (istop, r1norm)
+            print self.msg[istop]
+            print ' '
+            str1 = 'istop =%8g   r1norm =%8.1e'   % (istop, sqrt(r1norm))
             #str2 = 'Anorm =%8.1e   Arnorm =%8.1e' % (Anorm, Arnorm)
-            str3 = 'itn   =%8g   r2norm =%8.1e'   % ( itn, r2norm)
+            str3 = 'itn   =%8g   r2norm =%8.1e'   % ( itn, sqrt(r2norm))
             #str4 = 'Acond =%8.1e   xnorm  =%8.1e' % (Acond, xnorm )
-            #str5 = '                  bnorm  =%8.1e'    % bnorm
+            str5 = '                  bnorm  =%8.1e'    % bnorm
             str6 = 'xNrgNorm2 = %7.1e   trnDirErr = %7.1e' % \
                     (xNrgNorm2, trncDirErr)
-            #print str1 + '   ' + str2
+            print str1 #+ '   ' + str2
             print str3 #+ '   ' + str4
-            #print str5
+            print str5
             print str6
             print ' '
 
@@ -441,13 +467,13 @@ class CRAIGFramework(KrylovMethod):
         self.istop = istop
         self.itn = itn
         self.nMatvec = 2*itn
-        #self.r1norm = r1norm
-        #self.r2norm = r2norm
+        self.r1norm = sqrt(r1norm)
+        self.r2norm = sqrt(r2norm)
         #self.residNorm = r2norm
         #self.Anorm = Anorm
         #self.Acond = Acond
         self.Arnorm = Arnorm
-        #self.xnorm = xnorm
+        self.xnorm = xnorm
         #self.var = var
         return
 
