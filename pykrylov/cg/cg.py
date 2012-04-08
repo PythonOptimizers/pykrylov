@@ -65,7 +65,9 @@ class CG( KrylovMethod ):
         store_resids = kwargs.get('store_resids', False)
 
         if check_sym:
-            check_symmetric(self.matvec)
+            if not check_symmetric(self.matvec):
+                self.logger.error('Coefficient matrix is not symmetric')
+                return
 
         # Initial guess
         guess_supplied = 'guess' in kwargs.keys()
@@ -109,7 +111,7 @@ class CG( KrylovMethod ):
 
             if check_curvature:
                 if pAp <= 0:
-                    self.logger.info('Coefficient matrix is not positive definite')
+                    self.logger.error('Coefficient matrix is not positive definite')
                     self.infiniteDescent = p
                     definite = False
                     continue
