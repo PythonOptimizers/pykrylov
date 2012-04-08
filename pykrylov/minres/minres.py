@@ -83,6 +83,7 @@ class Minres:
         self.x = None
 
         #  Initialize
+        self.acronym = 'MINRES'
         self.first = 'Enter minres.   '
         self.last  = 'Exit  minres.   '
         self.space = ' '
@@ -157,6 +158,7 @@ class Minres:
 
         if beta1 > 0:
             beta1 = sqrt(beta1);       # Normalize y to get v1 later.
+        self.residNorm0 = beta1
 
         # See if A is symmetric.
         if check:
@@ -354,10 +356,10 @@ class Minres:
             print last+' Arnorm  =  %12.4e' % Arnorm
             print last+self.msg[istop+1]
 
-        self.x = x
+        self.x = self.bestSolution = x
         self.istop = istop
-        self.itn = itn
-        self.rnorm = rnorm
+        self.itn = self.nMatvec = itn
+        self.rnorm = self.residNorm = rnorm
         self.Arnorm = Arnorm
         self.Anorm = Anorm
         self.Acond = Acond
