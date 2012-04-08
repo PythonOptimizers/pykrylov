@@ -19,8 +19,12 @@ def demo(KSolver, mtx, **kwargs):
     e = np.ones(n)
     rhs = A*e
 
-    ks = KSolver(A, reltol=1.0e-8, **kwargs)
-    ks.solve(rhs, guess=1+np.arange(n, dtype=np.float), matvec_max=2*n)
+    if 'logger' in kwargs:
+        logger = kwargs.pop('logger')
+
+    ks = KSolver(A, reltol=1.0e-8, logger=logger)
+    ks.solve(rhs, guess=1+np.arange(n, dtype=np.float), matvec_max=2*n,
+             **kwargs)
 
     err = np.linalg.norm(ks.bestSolution-e)/sqrt(n)
 
