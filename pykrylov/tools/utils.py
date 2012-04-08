@@ -1,7 +1,6 @@
 # Various utilities.
 
 from math import copysign, sqrt
-#import sys
 
 def roots_quadratic(q2, q1, q0, tol=1.0e-8, nitref=1):
     """
@@ -36,15 +35,6 @@ def roots_quadratic(q2, q1, q0, tol=1.0e-8, nitref=1):
             # Ill-conditioned quadratic.
             roots = [-a1/a2, 0.0]
 
-    #sys.stdout.write('Roots before refinement: [')
-    #for root in roots:
-    #    sys.stdout.write('%15.7e  ' % root)
-    #sys.stdout.write(']\n')
-    #sys.stdout.write('Values: [')
-    #for root in roots:
-    #    sys.stdout.write('%15.7e  ' % ((a2*root + a1)*root+a0))
-    #sys.stdout.write(']\n')
-
     # Perform a few Newton iterations to improve accuracy.
     new_roots = []
     for root in roots:
@@ -56,15 +46,6 @@ def roots_quadratic(q2, q1, q0, tol=1.0e-8, nitref=1):
             else:
                 root = root - val/der
         new_roots.append(root)
-
-    #sys.stdout.write('Roots after refinement: [')
-    #for root in roots:
-    #    sys.stdout.write('%15.7e  ' % root)
-    #sys.stdout.write(']\n')
-    #sys.stdout.write('Values: [')
-    #for root in roots:
-    #    sys.stdout.write('%15.7e  ' % ((a2*root + a1)*root+a0))
-    #sys.stdout.write(']\n')
 
     return new_roots
 
