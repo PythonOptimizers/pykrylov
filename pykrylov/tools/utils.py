@@ -1,5 +1,6 @@
 # Various utilities.
 
+import numpy
 from math import copysign, sqrt
 
 def roots_quadratic(q2, q1, q0, tol=1.0e-8, nitref=1):
@@ -48,6 +49,27 @@ def roots_quadratic(q2, q1, q0, tol=1.0e-8, nitref=1):
         new_roots.append(root)
 
     return new_roots
+
+
+def check_symmetric(op, x=None):
+    """
+    Cheap check that a linear operator is symmetric. Supply `op`, a callable
+    linear operator and `x`, an initial vector. If `x` is not supplied, a
+    random vector will be generated. This function returns `True` or `False`.
+    """
+    m, n = op.get_shape()
+    if m != n: return False
+    eps = numpy.finfo(numpy.double).eps
+    if x is None:
+        x = numpy.random.random(n)
+    w = op(x)
+    r = op(w)
+    s = numpy.dot(w,w)
+    t = numpy.dot(x,r)
+    z = abs(s - t)
+    epsa = (s + eps) * eps**(1.0/3)
+    return (z <= epsa)
+
 
 
 if __name__ == '__main__':
