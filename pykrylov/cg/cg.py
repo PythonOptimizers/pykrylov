@@ -4,6 +4,7 @@ __docformat__ = 'restructuredtext'
 import numpy as np
 from math import sqrt
 
+from pykrylov.tools.utils import check_symmetric
 from pykrylov.generic import KrylovMethod
 
 class CG( KrylovMethod ):
@@ -51,15 +52,20 @@ class CG( KrylovMethod ):
 
            :guess:           Initial guess (Numpy array). Default: 0.
            :matvec_max:      Max. number of matrix-vector produts. Default: 2n.
-           :check_curvature: Ensure matrix is positive definte. Default: True.
+           :check_symmetric: Ensure matrix is symmetric. Default: False.
+           :check_curvature: Ensure matrix is positive definite. Default: True.
            :store_resids:    Store full residual vector history. Default: False.
 
         """
         n = rhs.shape[0]
         nMatvec = 0
         definite = True
+        check_sym = kwargs.get('check_symmetric', False)
         check_curvature = kwargs.get('check_curvature', True)
         store_resids = kwargs.get('store_resids', False)
+
+        if check_sym:
+            check_symmetric(self.matvec)
 
         # Initial guess
         guess_supplied = 'guess' in kwargs.keys()
