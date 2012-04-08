@@ -148,7 +148,7 @@ class Minres:
         #  Test for an indefinite preconditioner.
         #  If b = 0 exactly, stop with x = 0.
         if beta1 < 0:
-            istop = 8
+            istop = 9
             self.show = True
             done = True
 
@@ -163,14 +163,14 @@ class Minres:
         # See if A is symmetric.
         if check:
             if not check_symmetric(A, x=y):
-                istop = 6
+                istop = 7
                 done  = True
                 self.show = True
 
         # See if preconditioner is symmetric.
         if check and (precon is not None):
             if not check_symmetric(precon, y):
-                istop = 7
+                istop = 8
                 show = True
                 done = True
 
