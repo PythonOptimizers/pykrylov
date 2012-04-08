@@ -1,4 +1,3 @@
-
 __docformat__ = 'restructuredtext'
 
 import numpy as np
@@ -22,8 +21,10 @@ class CG( KrylovMethod ):
         minimize    -<b,x> + 1/2 <x, Ax>
 
     in the variable x.
-
-    CG performs 1 matrix-vector product, 2 dot products and 3 daxpys per
+    Please  refer Shewchuk's paper titled "An Introduction to Conjugate Gradient Method Without the Agonizing Pain"
+    for mathematical details of the algorithm.
+    
+    CG performs 1 matrix-vector product (dgemv), 2 dot products (ddot) and 3 vector-vector additions (daxpy) per
     iteration.
 
     If a preconditioner is supplied, it needs to solve one preconditioning
@@ -109,7 +110,7 @@ class CG( KrylovMethod ):
 
             if check_curvature:
                 if pAp <= 0:
-                    self.logger.info('Coefficient matrix is not positive definite')
+                    self.logger.info('Coefficient matrix is not positive definite. Please consider using another solver such as TFQMR, BiCGSTAB or CGS instead.')
                     self.infiniteDescent = p
                     definite = False
                     continue
