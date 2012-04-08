@@ -13,8 +13,11 @@ available at http://www.stanford.edu/group/SOL/software/minres.htm.
 .. moduleauthor:: D. Orban <dominique.orban@gerad.ca>
 """
 
+import numpy as np
 from numpy import zeros, dot, empty
 from math import sqrt
+from pykrylov.tools.utils import check_symmetric
+
 
 class Minres:
     """
@@ -95,18 +98,7 @@ class Minres:
                     ' Mname  does not define a symmetric matrix         ',  # 8
                     ' Mname  does not define a pos-def preconditioner   ' ] # 9
 
-        self.eps = self._Epsilon()
-
-
-    def _Epsilon(self):
-        """
-        Return approximate value of machine epsilon
-        """
-        one = 1.0
-        eps = 1.0
-        while (one + eps) > one:
-            eps = eps / 2.0
-        return eps*2.0
+        self.eps = np.finfo(np.double).eps
 
 
     def normof2(self, x,y):
@@ -168,27 +160,14 @@ class Minres:
 
         # See if A is symmetric.
         if check:
-            w  = A * y
-            r2 = A * w
-            s  = dot(w,w)
-            t  = dot(y,r2)
-            print 's = ', s, ', t = ', t
-            z    = abs(s - t)
-            epsa = (s + eps) * eps**(1.0/3)
-            print 'z = ', z, ', epsa = ', epsa
-            if z > epsa:
+            if not check_symmetric(A, x=y):
                 istop = 6
                 done  = True
                 self.show = True
 
         # See if preconditioner is symmetric.
         if check and (precon is not None):
-            r2   = precon(y)
-            s    = dot(y,y)
-            t    = dot(r1,r2)
-            z    = abs(s - t)
-            epsa = (s + eps) * eps**(1.0/3)
-            if z > epsa:
+            if not check_symmetric(precon, y):
                 istop = 7
                 show = True
                 done = True
