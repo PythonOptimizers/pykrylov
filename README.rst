@@ -87,7 +87,7 @@ Bugs, Comments, Feature Requests
 ================================
 
 Please send bugs, comments, feature requests, test cases, chocolate and coffee
-to the `Lighthouse PyKrylov page
+via Github Issues or the `Lighthouse PyKrylov page
 <http://pykrylov.lighthouseapp.com/projects/21441-pykrylov>`_.
 
 
