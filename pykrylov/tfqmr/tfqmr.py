@@ -1,4 +1,3 @@
-
 __docformat__ = 'restructuredtext'
 
 import numpy as np
@@ -8,7 +7,7 @@ from pykrylov.generic import KrylovMethod
 
 class TFQMR( KrylovMethod ):
     """
-    A pure Python implementation of the transpose-free quasi-minimum residual
+    A pure Python implementation of the transpose-free quasi-minimal residual
     (TFQMR) algorithm. TFQMR may be used to solve unsymmetric systems of linear
     equations, i.e., systems of the form
 
