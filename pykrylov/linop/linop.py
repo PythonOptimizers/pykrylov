@@ -87,16 +87,16 @@ class LinearOperator(object):
         raise NotImplementedError, 'Please subclass to implement __mul__.'
 
 
-    #def __neg__(self):
-    #    # From http://goo.gl/y2feG
-    #    # It feels like there should be a better design.
-    #    class NegLinearOperator(self.__class__):
-    #        def __call__(*args, **kwargs):
-    #            Args = args[1:]
-    #            return -self(*Args, **kwargs)
-    #    neg = LinearOperator.__new__(NegLinearOperator)
-    #    neg.__dict__ = self.__dict__.copy()
-    #    return neg
+    def __neg__(self):
+        # From http://goo.gl/y2feG
+        # It feels like there should be a better design.
+        class NegLinearOperator(self.__class__):
+            def __call__(*args, **kwargs):
+                Args = args[1:]
+                return -self(*Args, **kwargs)
+        neg = LinearOperator.__new__(NegLinearOperator)
+        neg.__dict__ = self.__dict__.copy()
+        return neg
 
 
     #def __neg__(self):
