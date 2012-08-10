@@ -95,6 +95,7 @@ class CRAIGFramework(KrylovMethod):
         self.norms  = []    # Iterates SQUARED energy norm.
         self.resids = []    # SQUARED least-squares objective function values.
         self.normal_eqns_resids = [] # Resids of normal equations (not squared).
+        self.dir_errors_window = []
         return
 
     def solve(self, rhs, itnlim=0, damp=0.0, M=None, N=None, atol=1.0e-9,
@@ -335,6 +336,7 @@ class CRAIGFramework(KrylovMethod):
             dErr[itn % window] = zeta
             if itn > window:
                 trncDirErr = norm(dErr)
+                self.dir_errors_window.append(trncDirErr)
                 if trncDirErr < etol * sqrt(xNrgNorm2):
                     istop = 8
 
