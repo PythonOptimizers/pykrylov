@@ -11,7 +11,7 @@ null_log.setLevel(logging.INFO)
 null_log.addHandler(logging.NullHandler())
 
 
-class LinearOperator(object):
+class BaseLinearOperator(object):
     """
     A linear operator is a linear mapping x -> A(x) such that the size of the
     input vector x is `nargin` and the size of the output is `nargout`. It can
@@ -19,60 +19,45 @@ class LinearOperator(object):
     """
 
     def __init__(self, nargin, nargout, symmetric=False, **kwargs):
-        self.nargin = nargin
-        self.nargout = nargout
-        self.symmetric = symmetric
-        self.shape = (nargout, nargin)
-        self.nMatvec = 0
-        self.nMatvecTransp = 0
+        self.__nargin = nargin
+        self.__nargout = nargout
+        self.__symmetric = symmetric
+        self.__shape = (nargout, nargin)
+        self._nMatvec = 0
+        self._nMatvecTransp = 0
 
         # Log activity.
         self.logger = kwargs.get('logger', null_log)
         self.logger.info('New linear operator with shape ' + str(self.shape))
         return
 
+    @property
+    def nargin(self):
+        return self.__nargin
+
+    @property
+    def nargout(self):
+        return self.__nargout
+
+    @property
+    def symmetric(self):
+        return self.__symmetric
+
+    @property
+    def shape(self):
+        return self.__shape
+
+    @property
+    def nMatvec(self):
+        return self._nMatvec
+
+    @property
+    def nMatvecTransp(self):
+        return self._nMatvecTransp
+
     def reset_counters(self):
-        self.nMatvec = 0
-        self.nMatvecTransp = 0
-
-    def get_shape(self):
-        return self.shape
-
-    def check_symmetric(self, loop=10, explicit=False):
-        """
-        Make sure this linear operator is indeed symmetric. The check is
-        performed without using the transpose operator self.T.
-        """
-        n = self.nargin
-        eps = np.finfo(np.double).eps
-
-        if explicit:
-            H = np.empty((n, n))
-            for i in xrange(n):
-                ei = np.zeros(n) ; ei[i] = 1.0
-                H[:, i] = self * ei
-            normHHT = np.linalg.norm(H - H.T)
-            if normHHT > (eps + np.linalg.norm(H)) * eps**(1.0/3):
-                self.logger.debug("norm(H - H.T) = %7.1e" % normHHT)
-                return False
-        else:
-            np.random.seed(1)
-            for i in xrange(loop):
-                y = 10 * np.random.random(n)
-                w = self * y      # = A*y
-                v = self * w      # = A*(A*y)
-                s = np.dot(w, w)  # = y'*A'*A*y
-                t = np.dot(y, v)  # = y'*(A*(A*y))
-                z = abs(s - t)
-                epsa = (s + eps) * eps**(1.0/3)
-
-                self.logger.debug("y'*A'*A*y    = %g" % s)
-                self.logger.debug("y'*(A*(A*y)) = %g" % t)
-                self.logger.debug('z = %g, epsa = %g' % (z, epsa))
-
-                if z > epsa:
-                    return False
-        return True
+        self._nMatvec = 0
+        self._nMatvecTransp = 0
 
     def __call__(self, *args, **kwargs):
         # An alias for __mul__.
@@ -82,277 +67,241 @@ class LinearOperator(object):
         raise NotImplementedError('Please subclass to implement __mul__.')
 
 
-    #def __neg__(self):
-    #    # From http://goo.gl/y2feG
-    #    # It feels like there should be a better design.
-    #    class NegLinearOperator(self.__class__):
-    #        def __call__(*args, **kwargs):
-    #            Args = args[1:]
-    #            return -self(*Args, **kwargs)
-    #    neg = LinearOperator.__new__(NegLinearOperator)
-    #    neg.__dict__ = self.__dict__.copy()
-    #    return neg
-
-
-    #def __neg__(self):
-    #    # Implements -A for an operator A.
-    #    def call(*args, **kwargs):
-    #        return -self.__call__(*args, **kwargs)
-
-    #    nLinOp = type('nLinearOperator', (LinearOperator,), {'__call__': call})
-    #    new = nLinOp(self.nargin, self.nargout)
-
-    #    for n, v in inspect.getmembers(self):
-    #        if n != '__call__':
-    #            print 'Copying ', n
-    #            try:
-    #                setattr(new, n, v)
-    #            except:
-    #                print 'Cannot copy ', n
-    #                print '  ' + `v`
-    #                pass
-
-    #    new.reset_counters()
-
-    #    return new
-
-
-class IdentityOperator(LinearOperator):
-
-    def __init__(self, nargin, **kwargs):
-        kwargs.pop('symmetric')
-
-        super(IdentityOperator, self).__init__(nargin, nargin,
-                                               symmetric=True, **kwargs)
-
-    def __mul__(self, other):
-        if len(other) != self.nargin:
-            raise ShapeError('Multiplying with vector of wrong shape.')
-        return other[:]
-
-
-class ZeroOperator(LinearOperator):
-
-    def __mul__(self, other):
-        if len(other) != self.nargin:
-            raise ShapeError('Multiplying with vector of wrong shape.')
-        return np.zeros(self.nargout)
-
-
-class SimpleLinearOperator(LinearOperator):
+class LinearOperator(BaseLinearOperator):
     """
     A linear operator constructed from a matvec and (possibly) a matvec_transp
     function.
     """
 
-    def __init__(self, nargin, nargout, matvec,
-                 matvec_transp=None, symmetric=False, **kwargs):
+    def __init__(self, nargin, nargout, matvec, matvec_transp=None, **kwargs):
 
-        super(SimpleLinearOperator, self).__init__(nargin, nargout, **kwargs)
-        self.symmetric = symmetric
-        self.transposed = kwargs.get('transposed', False)
+        super(LinearOperator, self).__init__(nargin, nargout, **kwargs)
+        self.__transposed = kwargs.get('transposed', False)
         transpose_of = kwargs.get('transpose_of', None)
 
-        self.matvec = matvec
+        self.__matvec = matvec
 
-        if symmetric:
-            self.T = self
+        if self.symmetric:
+            self.__T = self
         else:
             if transpose_of is None:
                 if matvec_transp is not None:
                     # Create 'pointer' to transpose operator.
-                    self.T = SimpleLinearOperator(nargout, nargin,
-                                                  matvec_transp,
-                                                  matvec_transp=matvec,
-                                                  transposed=not self.transposed,
-                                                  transpose_of=self,
-                                                  **kwargs)
+                    self.__T = LinearOperator(nargout, nargin,
+                                              matvec_transp,
+                                              matvec_transp=matvec,
+                                              transposed=not self.__transposed,
+                                              transpose_of=self,
+                                              **kwargs)
                 else:
-                    self.T = None
+                    self.__T = None
             else:
                 # Use operator supplied as transpose operator.
-                if isinstance(transpose_of, LinearOperator):
-                    self.T = transpose_of
+                if isinstance(transpose_of, BaseLinearOperator):
+                    self.__T = transpose_of
                 else:
-                    msg = 'kwarg transposed_of must be a LinearOperator.'
+                    msg = 'kwarg transposed_of must be a BaseLinearOperator.'
                     msg += ' Got ' + str(transpose_of.__class__)
                     raise ValueError(msg)
 
-    def __mul__(self, x):
-        if self.transposed:
-            self.nMatvecTransp += 1
+    @property
+    def T(self):
+        return self.__T
+
+    def __mul_scalar(self, x):
+        "Product between a linear operator and a scalar."
+        def matvec(y):
+            return x * (self(y))
+
+        def matvec_transp(y):
+            return x * (self.T(y))
+
+        return LinearOperator(self.nargin, self.nargout,
+                              symmetric=self.symmetric,
+                              matvec=matvec,
+                              matvec_transp=matvec_transp)
+
+    def __mul_linop(self, op):
+        "Product between two linear operators."
+        if self.nargin != op.nargout:
+            raise ShapeError('Cannot multiply operators together')
+
+        def matvec(x):
+            return self(op(x))
+
+        def matvec_transp(x):
+            return op.T(self.T(x))
+
+        return LinearOperator(op.nargin, self.nargout,
+                              symmetric=False,   # Generally.
+                              matvec=matvec,
+                              matvec_transp=matvec_transp)
+
+    def __mul_vector(self, x):
+        "Product between a linear operator and a vector."
+        if self.__transposed:
+            self._nMatvecTransp += 1
         else:
-            self.nMatvec += 1
-        return self.matvec(x)
-
-
-class PysparseLinearOperator(LinearOperator):
-    """
-    A linear operator constructed from any object implementing either `__mul__`
-    or `matvec` and either `__rmul__` or `matvec_transp`, such as a `ll_mat`
-    object or a `PysparseMatrix` object.
-    """
-
-    def __init__(self, A, symmetric=False, **kwargs):
-
-        m, n = A.shape
-        self.A = A
-        self.symmetric = symmetric
-        self.transposed = kwargs.pop('transposed', False)
-        transpose_of = kwargs.pop('transpose_of', None)
-
-        if self.transposed:
-
-            super(PysparseLinearOperator, self).__init__(m, n, **kwargs)
-
-        else:
-
-            super(PysparseLinearOperator, self).__init__(n, m, **kwargs)
-
-        self.logger.info('New linop has transposed=' + str(self.transposed))
-
-        if symmetric:
-            self.T = self
-        else:
-            if transpose_of is None:
-                # Create 'pointer' to transpose operator.
-                self.T = PysparseLinearOperator(self.A,
-                                                transposed=not self.transposed,
-                                                transpose_of=self,
-                                                logger=self.logger)
-            else:
-                # Use operator supplied as transpose operator.
-                if isinstance(transpose_of, LinearOperator):
-                    self.T = transpose_of
-                else:
-                    msg = 'kwarg transposed_of must be a LinearOperator.'
-                    msg += ' Got ' + str(transpose_of.__class__)
-                    raise ValueError(msg)
-
-        return
-
-    def _mul(self, x):
-        # Make provision for the case where A does not implement __mul__.
-        if x.shape != (self.nargin,):
-            msg = 'Input has shape ' + str(x.shape)
-            msg += ' instead of (%d,)' % self.nargin
-            raise ValueError(msg)
-        if self.transposed:
-            self.nMatvecTransp += 1
-        else:
-            self.nMatvec += 1
-        if hasattr(self.A, '__mul__'):
-            return self.A.__mul__(x)
-        Ax = np.empty(self.nargout)
-        self.A.matvec(x, Ax)
-        return Ax
-
-    def _rmul(self, y):
-        # Make provision for the case where A does not implement __rmul__.
-        # This method is only relevant when transposed=True.
-        if y.shape != (self.nargin,):  # This is the transposed op's nargout!
-            msg = 'Input has shape ' + str(y.shape)
-            msg += ' instead of (%d,)' % self.nargin
-            raise ValueError(msg)
-        if self.transposed:
-            self.nMatvec += 1
-        else:
-            self.nMatvecTransp += 1
-        if hasattr(self.A, '__rmul__'):
-            return self.A.__rmul__(y)
-        ATy = np.empty(self.nargout)   # This is the transposed op's nargin!
-        self.A.matvec_transp(y, ATy)
-        return ATy
-
-    def __mul__(self, other):
-        if self.transposed:
-            return self._rmul(other)
-        return self._mul(other)
-
-
-# It would be much better if we could add and multiply linear operators.
-# In the meantime, here is a patch.
-class SquaredLinearOperator(LinearOperator):
-    """
-    Given a linear operator ``A``, build the linear operator ``A.T * A``. If
-    ``transpose`` is set to ``True``, build ``A * A.T`` instead. This may be
-    useful for solving one of the normal equations
-
-    |           A'Ax = A'b
-    |           AA'y = Ag
-
-    which are the optimality conditions of the linear least-squares problems
-
-    |          minimize{in x}  | Ax-b |
-    |          minimize{in y}  | A'y-g |
-
-    in the Euclidian norm.
-    """
-
-    def __init__(self, A, **kwargs):
-
-        transposed = kwargs.get('transposed', False)
-        nargout, nargin = A.shape
-        if transposed:
-            super(SquaredLinearOperator, self).__init__(nargout, nargout,
-                    **kwargs)
-        else:
-            super(SquaredLinearOperator, self).__init__(nargin, nargin,
-                    **kwargs)
-        self.transposed = transposed
-        if isinstance(A, LinearOperator):
-            self.A = A
-        else:
-            self.A = PysparseLinearOperator(A, transposed=False)
-        self.symmetric = True
-        self.logger.info('New squared operator with shape ' + str(self.shape))
-        self.T = self
-
-    def _mul(self, x):
-        self.nMatvec += 1
-        return self.A.T * (self.A * x)
-
-    def _rmul(self, x):
-        self.nMatvecTransp += 1
-        return self.A * (self.A.T * x)
-
-    def __mul__(self, other):
-        if self.transposed:
-            return self._rmul(other)
-        return self._mul(other)
-
-
-class ReducedLinearOperator(object):
-    """
-    Given a linear operator A, implement the linear operator equivalent of
-    the matrix notation A[I,J] where I and J and index sets of rows and
-    columns, respectively.
-    """
-
-    def __init__(self, A, row_indices, col_indices, **kwargs):
-
-        self.op = A             # A linear operator.
-        self.row_indices = row_indices
-        self.col_indices = col_indices
-        self.shape = (len(row_indices), len(col_indices))
-        self.symmetric = False  # Generally.
+            self._nMatvec += 1
+        return self.__matvec(x)
 
     def __mul__(self, x):
-        # Return the result of A[I,J]*x. Note that the input x must have
-        # as many components as there are indices in J. The result
-        # has as many components as there are indices in I.
-        m, n = self.op.shape    # Shape of non-reduced operator.
-        z = np.zeros(n) ; z[self.col_indices] = x[:]
-        y = self.op * z
-        return y[self.row_indices]
+        if np.isscalar(x):
+            return self.__mul_scalar(x)
+        if isinstance(x, BaseLinearOperator):
+            return self.__mul_linop(x)
+        if isinstance(x, np.ndarray):
+            return self.__mul_vector(x)
+        raise ValueError('Cannot multiply')
+
+    def __rmul__(self, x):
+        if isinstance(x, BaseLinearOperator):
+            return x.__mul_linop(self)
+        raise ValueError('Cannot multiply')
+
+    def __add__(self, other):
+        if not isinstance(other, BaseLinearOperator):
+            raise ValueError('Cannot add')
+        if self.shape != other.shape:
+            raise ShapeError('Cannot add')
+
+        def matvec(x):
+            return self(x) + other(x)
+
+        def matvec_transp(x):
+            return self.T(x) + other.T(x)
+
+        return LinearOperator(self.nargin, self.nargout,
+                                  symmetric=self.symmetric and other.symmetric,
+                                  matvec=matvec,
+                                  matvec_transp=matvec_transp)
+
+    def __neg__(self):
+        return self * (-1)
+
+    def __sub__(self, other):
+        if not isinstance(other, BaseLinearOperator):
+            raise ValueError('Cannot add')
+        if self.shape != other.shape:
+            raise ShapeError('Cannot add')
+
+        def matvec(x):
+            return self(x) - other(x)
+
+        def matvec_transp(x):
+            return self.T(x) - other.T(x)
+
+        return LinearOperator(self.nargin, self.nargout,
+                                  symmetric=self.symmetric and other.symmetric,
+                                  matvec=matvec,
+                                  matvec_transp=matvec_transp)
+
+    def __div__(self, other):
+        if not np.isscalar(other):
+            raise ValueError('Cannot divide')
+        return self * (1./other)
 
 
-class SymmetricallyReducedLinearOperator(ReducedLinearOperator):
-    def __init__(self, A, row_indices, **kwargs):
+class IdentityOperator(LinearOperator):
 
-        super(SymmetricallyReducedLinearOperator, self).__init__(A,
-                row_indices, row_indices, **kwargs)
-        self.symmetric = self.op.symmetric
+    def __init__(self, nargin, **kwargs):
+        if 'symmetric' in kwargs:
+            kwargs.pop('symmetric')
+        if 'matvec' in kwargs:
+            kwargs.pop('matvec')
+
+        super(IdentityOperator, self).__init__(nargin, nargin,
+                                               symmetric=True,
+                                               matvec=lambda x: x,
+                                               **kwargs)
+
+
+class DiagonalOperator(LinearOperator):
+
+    def __init__(self, diag, **kwargs):
+        if 'symmetric' in kwargs:
+            kwargs.pop('symmetric')
+        if 'matvec' in kwargs:
+            kwargs.pop('matvec')
+
+        super(DiagonalOperator, self).__init__(diag.shape[0], diag.shape[0],
+                                               symmetric=True,
+                                               matvec=lambda x: diag*x,
+                                               **kwargs)
+
+
+class ZeroOperator(LinearOperator):
+
+    def __init__(self, nargin, nargout, **kwargs):
+        if 'matvec' in kwargs:
+            kwargs.pop('matvec')
+        if 'matvec_transp' in kwargs:
+            kwargs.pop('matvec_transp')
+
+        def matvec(x):
+            if x.shape != (nargin,):
+                msg = 'Input has shape ' + str(x.shape)
+                msg += ' instead of (%d,)' % self.nargin
+                raise ValueError(msg)
+            return np.zeros(nargout)
+
+        def matvec_transp(x):
+            if x.shape != (nargout,):
+                msg = 'Input has shape ' + str(x.shape)
+                msg += ' instead of (%d,)' % self.nargout
+                raise ValueError(msg)
+            return np.zeros(nargin)
+
+        super(ZeroOperator, self).__init__(nargin, nargout,
+                                           matvec=matvec,
+                                           matvec_transp=matvec_transp,
+                                           **kwargs)
+
+
+def ReducedLinearOperator(op, row_indices, col_indices):
+    """
+    Reduce a linear operator by limiting its input to `col_indices` and its
+    output to `row_indices`.
+    """
+
+    nargin, nargout = len(col_indices), len(row_indices)
+    m, n = op.shape    # Shape of non-reduced operator.
+
+    def matvec(x):
+        z = np.zeros(n) ; z[col_indices] = x[:]
+        y = op * z
+        return y[row_indices]
+
+    def matvec_transp(x):
+        z = np.zeros(m) ; z[row_indices] = x[:]
+        y = op.T * z
+        return y[col_indices]
+
+    return LinearOperator(nargin, nargout, matvec=matvec, symmetric=False,
+                          matvec_transp=matvec_transp)
+
+
+def SymmetricallyReducedLinearOperator(op, indices):
+    """
+    Reduce a linear operator symmetrically by reducing boths its input and
+    output to `indices`.
+    """
+
+    nargin = len(indices)
+    m, n = op.shape    # Shape of non-reduced operator.
+
+    def matvec(x):
+        z = np.zeros(n) ; z[indices] = x[:]
+        y = op * z
+        return y[indices]
+
+    def matvec_transp(x):
+        z = np.zeros(m) ; z[indices] = x[:]
+        y = op * z
+        return y[indices]
+
+    return LinearOperator(nargin, nargin, matvec=matvec,
+                          symmetric=op.symmetric, matvec_transp=matvec_transp)
 
 
 class ShapeError(Exception):
@@ -364,15 +313,51 @@ class ShapeError(Exception):
         pass
 
 
+def PysparseLinearOperator(A):
+    "Return a linear operator from a Pysparse sparse matrix."
+
+    nargout, nargin = A.shape
+    try:
+        symmetric = A.issym
+    except:
+        symmetric = A.isSymmetric()
+
+    def matvec(x):
+        if x.shape != (nargin,):
+            msg = 'Input has shape ' + str(x.shape)
+            msg += ' instead of (%d,)' % nargin
+            raise ValueError(msg)
+        if hasattr(A, '__mul__'):
+            return A*x
+        Ax = np.empty(nargout)
+        A.matvec(x, Ax)
+        return Ax
+
+    def matvec_transp(y):
+        if y.shape != (nargout,):
+            msg = 'Input has shape ' + str(y.shape)
+            msg += ' instead of (%d,)' % nargout
+            raise ValueError(msg)
+        if hasattr(A, '__rmul__'):
+            return y*A
+        ATy = np.empty(nargin)
+        A.matvec_transp(y, ATy)
+        return ATy
+
+    return LinearOperator(nargin, nargout, matvec=matvec,
+                          matvec_transp=matvec_transp, symmetric=symmetric)
+
+
 def linop_from_ndarray(A):
     "Return a linear operator from a Numpy `ndarray`."
-    return SimpleLinearOperator(A.shape[1], A.shape[0],
-                                lambda v: np.dot(A, v),
-                                matvec_transp=lambda u: np.dot(A.T, u),
-                                symmetric=False)
+    return LinearOperator(A.shape[1], A.shape[0],
+                          lambda v: np.dot(A, v),
+                          matvec_transp=lambda u: np.dot(A.T, u),
+                          symmetric=False)
 
 
 if __name__ == '__main__':
+    from pykrylov.tools import check_symmetric
     from pysparse.sparse.pysparseMatrix import PysparseMatrix as sp
     from nlpy.model import AmplModel
     import sys
@@ -381,14 +366,9 @@ if __name__ == '__main__':
 
     nlp = AmplModel(sys.argv[1])
     J = sp(matrix=nlp.jac(nlp.x0))
-    #J = nlp.jac(nlp.x0)
     e1 = np.ones(J.shape[0])
     e2 = np.ones(J.shape[1])
     print 'J.shape = ', J.getShape()
-
-    #print 'Explicitly:'
-    #print 'J*e2 = ', J*e2
-    #print "J'*e1 = ", e1*J
 
     print 'Testing PysparseLinearOperator:'
     op = PysparseLinearOperator(J)
@@ -403,10 +383,10 @@ if __name__ == '__main__':
     print 'op.T(e1) = ', op.T(e1)
     print 'op.T.T is op : ', (op.T.T is op)
     print
-    print 'Testing SimpleLinearOperator:'
-    op = SimpleLinearOperator(J.shape[1], J.shape[0],
-                              lambda v: J*v,
-                              matvec_transp=lambda u: u*J)
+    print 'Testing LinearOperator:'
+    op = LinearOperator(J.shape[1], J.shape[0],
+                        lambda v: J*v,
+                        matvec_transp=lambda u: u*J)
     print 'op.shape = ', op.shape
     print 'op.T.shape = ', op.T.shape
     print 'op * e2 = ', op * e2
@@ -417,17 +397,16 @@ if __name__ == '__main__':
     print 'op.T(e1) = ', op.T(e1)
     print 'op.T.T is op : ', (op.T.T is op)
     print
-    print 'Building a SquaredLinearOperator:'
-    op2 = SquaredLinearOperator(J, log=True)
+    op2 = op.T * op
     print 'op2 * e2 = ', op2 * e2
     print 'op.T * (op * e2) = ', op.T * (op * e2)
-    op3 = SquaredLinearOperator(J, transposed=True, log=True)
+    print 'op2 is symmetric: ', check_symmetric(op2)
+    op3 = op * op.T
     print 'op3 * e1 = ', op3 * e1
     print 'op * (op.T * e1) = ', op * (op.T * e1)
-    print 'op3 is symmetric: ', op3.check_symmetric()
-
-    #print
-    #print 'Testing negative operator:'
-    #nop = -op
-    #print op*e2
-    #print nop*e2
+    print 'op3 is symmetric: ', check_symmetric(op3)
+    print
+    print 'Testing negative operator:'
+    nop = -op
+    print op * e2
+    print nop * e2
