@@ -210,6 +210,19 @@ class LinearOperator(BaseLinearOperator):
             raise ValueError('Cannot divide')
         return self * (1./other)
 
+    def __pow__(self, other):
+        if not isinstance(other, int):
+            raise ValueError('Can only raise to integer power')
+        if other < 0:
+            raise ValueError('Can only raise to nonnegative power')
+        if self.nargin != self.nargout:
+            raise ValueError('Can only raise square operators to a power')
+        if other == 0:
+            return IdentityOperator(self.nargin)
+        if other == 1:
+            return self
+        return self * self**(other-1)
+
 
 class IdentityOperator(LinearOperator):
 
