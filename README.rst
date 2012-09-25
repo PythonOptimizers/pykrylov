@@ -82,16 +82,12 @@ References
 ==========
 
 * J. W. Demmel, *Applied Numerical Linear Algebra*, SIAM, Philadelphia, 1997.
-
 * A. Greenbaum, *Iterative Methods for Solving Linear Systems*,
   number 17 in *Frontiers in Applied Mathematics*, SIAM, Philadelphia, 1997.
-
 * C. T. Kelley, *Iterative Methods for Linear and Nonlinear Equations*,
   number 16 in *Frontiers in Applied Mathematics*, SIAM, Philadelphia, 1995.
-
 * Y. Saad, *Iterative Methods for Sparse Linear Systems*, 2nd ed., SIAM,
   Philadelphia, 2003.
-
 * R. Barrett, M. Berry, T. F. Chan, J. Demmel, J. M. Donato,
   J. Dongarra, V. Eijkhout, R. Pozo, C. Romine and
   H. Van der Vorst, *Templates for the Solution of Linear Systems:
