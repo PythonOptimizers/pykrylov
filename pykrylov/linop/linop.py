@@ -66,6 +66,15 @@ class BaseLinearOperator(object):
     def __mul__(self, x):
         raise NotImplementedError('Please subclass to implement __mul__.')
 
+    def __repr__(self):
+        if self.symmetric:
+            s = 'Symmetric <'
+        else:
+            s = 'Unsymmetric <'
+        s += self.__class__.__name__ + '>'
+        s += ' with shape (%d,%d)' % (self.nargout, self.nargin)
+        return s
+
 
 class LinearOperator(BaseLinearOperator):
     """
