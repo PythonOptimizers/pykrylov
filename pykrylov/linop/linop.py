@@ -16,6 +16,9 @@ class BaseLinearOperator(object):
     A linear operator is a linear mapping x -> A(x) such that the size of the
     input vector x is `nargin` and the size of the output is `nargout`. It can
     be visualized as a matrix of shape (`nargout`, `nargin`).
+
+    A logger may be attached to the linear operator via the `logger` keyword
+    argument.
     """
 
     def __init__(self, nargin, nargout, symmetric=False, **kwargs):
@@ -32,25 +35,31 @@ class BaseLinearOperator(object):
 
     @property
     def nargin(self):
+        "The size of an input vector."
         return self.__nargin
 
     @property
     def nargout(self):
+        "The size of an output vector."
         return self.__nargout
 
     @property
     def symmetric(self):
+        "Indicates whether the operator is symmetric or not."
         return self.__symmetric
 
     @property
     def shape(self):
+        "The shape of the operator."
         return self.__shape
 
     @property
     def nMatvec(self):
+        "The number of products with vectors computed so far."
         return self._nMatvec
 
     def reset_counters(self):
+        "Reset operator/vector product counter to zero."
         self._nMatvec = 0
 
     def __call__(self, *args, **kwargs):
@@ -72,8 +81,9 @@ class BaseLinearOperator(object):
 
 class LinearOperator(BaseLinearOperator):
     """
-    A linear operator constructed from a matvec and (possibly) a matvec_transp
-    function.
+    A linear operator constructed from a `matvec` and (possibly) a
+    `matvec_transp` function. If `symmetric` is `True`, `matvec_transp` is
+    ignored. All other keyword arguments are passed directly to the superclass.
     """
 
     def __init__(self, nargin, nargout, matvec, matvec_transp=None, **kwargs):
@@ -109,6 +119,7 @@ class LinearOperator(BaseLinearOperator):
 
     @property
     def T(self):
+        "The transpose operator."
         return self.__T
 
     def __mul_scalar(self, x):
@@ -216,6 +227,9 @@ class LinearOperator(BaseLinearOperator):
 
 
 class IdentityOperator(LinearOperator):
+    """
+    A linear operator representing the identity operator of size `nargin`.
+    """
 
     def __init__(self, nargin, **kwargs):
         if 'symmetric' in kwargs:
@@ -230,6 +244,9 @@ class IdentityOperator(LinearOperator):
 
 
 class DiagonalOperator(LinearOperator):
+    """
+    A diagonal linear operator defined by its diagonal `diag` (a Numpy array.)
+    """
 
     def __init__(self, diag, **kwargs):
         if 'symmetric' in kwargs:
@@ -244,6 +261,9 @@ class DiagonalOperator(LinearOperator):
 
 
 class ZeroOperator(LinearOperator):
+    """
+    The zero linear operator of shape `nargout`-by-`nargin`.
+    """
 
     def __init__(self, nargin, nargout, **kwargs):
         if 'matvec' in kwargs:
