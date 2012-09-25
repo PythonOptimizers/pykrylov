@@ -331,8 +331,11 @@ class ShapeError(Exception):
     Exception raised when defining a linear operator of the wrong shape or
     multiplying a linear operator with a vector of the wrong shape.
     """
-    def __init__(self):
-        pass
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
 
 
 def PysparseLinearOperator(A):
