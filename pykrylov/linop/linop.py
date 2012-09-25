@@ -24,7 +24,6 @@ class BaseLinearOperator(object):
         self.__symmetric = symmetric
         self.__shape = (nargout, nargin)
         self._nMatvec = 0
-        self._nMatvecTransp = 0
 
         # Log activity.
         self.logger = kwargs.get('logger', null_log)
@@ -51,13 +50,8 @@ class BaseLinearOperator(object):
     def nMatvec(self):
         return self._nMatvec
 
-    @property
-    def nMatvecTransp(self):
-        return self._nMatvecTransp
-
     def reset_counters(self):
         self._nMatvec = 0
-        self._nMatvecTransp = 0
 
     def __call__(self, *args, **kwargs):
         # An alias for __mul__.
@@ -148,10 +142,7 @@ class LinearOperator(BaseLinearOperator):
 
     def __mul_vector(self, x):
         "Product between a linear operator and a vector."
-        if self.__transposed:
-            self._nMatvecTransp += 1
-        else:
-            self._nMatvec += 1
+        self._nMatvec += 1
         return self.__matvec(x)
 
     def __mul__(self, x):

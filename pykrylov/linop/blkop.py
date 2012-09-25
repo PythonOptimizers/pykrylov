@@ -1,8 +1,9 @@
-from pykrylov.linop import BaseLinearOperator, ShapeError, null_log
+from pykrylov.linop import BaseLinearOperator, LinearOperator
+from pykrylov.linop import ShapeError, null_log
 import numpy as np
 
 
-class BlockLinearOperator(BaseLinearOperator):
+class BlockLinearOperator(LinearOperator):
     """
     A linear operator defined by blocks. Each block must be a linear operator.
     """
@@ -14,7 +15,8 @@ class BlockLinearOperator(BaseLinearOperator):
         `[[b1, b2, ..., bn]]`, not as `[b1, b2, ..., bn]`.
 
         If the overall linear operator is symmetric, only its upper triangle
-        need be specified, e.g., `[[A,B,C], [D,E], [F]]`.
+        need be specified, e.g., `[[A,B,C], [D,E], [F]]`, and the blocks on the
+        diagonal must be square and symmetric.
         """
 
         # If building a symmetric operator, fill in the blanks.
@@ -40,93 +42,78 @@ class BlockLinearOperator(BaseLinearOperator):
         log = kwargs.get('logger', null_log)
         log.debug('Building new BlockLinearOperator')
 
-        self.transposed = kwargs.pop('transposed', False)
-
-        nargins = [[blk.shape[-1] for blk in row] for row in blocks]
+        nargins = [[blk.shape[-1] for blk in row] for row in self._blocks]
         log.debug('nargins = ' + repr(nargins))
         nargins_by_row = [nargin[0] for nargin in nargins]
         if min(nargins_by_row) != max(nargins_by_row):
             raise ShapeError('Inconsistent block shapes')
 
-        nargouts = [[blk.shape[0] for blk in row] for row in blocks]
+        nargouts = [[blk.shape[0] for blk in row] for row in self._blocks]
         log.debug('nargouts = ' + repr(nargouts))
         for row in nargouts:
             if min(row) != max(row):
                 raise ShapeError('Inconsistent block shapes')
 
-        # Keep track of the segmentation for easier reference.
-        self.nargins = nargins[0]
-        self.nargouts = [nargout[0] for nargout in nargouts]
-
-        log.debug('self.nargins = ' + repr(self.nargins))
-        log.debug('self.nargouts = ' + repr(self.nargouts))
-
         nargin = sum(nargins[0])
         nargout = sum([out[0] for out in nargouts])
 
-        transpose_of = kwargs.pop('transpose_of', None)
+        # Create blocks of transpose operator.
+        blocksT = map(lambda *row: [blk.T for blk in row], *self._blocks)
 
-        super(BlockLinearOperator, self).__init__(nargin=nargin,
-                                                  nargout=nargout,
-                                                  symmetric=symmetric,
-                                                  **kwargs)
+        def blk_matvec(x, blks):
+            nargins = [[blk.shape[-1] for blk in blkrow] for blkrow in blks]
+            nargouts = [[blk.shape[0] for blk in blkrow] for blkrow in blks]
+            nargin = sum(nargins[0])
+            nargout = sum([out[0] for out in nargouts])
+            nx = len(x)
+            self.logger.debug('Multiplying with a vector of size %d' % nx)
+            self.logger.debug('nargin=%d, nargout=%d' % (nargin, nargout))
+            if nx != nargin:
+                raise ShapeError('Multiplying with vector of wrong shape.')
+            y = np.zeros(nargout)
 
-        # Define transpose operator.
-        if symmetric:
-            self.T = self
-        else:
-            if transpose_of is None:
-                # Create 'pointer' to transpose operator.
-                blocksT = map(lambda *row: [blk.T for blk in row], *blocks)
-                self.T = BlockLinearOperator(blocksT,
-                                             symmetric,
-                                             transposed=not self.transposed,
-                                             transpose_of=self,
-                                             **kwargs)
-            else:
-                # Use operator supplied as transpose operator.
-                if isinstance(transpose_of, BaseLinearOperator):
-                    self.T = transpose_of
-                else:
-                    msg = 'kwarg transposed_of must be a BaseLinearOperator.'
-                    msg += ' Got ' + str(transpose_of.__class__)
-                    raise ValueError(msg)
+            nblk_row = len(blks)
+            nblk_col = len(blks[0])
 
-    def __mul__(self, x):
-        nx = len(x)
-        self.logger.debug('Multiplying with a vector of size %d' % nx)
-        self.logger.debug('nargin=%d, nargout=%d' % (self.nargin, self.nargout))
-        if nx != self.nargin:
-            raise ShapeError('Multiplying with vector of wrong shape.')
-        y = np.zeros(self.nargout)
+            row_start = col_start = 0
+            for row in range(nblk_row):
+                row_end = row_start + nargouts[row][0]
+                yout = y[row_start:row_end]
+                for col in range(nblk_col):
+                    col_end = col_start + nargins[0][col]
+                    xin = x[col_start:col_end]
+                    B = blks[row][col]
+                    yout[:] += B * xin
+                    col_start = col_end
+                row_start = row_end
+                col_start = 0
 
-        nblk_row = len(self._blocks)
-        nblk_col = len(self._blocks[0])
+            return y
 
-        row_start = col_start = 0
-        for row in range(nblk_row):
-            row_end = row_start + self.nargouts[row]
-            yout = y[row_start:row_end]
-            for col in range(nblk_col):
-                col_end = col_start + self.nargins[col]
-                xin = x[col_start:col_end]
-                B = self._blocks[row][col]
-                yout[:] += B * xin
-                col_start = col_end
-            row_start = row_end
-            col_start = 0
+        super(BlockLinearOperator, self).__init__(nargin, nargout,
+                                symmetric=symmetric,
+                                matvec=lambda x: blk_matvec(x, self._blocks),
+                                matvec_transp=lambda x: blk_matvec(x, blocksT))
 
-        return y
+        self.T._blocks = blocksT
 
-    def __getitem__(self, idx):
-        return self._blocks[idx[0]][idx[1]]
+    def __getitem__(self, indices):
+        blks = np.matrix(self._blocks, dtype=object)[indices]
+        # If indexing narrowed it down to a single block, return it.
+        if isinstance(blks, BaseLinearOperator):
+            return blks
+        # Otherwise, we have a matrix of blocks.
+        return BlockLinearOperator(blks.tolist(), symmetric=False)
 
-    def __getslice__(self, slice):
-        # A priori, a slice is not symmetric.
-        return BlockLinearOperator(self._blocks[slice], symmetric=False)
+    def __contains__(self, op):
+        return op in self._blocks
+
+    def __iter__(self):
+        for block in self._blocks:
+            yield block
 
 
-class BlockDiagonalLinearOperator(BaseLinearOperator):
+class BlockDiagonalLinearOperator(LinearOperator):
     """
     A block diagonal linear operator. Each block must be a linear operator.
     """
@@ -136,70 +123,80 @@ class BlockDiagonalLinearOperator(BaseLinearOperator):
         The blocks may be specified as one list, e.g., `[A, B, C]`.
         """
 
-        self._blocks = blocks
-        self.nargins = [blk.shape[-1] for blk in blocks]
-        self.nargouts = [blk.shape[0] for blk in blocks]
-
-        nargin = sum(self.nargins)
-        nargout = sum(self.nargouts)
-
-        self.transposed = kwargs.pop('transposed', False)
-        transpose_of = kwargs.pop('transpose_of', None)
-
-        super(BlockDiagonalLinearOperator, self).__init__(nargin=nargin,
-                                                          nargout=nargout,
-                                                          symmetric=symmetric,
-                                                          **kwargs)
-
-        # Define transpose operator.
         if symmetric:
-            self.T = self
-        else:
-            if transpose_of is None:
-                # Create 'pointer' to transpose operator.
-                blocksT = [blk.T for blk in blocks]
-                self.T = BlockDiagonalLinearOperator(blocksT,
-                                                symmetric,
-                                                transposed=not self.transposed,
-                                                transpose_of=self,
-                                                **kwargs)
-            else:
-                # Use operator supplied as transpose operator.
-                if isinstance(transpose_of, BaseLinearOperator):
-                    self.T = transpose_of
-                else:
-                    msg = 'kwarg transposed_of must be a LinearOperator.'
-                    msg += ' Got ' + str(transpose_of.__class__)
-                    raise ValueError(msg)
+            for blk in blocks:
+                if not blk.symmetric:
+                    raise ValueError('Blocks on diagonal must be symmetric.')
 
-    def __mul__(self, x):
-        nx = len(x)
-        self.logger.debug('Multiplying with a vector of size %d' % nx)
-        self.logger.debug('nargin=%d, nargout=%d' % (self.nargin, self.nargout))
-        if nx != self.nargin:
-            raise ShapeError('Multiplying with vector of wrong shape.')
-        y = np.empty(self.nargout)
+        self._blocks = blocks
 
-        nblks = len(self._blocks)
+        log = kwargs.get('logger', null_log)
+        log.debug('Building new BlockDiagonalLinearOperator')
 
-        row_start = col_start = 0
-        for blk in range(nblks):
-            row_end = row_start + self.nargouts[blk]
-            yout = y[row_start:row_end]
+        nargins = [blk.shape[-1] for blk in blocks]
+        log.debug('nargins = ' + repr(nargins))
 
-            col_end = col_start + self.nargins[blk]
-            xin = x[col_start:col_end]
+        nargouts = [blk.shape[0] for blk in blocks]
+        log.debug('nargouts = ' + repr(nargouts))
 
-            B = self._blocks[blk]
-            yout[:] = B * xin
+        nargin = sum(nargins)
+        nargout = sum(nargouts)
 
-            col_start = col_end
-            row_start = row_end
+        # Create blocks of transpose operator.
+        blocksT = [blk.T for blk in blocks]
 
-        return y
+        def blk_matvec(x, blks):
+            nx = len(x)
+            nargins = [blk.shape[-1] for blk in blocks]
+            nargin = sum(nargins)
+            nargouts = [blk.shape[0] for blk in blocks]
+            nargout = sum(nargouts)
+            self.logger.debug('Multiplying with a vector of size %d' % nx)
+            self.logger.debug('nargin=%d, nargout=%d' % (nargin, nargout))
+            if nx != nargin:
+                raise ShapeError('Multiplying with vector of wrong shape.')
+            y = np.empty(nargout)
+
+            nblks = len(blks)
+
+            row_start = col_start = 0
+            for blk in range(nblks):
+                row_end = row_start + nargouts[blk]
+                yout = y[row_start:row_end]
+
+                col_end = col_start + nargins[blk]
+                xin = x[col_start:col_end]
+
+                B = blks[blk]
+                yout[:] = B * xin
+
+                col_start = col_end
+                row_start = row_end
+
+            return y
+
+        super(BlockDiagonalLinearOperator, self).__init__(nargin, nargout,
+                                symmetric=symmetric,
+                                matvec=lambda x: blk_matvec(x, self._blocks),
+                                matvec_transp=lambda x: blk_matvec(x, blocksT))
+
+        self.T._blocks = blocksT
 
     def __getitem__(self, idx):
-        return self._blocks[idx]
+        blks = self._blocks[idx]
+        if isinstance(idx, slice):
+            return BlockDiagonalLinearOperator(blks, symmetric=self.symmetric)
+        return blks
+
+    def __setitem__(self, idx, ops):
+        if not isinstance(ops, BaseLinearOperator):
+            if isinstance(ops, list) or isinstance(ops, tuple):
+                for op in ops:
+                    if not isinstance(op, BaseLinearOperator):
+                        msg  = 'Block operators can only contain'
+                        msg += ' linear operators'
+                        raise ValueError(msg)
+        self._blocks[idx] = ops
 
 
 if __name__ == '__main__':
@@ -216,14 +213,16 @@ if __name__ == '__main__':
     hndlr.setFormatter(fmt)
     log.addHandler(hndlr)
 
-    A = LinearOperator(nargin=3, nargout=3, matvec=lambda v: 2*v, symmetric=True)
+    A = LinearOperator(nargin=3, nargout=3,
+                       matvec=lambda v: 2*v, symmetric=True)
     B = LinearOperator(nargin=4, nargout=3, matvec=lambda v: v[:3],
                        matvec_transp=lambda v: np.concatenate((v, np.zeros(1))))
     C = LinearOperator(nargin=3, nargout=2, matvec=lambda v: v[:2],
                        matvec_transp=lambda v: np.concatenate((v, np.zeros(1))))
     D = LinearOperator(nargin=4, nargout=2, matvec=lambda v: v[:2],
                        matvec_transp=lambda v: np.concatenate((v, np.zeros(2))))
-    E = LinearOperator(nargin=4, nargout=4, matvec=lambda v: -v, symmetric=True)
+    E = LinearOperator(nargin=4, nargout=4,
+                       matvec=lambda v: -v, symmetric=True)
 
     print A.shape, A.T.shape
     print B.shape, B.T.shape
