@@ -6,19 +6,17 @@ import numpy as np
 class BlockLinearOperator(LinearOperator):
     """
     A linear operator defined by blocks. Each block must be a linear operator.
+
+    `blocks` should be a list of lists describing the blocks row-wise.
+    If there is only one block row, it should be specified as
+    `[[b1, b2, ..., bn]]`, not as `[b1, b2, ..., bn]`.
+
+    If the overall linear operator is symmetric, only its upper triangle
+    need be specified, e.g., `[[A,B,C], [D,E], [F]]`, and the blocks on the
+    diagonal must be square and symmetric.
     """
 
     def __init__(self, blocks, symmetric=False, **kwargs):
-        """
-        `blocks` should be a list of lists describing the blocks row-wise.
-        If there is only one block row, it should be specified as
-        `[[b1, b2, ..., bn]]`, not as `[b1, b2, ..., bn]`.
-
-        If the overall linear operator is symmetric, only its upper triangle
-        need be specified, e.g., `[[A,B,C], [D,E], [F]]`, and the blocks on the
-        diagonal must be square and symmetric.
-        """
-
         # If building a symmetric operator, fill in the blanks.
         # They're just references to existing objects.
         if symmetric:
@@ -97,6 +95,11 @@ class BlockLinearOperator(LinearOperator):
 
         self.T._blocks = blocksT
 
+    @property
+    def blocks(self):
+        "The list of blocks defining the block operator."
+        return self._blocks
+
     def __getitem__(self, indices):
         blks = np.matrix(self._blocks, dtype=object)[indices]
         # If indexing narrowed it down to a single block, return it.
@@ -116,13 +119,10 @@ class BlockLinearOperator(LinearOperator):
 class BlockDiagonalLinearOperator(LinearOperator):
     """
     A block diagonal linear operator. Each block must be a linear operator.
+    The blocks may be specified as one list, e.g., `[A, B, C]`.
     """
 
     def __init__(self, blocks, symmetric=False, **kwargs):
-        """
-        The blocks may be specified as one list, e.g., `[A, B, C]`.
-        """
-
         if symmetric:
             for blk in blocks:
                 if not blk.symmetric:
@@ -181,6 +181,11 @@ class BlockDiagonalLinearOperator(LinearOperator):
                                 matvec_transp=lambda x: blk_matvec(x, blocksT))
 
         self.T._blocks = blocksT
+
+    @property
+    def blocks(self):
+        "The list of blocks defining the block diagonal operator."
+        return self._blocks
 
     def __getitem__(self, idx):
         blks = self._blocks[idx]
