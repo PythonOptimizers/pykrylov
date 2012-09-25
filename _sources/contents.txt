@@ -22,17 +22,13 @@ modifying the example scripts.
 Some examples use the efficient `Pysparse <http://pysparse.sf.net>`_ sparse
 matrix library to simulate functions that return matrix-vector products.
 
-Comments on this document or the software package should be posted on the
-`Lighthouse PyKrylov page
-<http://pykrylov.lighthouseapp.com/projects/21441-pykrylov>`_.
-
-
-Contents:
+Contents
+========
 
 .. toctree::
-   :maxdepth: 2
 
    Introduction <introduction>
+   Linear Operators <linop>
    Generic Template <generic>
    Conjugate Gradient <cg>
    Conjugate Gradient Squared <cgs>

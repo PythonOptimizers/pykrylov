@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>The Transpose-Free Quasi-Minimum Residual Method &mdash; PyKrylov 0.1 documentation</title>
+    <title>The Transpose-Free Quasi-Minimal Residual Method &mdash; PyKrylov 0.1 documentation</title>
     
     <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -25,6 +25,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://d3eoax9i5htok0.cloudfront.net/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="top" title="PyKrylov 0.1 documentation" href="index.html" />
     <link rel="next" title="The Symmetric Indefinite Method with Orthogonal Factorization" href="symmlq.html" />
     <link rel="prev" title="The Bi-Conjugate Gradient Stabilized Method" href="bicgstab.html" /> 
@@ -55,15 +56,15 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="the-transpose-free-quasi-minimum-residual-method">
-<span id="tfqmr-page"></span><h1>The Transpose-Free Quasi-Minimum Residual Method<a class="headerlink" href="#the-transpose-free-quasi-minimum-residual-method" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="the-transpose-free-quasi-minimal-residual-method">
+<span id="tfqmr-page"></span><h1>The Transpose-Free Quasi-Minimal Residual Method<a class="headerlink" href="#the-transpose-free-quasi-minimal-residual-method" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="module-tfqmr">
 <span id="the-tfqmr-module"></span><h2>The <a class="reference internal" href="#module-tfqmr" title="tfqmr"><tt class="xref py py-mod docutils literal"><span class="pre">tfqmr</span></tt></a> Module<a class="headerlink" href="#module-tfqmr" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="tfqmr.TFQMR">
 <em class="property">class </em><tt class="descclassname">tfqmr.</tt><tt class="descname">TFQMR</tt><big>(</big><em>matvec</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#tfqmr.TFQMR" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">pykrylov.generic.generic.KrylovMethod</span></tt></p>
-<p>A pure Python implementation of the transpose-free quasi-minimum residual
+<p>A pure Python implementation of the transpose-free quasi-minimal residual
 (TFQMR) algorithm. TFQMR may be used to solve unsymmetric systems of linear
 equations, i.e., systems of the form</p>
 <blockquote>
@@ -155,6 +156,7 @@ Direct error: 2.77e-05</pre>
           <h3>Table Of Contents</h3>
           <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="linop.html">Linear Operators</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generic.html">Generic Template</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cg.html">Conjugate Gradient</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cgs.html">Conjugate Gradient Squared</a></li>
@@ -203,7 +205,7 @@ Direct error: 2.77e-05</pre>
           
     <div class="footer">
         &copy; Copyright 2008, D. Orban.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
     </div>
         </div>
         <div class="clearer"></div>

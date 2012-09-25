@@ -1,8 +1,8 @@
-.. Description of transpose-free quasi-minimum residual module
+.. Description of transpose-free quasi-minimal residual module
 .. _tfqmr-page:
 
 ================================================
-The Transpose-Free Quasi-Minimum Residual Method
+The Transpose-Free Quasi-Minimal Residual Method
 ================================================
 
 The :mod:`tfqmr` Module
