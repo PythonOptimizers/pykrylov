@@ -162,14 +162,14 @@ class Minres:
 
         # See if A is symmetric.
         if check:
-            if not check_symmetric(A, x=y):
+            if not check_symmetric(A):  #, x=y):
                 istop = 7
                 done  = True
                 self.show = True
 
         # See if preconditioner is symmetric.
         if check and (precon is not None):
-            if not check_symmetric(precon, y):
+            if not check_symmetric(precon):  #, y):
                 istop = 8
                 show = True
                 done = True
