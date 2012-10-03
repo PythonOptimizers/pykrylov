@@ -204,6 +204,26 @@ class BlockDiagonalLinearOperator(LinearOperator):
         self._blocks[idx] = ops
 
 
+class BlockPreconditioner(BlockLinearOperator):
+    """
+    An alias for ``BlockLinearOperator`` with a ``solve`` method equivalent to
+    ``__mul__``.
+    """
+
+    def solve(self, x):
+        return self.__call__(x)
+
+
+class BlockDiagonalPreconditioner(BlockDiagonalLinearOperator):
+    """
+    An alias for ``BlockDiagonalLinearOperator`` with a ``solve`` method
+    equivalent to ``__mul__``.
+    """
+
+    def solve(self, x):
+        return self.__call__(x)
+
+
 if __name__ == '__main__':
 
     from pykrylov.linop import LinearOperator
