@@ -110,7 +110,9 @@ class LSQRFramework(KrylovMethod):
                     iterations may then be excessive.
            :show:   if set to `True`, gives an iteration log.
                     If set to `False`, suppresses output.
-           :store_resids: Store full residual norm history. Default: False.
+           :store_resids: Store full residual norm history (default: False).
+           :window: Number of consecutive iterations over which the director error
+                    should be measured (default: 5).
 
         :return:
 

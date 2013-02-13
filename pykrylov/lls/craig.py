@@ -59,7 +59,7 @@ class CRAIGFramework(KrylovMethod):
 
     1. M. Arioli and D. Orban,
        Iterative Methods for Symmetric Quasi-Definite Linear Systems,
-       Cahier du GERAD G-2012-xx, GERAD, Montreal, Canada, 2012.
+       Cahier du GERAD G-2013-xx, GERAD, Montreal, Canada, 2012.
     2. J. E. Craig, The N-step iteration procedures, Journal of Mathematics and
        Physics, 34(1):64–73, 1955.
     3. J. E. Craig. Iteration Procedures for Simultaneous Equations, Sc.D.
@@ -92,8 +92,8 @@ class CRAIGFramework(KrylovMethod):
         self.xnorm = 0.;
         self.r1norm = 0.; self.r2norm = 0.
         self.optimal = False
-        self.norms  = []    # Iterates SQUARED energy norm.
-        self.resids = []    # SQUARED least-squares objective function values.
+        self.norms  = []    # Squared energy norm of iterates.
+        self.resids = []    # Squared least-squares objective function values.
         self.normal_eqns_resids = [] # Resids of normal equations (not squared).
         self.dir_errors_window = []
         return
@@ -131,7 +131,9 @@ class CRAIGFramework(KrylovMethod):
                     iterations may then be excessive.
            :show:   if set to `True`, gives an iteration log.
                     If set to `False`, suppresses output.
-           :store_resids: Store full residual norm history. Default: False.
+           :store_resids: Store full residual norm history (default: False)
+           :window: Number of consecutive iterations over which the director error
+                    should be measured (default: 5).
 
         :return:
 
