@@ -15,7 +15,7 @@ def demo(KSolver, mtx, **kwargs):
     AA = spmatrix.ll_mat_from_mtx(mtx)
     A = Op(AA)
 
-    n = A.get_shape()[0]
+    n = A.shape[0]
     e = np.ones(n)
     rhs = A*e
 
