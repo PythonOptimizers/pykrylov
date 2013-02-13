@@ -1,7 +1,12 @@
 # Various utilities.
 
+import numpy as np
 from math import copysign, sqrt
-#import sys
+
+
+def machine_epsilon():
+    return np.finfo(np.double).eps
+
 
 def roots_quadratic(q2, q1, q0, tol=1.0e-8, nitref=1):
     """
@@ -36,15 +41,6 @@ def roots_quadratic(q2, q1, q0, tol=1.0e-8, nitref=1):
             # Ill-conditioned quadratic.
             roots = [-a1/a2, 0.0]
 
-    #sys.stdout.write('Roots before refinement: [')
-    #for root in roots:
-    #    sys.stdout.write('%15.7e  ' % root)
-    #sys.stdout.write(']\n')
-    #sys.stdout.write('Values: [')
-    #for root in roots:
-    #    sys.stdout.write('%15.7e  ' % ((a2*root + a1)*root+a0))
-    #sys.stdout.write(']\n')
-
     # Perform a few Newton iterations to improve accuracy.
     new_roots = []
     for root in roots:
@@ -57,18 +53,33 @@ def roots_quadratic(q2, q1, q0, tol=1.0e-8, nitref=1):
                 root = root - val/der
         new_roots.append(root)
 
-    #sys.stdout.write('Roots after refinement: [')
-    #for root in roots:
-    #    sys.stdout.write('%15.7e  ' % root)
-    #sys.stdout.write(']\n')
-    #sys.stdout.write('Values: [')
-    #for root in roots:
-    #    sys.stdout.write('%15.7e  ' % ((a2*root + a1)*root+a0))
-    #sys.stdout.write(']\n')
-
     return new_roots
 
 
+def check_symmetric(op, repeats=10):
+    """
+    Cheap check that a linear operator is symmetric. Supply `op`, a callable
+    linear operator. A set of `repeats` random vectors will be generated.
+    This function returns `True` or `False`.
+    """
+    m, n = op.shape
+    if m != n:
+        return False
+    eps = machine_epsilon()
+    np.random.seed(1)
+    for k in xrange(repeats):
+        x = np.random.random(n)
+        w = op(x)
+        r = op(w)
+        s = np.dot(w, w)
+        t = np.dot(x, r)
+        z = abs(s - t)
+        epsa = (s + eps) * eps**(1.0/3)
+        if z > epsa:
+            return False
+    return True
+
+
 if __name__ == '__main__':
-    roots = roots_quadratic(2.0e+20,.1,-4)
+    roots = roots_quadratic(2.0e+20, .1, -4)
     print 'Received: ', roots

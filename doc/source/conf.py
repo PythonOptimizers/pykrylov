@@ -17,6 +17,7 @@ import sys, os
 # is relative to the documentation root, use os.path.abspath to make it
 # absolute, like shown here.
 #sys.path.append(os.path.abspath('.'))
+sys.path.append(os.path.abspath('../../pykrylov/linop'))
 sys.path.append(os.path.abspath('../../pykrylov/generic'))
 sys.path.append(os.path.abspath('../../pykrylov/bicgstab'))
 sys.path.append(os.path.abspath('../../pykrylov/cg'))
@@ -28,6 +29,8 @@ sys.path.append('sphinxext')
 # Import support for ipython console session syntax highlighting (lives
 # in the sphinxext directory defined above)
 import ipython_console_highlighting
+import inheritance_diagram
+import mathjax
 
 # General configuration
 # ---------------------
@@ -37,6 +40,9 @@ import ipython_console_highlighting
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest']
 extensions += ['sphinx.ext.todo']
 extensions += ['ipython_console_highlighting']
+extensions += ['inheritance_diagram']
+extensions += ['mathjax']
+mathjax_path = 'https://d3eoax9i5htok0.cloudfront.net/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['.templates']
@@ -193,7 +199,7 @@ latex_documents = [
 #latex_use_parts = False
 
 # Additional stuff for the LaTeX preamble.
-#latex_preamble = ''
+latex_preamble = '\usepackage{amsfonts}'
 
 # Documents to append as an appendix to all manuals.
 #latex_appendices = []

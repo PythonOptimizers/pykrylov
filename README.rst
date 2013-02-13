@@ -8,8 +8,7 @@ PyKrylov is a pure Python package implementing common Krylov methods.
 Requirements
 ============
 
-1. `Python <http://www.python.org>`_ 2.3, 2.4, 2.5 or 2.6. We are pretty sure
-   Python 3.0 will not be compatible.
+1. `Python <http://www.python.org>`_ 2.7. I've never tested with Python 3.
 2. `NumPy <http://www.scipy.org/NumPy>`_
 
 If you are working under Linux, OS/X or Windows, prebuilt packages are
@@ -71,44 +70,25 @@ doc/build/latex. Obviously, if you don't have a working LaTeX distribution such
 as TeXLive, only issue the first two commands.
 
 
-Obtaining PyKrylov
-==================
-
-PyKrylov is hosted on `GitHub <http://www.github.com>`_. Head to the
-`PyKrylov GitHub page <http://github.com/dpo/pykrylov/tree/master>`_ and hit the
-Download button.
-
-To clone the Git repository::
-
-   git clone git://github.com/dpo/pykrylov.git
-
-
 Bugs, Comments, Feature Requests
 ================================
 
 Please send bugs, comments, feature requests, test cases, chocolate and coffee
-to the `Lighthouse PyKrylov page
+via Github Issues or the `Lighthouse PyKrylov page
 <http://pykrylov.lighthouseapp.com/projects/21441-pykrylov>`_.
 
 
 References
 ==========
 
-.. [Demmel] J. W. Demmel, *Applied Numerical Linear Algebra*, SIAM,
-            Philadelphia, 1997.
-
-.. [Greenbaum] A. Greenbaum, *Iterative Methods for Solving Linear Systems*,
-               number 17 in *Frontiers in Applied Mathematics*, SIAM,
-               Philadelphia, 1997.
-
-.. [Kelley] C. T. Kelley, *Iterative Methods for Linear and Nonlinear
-            Equations*, number 16 in *Frontiers in Applied Mathematics*, SIAM,
-            Philadelphia, 1995.
-
-.. [Saad] Y. Saad, *Iterative Methods for Sparse Linear Systems*, 2nd ed., SIAM,
-          Philadelphia, 2003.
-
-.. [Templates] R. Barrett, M. Berry, T. F. Chan, J. Demmel, J. M. Donato,
-               J. Dongarra, V. Eijkhout, R. Pozo, C. Romine and
-               H. Van der Vorst, *Templates for the Solution of Linear Systems:
-               Building Blocks for Iterative Methods*, SIAM, Philadelphia, 1993.
+* J.W. Demmel, *Applied Numerical Linear Algebra*, SIAM, Philadelphia, 1997.
+* A. Greenbaum, *Iterative Methods for Solving Linear Systems*,
+  number 17 in *Frontiers in Applied Mathematics*, SIAM, Philadelphia, 1997.
+* C.T. Kelley, *Iterative Methods for Linear and Nonlinear Equations*,
+  number 16 in *Frontiers in Applied Mathematics*, SIAM, Philadelphia, 1995.
+* Y. Saad, *Iterative Methods for Sparse Linear Systems*, 2nd ed., SIAM,
+  Philadelphia, 2003.
+* R. Barrett, M. Berry, T.F. Chan, J. Demmel, J.M. Donato,
+  J. Dongarra, V. Eijkhout, R. Pozo, C. Romine and
+  H. Van der Vorst, *Templates for the Solution of Linear Systems:
+  Building Blocks for Iterative Methods*, SIAM, Philadelphia, 1993.
