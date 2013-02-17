@@ -42,7 +42,8 @@ class LSMRFramework(KrylovMethod):
                   'Ax - b is small enough for this machine                   ',
                   'The least-squares solution is good enough for this machine',
                   'Cond(Abar) seems to be too large for this machine         ',
-                  'The iteration limit has been reached                      ')
+                  'The iteration limit has been reached                      ',
+                  'The truncated direct error is small enough, given etol    ')
 
         self.A = A
         self.x = None ; self.var = None
@@ -54,6 +55,7 @@ class LSMRFramework(KrylovMethod):
         self.optimal = False
         self.resids = []             # Least-squares objective function values.
         self.normal_eqns_resids = [] # Residuals of normal equations.
+        self.norms = []              # Squared energy norm of iterates.
         return
 
 
@@ -99,6 +101,8 @@ class LSMRFramework(KrylovMethod):
                 For example, if the entries of A have 7 correct digits, set atol
                 = 1e-7. This prevents the algorithm from doing unnecessary work
                 beyond the uncertainty of the input data.
+            :etol: float
+                stopping tolerance based on direct error (default 1.0e-6).
             :conlim: float
                 lsmr terminates if an estimate of cond(A) exceeds conlim.
                 For compatible systems Ax = b, conlim could be as large as 1.0e+12
@@ -112,7 +116,11 @@ class LSMRFramework(KrylovMethod):
                 a larger value of itnlim may be needed.
             :show: bool
                 print iterations logs if show=True
-            :store_resids: Store full residual norm history. Default: False.
+            :store_resids: bool
+                Store full residual norm history. Default: False
+            :window: int
+                Number of consecutive iterations over which the director error
+                should be measured (default: 5).
 
         :returns:
 
@@ -132,6 +140,8 @@ class LSMRFramework(KrylovMethod):
                         = 6 is the same as 3 with CONLIM = 1/eps.
                         = 7 means ITN reached itnlim before the other stopping
                             conditions were satisfied.
+                        = 8 means that the truncated direct error estimate is
+                            sufficiently small.
             :itn: int
                 number of iterations used
             :normr: float
@@ -154,7 +164,10 @@ class LSMRFramework(KrylovMethod):
 
         """
 
+        etol = kwargs.get('etol', 1.0e-6)
         store_resids = kwargs.get('store_resids', False)
+        window = kwargs.get('window', 5)
+
         A = self.A
         b = b.squeeze()
         msg = self.msg
@@ -244,6 +257,9 @@ class LSMRFramework(KrylovMethod):
         normA   = sqrt(normA2)
         condA   = 1
         normx   = 0
+        xNrgNorm2 = 0  # norm(x)^2 in the appropriate energy norm.
+        dErr = zeros(window)     # Truncated direct error terms.
+        trncDirErr = 0           # Truncated direct error.
 
         # Items for use in stopping rules.
         normb  = beta
@@ -330,9 +346,16 @@ class LSMRFramework(KrylovMethod):
 
             # Update h, h_hat, x.
 
-            hbar      = h - (thetabar*rho/(rhoold*rhobarold))*hbar
-            x         = x + (zeta/(rho*rhobar))*hbar
-            h         = v - (thetanew/rho)*h
+            hbar       = h - (thetabar*rho/(rhoold*rhobarold))*hbar
+            x          = x + (zeta/(rho*rhobar))*hbar
+            h          = v - (thetanew/rho)*h
+
+            xNrgNorm2 +=  zeta * zeta
+            dErr[itn % window] = zeta
+            if itn > window:
+                trncDirErr = norm(dErr)
+                if trncDirErr < etol * sqrt(xNrgNorm2):
+                    istop = 8
 
             # Estimate of ||r||.
 
@@ -388,6 +411,7 @@ class LSMRFramework(KrylovMethod):
             rtol    = btol + atol*normA*normx/normb
 
             if store_resids:
+                self.norms.append(xNrgNorm2)
                 self.resids.append(normr)
                 self.normal_eqns_resids.append(normar)
 
