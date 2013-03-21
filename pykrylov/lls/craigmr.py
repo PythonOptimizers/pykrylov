@@ -1,5 +1,8 @@
 __docformat__ = 'restructuredtext'
 
+# TODO:
+#  []  Compute least-squares objective
+
 from pykrylov.generic import KrylovMethod
 
 from numpy import zeros, dot
@@ -175,13 +178,14 @@ class CRAIGMRFramework(KrylovMethod):
             # Updates.
             zeta     = c_hat * zeta_hat
             zeta_hat = s_hat * zeta_hat
-            xNrgNorm2 += zeta**2
+            xNrgNorm2 += zeta * zeta
             print itn, xNrgNorm2
             d = (u - beta_hat * d) / alpha_hat
             x += zeta * dbar
 
             if store_resids:
                 self.norms.append(xNrgNorm2)
+                self.normal_eqns_resids.append(abs(zeta))
 
             # See if it's time to stop.
             dErr[itn % window] = zeta
