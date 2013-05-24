@@ -95,7 +95,10 @@ class CRAIGFramework(KrylovMethod):
         self.norms  = []    # Squared energy norm of iterates.
         self.resids = []    # Squared least-squares objective function values.
         self.normal_eqns_resids = [] # Resids of normal equations (not squared).
-        self.dir_errors_window = []
+        self.dir_errors_p_window = []
+        self.dir_errors_d_window = []
+        self.iterates_p = []  # Primal iterates.
+        self.iterates_d = []  # Dual   iterates.
         return
 
     def solve(self, rhs, itnlim=0, damp=0.0, M=None, N=None, atol=1.0e-9,
@@ -156,7 +159,16 @@ class CRAIGFramework(KrylovMethod):
 
         etol = kwargs.get('etol', 1.0e-6)
         store_resids = kwargs.get('store_resids', False)
+        store_iterates = kwargs.get('store_iterates', False)
         window = kwargs.get('window', 5)
+
+        self.norms  = []    # Squared energy norm of iterates.
+        self.resids = []    # Squared least-squares objective function values.
+        self.normal_eqns_resids = [] # Resids of normal equations (not squared).
+        self.dir_errors_p_window = []
+        self.dir_errors_d_window = []
+        self.iterates_p = []  # Primal iterates.
+        self.iterates_d = []  # Dual   iterates.
 
         A = self.A
         m, n = A.shape
@@ -193,7 +205,9 @@ class CRAIGFramework(KrylovMethod):
         # Set up the first vectors u and v for the bidiagonalization.
         # These satisfy  beta*M*u = b,  alpha*N*v = A'u.
 
+        r = zeros(m)
         x = zeros(n)
+        rNrgNorm2 = 0.0
         xNrgNorm2 = 0.0          # Squared energy norm of final solution.
         dErr = zeros(window)     # Truncated direct error terms.
         trncDirErr = 0           # Truncated direct error.
@@ -232,6 +246,14 @@ class CRAIGFramework(KrylovMethod):
         bnorm = beta
         delta = 1.
         rho   = normof2(alpha, 1)
+
+        # Dual variable initialization.
+        d     = u / rho
+        tau   = beta / rho
+        r     = tau * d
+        rnorm = tau * tau
+
+        # Primal variable initialization.
         c     = alpha / rho
         s     = 1 / rho
         zeta  = s * beta
@@ -241,11 +263,17 @@ class CRAIGFramework(KrylovMethod):
         wbar  = s * v
         x     = zeta * w
         xnorm = eta * eta
-        rnorm  = zeta * zeta    # = ||b - Ax||^2_M + \|x\|^2_N.
+
+        #rnorm  = zeta * zeta    # = ||b - Ax||^2_M + \|x\|^2_N.
         r1norm = xi * xi        # = ||b - Ax||^2_M.
         r2norm = rnorm
+
         head1  = '   Itn      x(1)       r1norm     r2norm '
         head2  = ' Compatible   LS      Norm A   Cond A'
+
+        if store_iterates:
+            self.iterates_p.append(x.copy())
+            self.iterates_d.append(r.copy())
 
         #if show:
         #    print ' '
@@ -284,7 +312,7 @@ class CRAIGFramework(KrylovMethod):
             # Update residual of CRAIG's "other" normal equations.
             Arnorm = abs(alpha * beta * s * zeta)
 
-            # Update residual of SQD system estimate.
+            # Update residual estimate of SQD system.
             sqd_resid = beta * c * zeta
 
             if beta > 0:
@@ -318,6 +346,11 @@ class CRAIGFramework(KrylovMethod):
             c         = alpha / alpha_hat
             s         = delta / alpha_hat
 
+            # Update dual variables.
+            d = (u - beta_hat * d) / alpha_hat
+            tau = -beta_hat * tau / alpha_hat
+            r += tau * d
+
             # Update x, w and wbar.
 
             zeta = - beta_hat * zeta / alpha_hat
@@ -330,16 +363,22 @@ class CRAIGFramework(KrylovMethod):
             wbar += s * v
             x    += zeta * w
 
+            if store_iterates:
+                self.iterates_p.append(x.copy())
+                self.iterates_d.append(r.copy())
+
             #ddnorm  = ddnorm + norm(dk)**2
             #if wantvar: var += dk*dk
 
             # Update energy norm of x.
+            rNrgNorm2 += tau * tau
             xNrgNorm2 += zeta * zeta             # (A + B*inv(C)*B')-norm of x.
-            dErr[itn % window] = zeta
+            dErr[itn % window] = tau  #zeta
             if itn > window:
                 trncDirErr = norm(dErr)
-                self.dir_errors_window.append(trncDirErr)
-                if trncDirErr < etol * sqrt(xNrgNorm2):
+                rNrgNorm = sqrt(rNrgNorm2)
+                self.dir_errors_d_window.append(trncDirErr / rNrgNorm)
+                if trncDirErr < etol * rNrgNorm:
                     istop = 8
 
             # Use a plane rotation on the right to eliminate the
@@ -351,7 +390,8 @@ class CRAIGFramework(KrylovMethod):
             #rhs     =   phi  -  delta * z
             #zbar    =   rhs / gambar
             #xnorm   =   sqrt(xxnorm + zbar**2)
-            rnorm   += zeta * zeta               # inv(A)-norm of ||b-Ax||.
+            #rnorm   += zeta * zeta               # inv(A)-norm of ||b-Ax||.
+            rnorm   += tau * tau
             xnorm   += eta * eta                 # C-norm of x.
             #gamma   =   normof2(gambar, theta)
             #cs2     =   gambar / gamma
@@ -468,6 +508,7 @@ class CRAIGFramework(KrylovMethod):
         if istop == 8: self.status = 'direct error small'
         self.optimal = istop in [1,2,4,5,8]
         self.x = self.bestSolution = x
+        self.r = r
         self.istop = istop
         self.itn = itn
         self.nMatvec = 2*itn
