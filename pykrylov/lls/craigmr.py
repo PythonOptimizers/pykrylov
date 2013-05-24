@@ -9,7 +9,6 @@ from numpy import zeros, dot
 from numpy.linalg import norm
 from math import sqrt
 
-import pdb
 
 class CRAIGMRFramework(KrylovMethod):
 
@@ -32,8 +31,11 @@ class CRAIGMRFramework(KrylovMethod):
                   'The truncated direct error is small enough, given etol    ')
 
         self.A = A
-        self.x = None ; self.var = None
+        self.init_data()
 
+    def init_data(self):
+
+        self.x = None ; self.var = None
         self.itn = 0; self.istop = 0
         self.Anorm = 0.; self.Acond = 0. ; self.Arnorm = 0.
         self.xnorm = 0.;
@@ -43,6 +45,7 @@ class CRAIGMRFramework(KrylovMethod):
         self.normal_eqns_resids = [] # Residuals of normal equations.
         self.norms = []              # Squared energy norm of iterates.
         self.dir_errors_window = []
+        self.iterates = []
         return
 
     def solve(self, b, damp=0.0, atol=1e-9, btol=1e-9, conlim=1e8,
@@ -50,7 +53,11 @@ class CRAIGMRFramework(KrylovMethod):
 
         etol = kwargs.get('etol', 1.0e-6)
         store_resids = kwargs.get('store_resids', False)
+        store_iterates = kwargs.get('store_iterates', False)
         window = kwargs.get('window', 5)
+
+        # Reinitialize internal data for multiple solves.
+        self.init_data()
 
         A = self.A
         b = b.squeeze()
@@ -67,7 +74,7 @@ class CRAIGMRFramework(KrylovMethod):
 
         # Initialize the Golub-Kahan bidiagonalization process.
 
-        Mu = b
+        Mu = b.copy()  # Don't want to change input vector.
         if M is not None:
             u = M(Mu)
         else:
@@ -106,7 +113,10 @@ class CRAIGMRFramework(KrylovMethod):
         dbar      = zeros(m)
         x         = zeros(m)
 
-        xNrgNorm2 = 0  # norm(x)^2 in the appropriate energy norm.
+        if store_iterates:
+            self.iterates.append(x.copy())
+
+        xNrgNorm2 = 0.  # norm(x)^2 in the appropriate energy norm.
         dErr = zeros(window)     # Truncated direct error terms.
         trncDirErr = 0           # Truncated direct error.
 
@@ -183,6 +193,9 @@ class CRAIGMRFramework(KrylovMethod):
             d = (u - beta_hat * d) / alpha_hat
             x += zeta * dbar
 
+            if store_iterates:
+                self.iterates.append(x.copy())
+
             if store_resids:
                 self.norms.append(xNrgNorm2)
                 self.normal_eqns_resids.append(abs(zeta))
@@ -191,8 +204,9 @@ class CRAIGMRFramework(KrylovMethod):
             dErr[itn % window] = zeta
             if itn > window:
                 trncDirErr = norm(dErr)
-                self.dir_errors_window.append(trncDirErr)
-                if trncDirErr < etol * sqrt(xNrgNorm2):
+                xNrgNorm = sqrt(xNrgNorm2)
+                self.dir_errors_window.append(trncDirErr / xNrgNorm)
+                if trncDirErr < etol * xNrgNorm:
                     istop = 8
 
             if itn >= itnlim:   istop = 7
@@ -201,7 +215,7 @@ class CRAIGMRFramework(KrylovMethod):
 
         if show:
             print ' '
-            print 'CRAIG finished'
+            print 'CRAIG-MR finished'
             print self.msg[istop]
             print ' '
             #str1 = 'istop =%8g   r1norm =%8.1e'   % (istop, sqrt(r1norm))

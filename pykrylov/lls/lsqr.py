@@ -78,6 +78,9 @@ class LSQRFramework(KrylovMethod):
         self.optimal = False
         self.resids = []             # Least-squares objective function values.
         self.normal_eqns_resids = [] # Residuals of normal equations.
+        self.dir_errors_window = []  # Direct error estimates.
+        self.error_upper_bound = []  # Upper bound on direct error.
+        self.iterates = []
         return
 
     def solve(self, rhs, itnlim=0, damp=0.0, M=None, N=None, atol=1.0e-9,
@@ -135,7 +138,13 @@ class LSQRFramework(KrylovMethod):
 
         etol = kwargs.get('etol', 1.0e-6)
         store_resids = kwargs.get('store_resids', False)
+        store_iterates = kwargs.get('store_iterates', False)
         window = kwargs.get('window', 5)
+
+        self.resids = []             # Least-squares objective function values.
+        self.normal_eqns_resids = [] # Residuals of normal equations.
+        self.dir_errors_window = []  # Direct error estimates.
+        self.iterates = []
 
         A = self.A
         m, n = A.shape
@@ -175,6 +184,9 @@ class LSQRFramework(KrylovMethod):
         xNrgNorm2 = 0.0          # Squared energy norm of final solution.
         dErr = zeros(window)     # Truncated direct error terms.
         trncDirErr = 0           # Truncated direct error.
+
+        if store_iterates:
+            self.iterates.append(x.copy())
 
         Mu = rhs[:m].copy()
         if M is not None:
@@ -294,12 +306,17 @@ class LSQRFramework(KrylovMethod):
             ddnorm  = ddnorm + norm(dk)**2
             if wantvar: var += dk*dk
 
+            if store_iterates:
+                self.iterates.append(x.copy())
+
             # Update energy norm of x.
             xNrgNorm2 += phi*phi
             dErr[itn % window] = phi
             if itn > window:
                 trncDirErr = norm(dErr)
-                if trncDirErr < etol * sqrt(xNrgNorm2):
+                xNrgNorm = sqrt(xNrgNorm2)
+                self.dir_errors_window.append(trncDirErr / xNrgNorm)
+                if trncDirErr < etol * xNrgNorm:
                     istop = 8
 
             # Use a plane rotation on the right to eliminate the

@@ -1,6 +1,9 @@
 """
 A Python implementation of SYMMLQ.
 
+This is a line-by-line translation from Matlab code
+available at http://www.stanford.edu/group/SOL/software/symmlq.htm.
+
 .. moduleauthor: D. Orban <dominique.orban@gerad.ca>
 """
 
@@ -12,7 +15,7 @@ from math import sqrt
 from pykrylov.generic import KrylovMethod
 from pykrylov.tools   import machine_epsilon
 
-class SYMMLQ( KrylovMethod ) :
+class Symmlq(KrylovMethod) :
     """
     SYMMLQ is designed to solve the system of linear equations A x = b
     where A is an n by n symmetric matrix and b is a given vector.
@@ -57,6 +60,7 @@ class SYMMLQ( KrylovMethod ) :
         self.name = 'Symmetric Indefinite Lanczos with Orthogonal Factorization'
         self.acronym = 'SYMMLQ'
         self.prefix = self.acronym + ': '
+        self.iterates = []
 
 
     def solve(self, rhs, **kwargs):
@@ -71,11 +75,8 @@ class SYMMLQ( KrylovMethod ) :
         :keywords:
 
             :matvec_max: Max. number of matrix-vector produts. Default: 2n+2.
-
             :rtol:    relative stopping tolerance. Default: 1.0e-9.
-
             :shift:   optional shift value. Default: 0.
-
             :check:   specify whether or not to check that `matvec` indeed
                       describes a symmetric matrix and that `precon` indeed
                       describes a symmetric positive-definite preconditioner.
@@ -91,6 +92,7 @@ class SYMMLQ( KrylovMethod ) :
         shift = kwargs.get('shift', None)
         if shift == 0.0: shift = None
         eps = machine_epsilon()
+        store_iterates = kwargs.get('store_iterates', False)
 
         first = 'Enter SYMMLQ.   '
         last  = 'Exit  SYMMLQ.   '
@@ -117,6 +119,9 @@ class SYMMLQ( KrylovMethod ) :
         istop  = 0 ; ynorm  = 0 ; w = np.zeros(n) ; acond = 0
         itn    = 0 ; xnorm  = 0 ; x = np.zeros(n) ; done=False
         anorm  = 0 ; rnorm  = 0 ; v = np.zeros(n)
+
+        if store_iterates:
+            self.iterates.append(x.copy())
 
         # Set up y for the first Lanczos vector v1.
         # y is really beta1 * P * v1  where  P = C^(-1).
@@ -330,6 +335,9 @@ class SYMMLQ( KrylovMethod ) :
                 t = z*sn
                 x += s*w + t*v
                 w *= sn ; w -= cs*v
+
+                if store_iterates:
+                    self.iterates.append(x.copy())
 
                 # Accumulate the step along the direction b, and go round again.
 

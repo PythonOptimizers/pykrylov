@@ -56,6 +56,8 @@ class LSMRFramework(KrylovMethod):
         self.resids = []             # Least-squares objective function values.
         self.normal_eqns_resids = [] # Residuals of normal equations.
         self.norms = []              # Squared energy norm of iterates.
+        self.dir_errors_window = []  # Direct error estimates.
+        self.iterates = []
         return
 
 
@@ -166,7 +168,14 @@ class LSMRFramework(KrylovMethod):
 
         etol = kwargs.get('etol', 1.0e-6)
         store_resids = kwargs.get('store_resids', False)
+        store_iterates = kwargs.get('store_iterates', False)
         window = kwargs.get('window', 5)
+
+        self.resids = []             # Least-squares objective function values.
+        self.normal_eqns_resids = [] # Residuals of normal equations.
+        self.norms = []              # Squared energy norm of iterates.
+        self.dir_errors_window = []  # Direct error estimates.
+        self.iterates = []
 
         A = self.A
         b = b.squeeze()
@@ -200,7 +209,7 @@ class LSMRFramework(KrylovMethod):
 
         # Initialize the Golub-Kahan bidiagonalization process.
 
-        Mu = b
+        Mu = b.copy()
         if M is not None:
             u = M(Mu)
         else:
@@ -238,6 +247,9 @@ class LSMRFramework(KrylovMethod):
         h    = v.copy()
         hbar = zeros(n)
         x    = zeros(n)
+
+        if store_iterates:
+            self.iterates.append(x.copy())
 
         # Initialize variables for estimation of ||r||.
 
@@ -350,11 +362,16 @@ class LSMRFramework(KrylovMethod):
             x          = x + (zeta/(rho*rhobar))*hbar
             h          = v - (thetanew/rho)*h
 
+            if store_iterates:
+                self.iterates.append(x.copy())
+
             xNrgNorm2 +=  zeta * zeta
             dErr[itn % window] = zeta
             if itn > window:
                 trncDirErr = norm(dErr)
-                if trncDirErr < etol * sqrt(xNrgNorm2):
+                xNrgNorm = sqrt(xNrgNorm2)
+                self.dir_errors_window.append(trncDirErr / xNrgNorm)
+                if trncDirErr < etol * xNrgNorm:
                     istop = 8
 
             # Estimate of ||r||.
@@ -471,6 +488,7 @@ class LSMRFramework(KrylovMethod):
             str4    = '    normx =%8.1e'                %( normx)
             print str1, str2
             print str3, str4
+            print 'Estimated energy norm of x: %7.1e' % sqrt(xNrgNorm2)
 
         self.x = x
         return x, istop, itn, normr, normar, normA, condA, normx

@@ -15,10 +15,10 @@ available at http://www.stanford.edu/group/SOL/software/minres.htm.
 
 from pykrylov.generic import KrylovMethod
 import numpy as np
+from numpy.linalg import norm
 from numpy import zeros, dot, empty
 from math import sqrt
 from pykrylov.tools.utils import check_symmetric
-
 
 
 class Minres(KrylovMethod):
@@ -85,17 +85,18 @@ class Minres(KrylovMethod):
         self.acronym = 'MINRES'
         self.first = 'Enter minres.   '
         self.last  = 'Exit  minres.   '
-        self.msg = [' beta2 = 0.  If M = I, b and x are eigenvectors    ',  #-1
-                    ' beta1 = 0.  The exact solution is  x = 0          ',  # 0
-                    ' A solution to Ax = b was found, given rtol        ',  # 1
-                    ' A least-squares solution was found, given rtol    ',  # 2
-                    ' Reasonable accuracy achieved, given eps           ',  # 3
-                    ' x has converged to an eigenvector                 ',  # 4
-                    ' acond has exceeded 0.1/eps                        ',  # 5
-                    ' The iteration limit was reached                   ',  # 6
-                    ' Aname  does not define a symmetric matrix         ',  # 7
-                    ' Mname  does not define a symmetric matrix         ',  # 8
-                    ' Mname  does not define a pos-def preconditioner   ' ] # 9
+        self.msg = [' beta2 = 0.  If M = I, b and x are eigenvectors    ',     # -1
+                    ' beta1 = 0.  The exact solution is  x = 0          ',     #  0
+                    ' A solution to Ax = b was found, given rtol        ',     #  1
+                    ' A least-squares solution was found, given rtol    ',     #  2
+                    ' Reasonable accuracy achieved, given eps           ',     #  3
+                    ' x has converged to an eigenvector                 ',     #  4
+                    ' acond has exceeded 0.1/eps                        ',     #  5
+                    ' The iteration limit was reached                   ',     #  6
+                    ' Aname  does not define a symmetric matrix         ',     #  7
+                    ' Mname  does not define a symmetric matrix         ',     #  8
+                    ' Mname  does not define a pos-def preconditioner   ',     #  9
+                    'The truncated direct error is small enough, given etol']  # 10
 
         KrylovMethod.__init__(self, matvec, **kwargs)
 
@@ -104,6 +105,8 @@ class Minres(KrylovMethod):
         self.prefix = self.acronym + ': '
         self.residHistory = []     # Residual norms.
         self.resids = []           # Residual vectors.
+        self.dir_errors_window = []  # Direct error estimates.
+        self.iterates = []
 
         self.eps = np.finfo(np.double).eps
 
@@ -114,7 +117,6 @@ class Minres(KrylovMethod):
 
         A = self.matvec
         n = b.shape[0]
-        x = zeros(n)
 
         # Read keyword arguments
         precon = kwargs.get('precon', None)
@@ -123,7 +125,21 @@ class Minres(KrylovMethod):
         check  = kwargs.get('check',  True)
         itnlim = kwargs.get('itnlim', 5*n)
         rtol   = kwargs.get('rtol',   1.0e-12)
+        etol   = kwargs.get('etol',   1.0e-6)
         store_resids = kwargs.get('store_resids', False)
+        store_iterates = kwargs.get('store_iterates', False)
+        window = kwargs.get('window', 5)
+
+        self.dir_errors_window = []  # Direct error estimates.
+        self.iterates = []
+
+        x = zeros(n)
+        xNrgNorm2 = 0.0          # Squared energy norm of final solution.
+        dErr = zeros(window)     # Truncated direct error terms.
+        trncDirErr = 0           # Truncated direct error.
+
+        if store_iterates:
+            self.iterates.append(x.copy())
 
         # Transfer some pointers for readability
         eps = self.eps
@@ -280,6 +296,19 @@ class Minres(KrylovMethod):
                 w     = (v - oldeps*w1 - delta*w2) * denom
                 x    += phi*w  #x     = x  +  phi*w
 
+                if store_iterates:
+                    self.iterates.append(x.copy())
+
+                # Update energy norm of x.
+                xNrgNorm2 += phi*phi
+                dErr[itn % window] = phi
+                if itn > window:
+                    trncDirErr = norm(dErr)
+                    xNrgNorm = sqrt(xNrgNorm2)
+                    self.dir_errors_window.append(trncDirErr / xNrgNorm)
+                    if trncDirErr < etol * xNrgNorm:
+                        istop = 10
+
                 # Go round again.
 
                 gmax   = max(gmax, gamma)
@@ -363,7 +392,8 @@ class Minres(KrylovMethod):
             print last+' Arnorm  =  %12.4e' % Arnorm
             print last+self.msg[istop+1]
 
-        self.converged = istop in [1,2,3,4]
+        self.converged = istop in [1,2,3,4,10]
+        if istop == 10: self.status = 'direct error small'
         self.bestSolution = self.x = x
         self.istop = istop
         self.itn = itn

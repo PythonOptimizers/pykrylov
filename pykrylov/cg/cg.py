@@ -38,6 +38,7 @@ class CG( KrylovMethod ):
         self.acronym = 'CG'
         self.prefix = self.acronym + ': '
         self.resids = []
+        self.iterates = []
 
         # Direction of nonconvexity if A is not positive definite
         self.infiniteDescent = None
@@ -55,6 +56,7 @@ class CG( KrylovMethod ):
            :check_symmetric: Ensure matrix is symmetric. Default: False.
            :check_curvature: Ensure matrix is positive definite. Default: True.
            :store_resids:    Store full residual vector history. Default: False.
+           :store_iterates:  Store full iterate history. Default: False.
 
         """
         n = rhs.shape[0]
@@ -63,6 +65,7 @@ class CG( KrylovMethod ):
         check_sym = kwargs.get('check_symmetric', False)
         check_curvature = kwargs.get('check_curvature', True)
         store_resids = kwargs.get('store_resids', False)
+        store_iterates = kwargs.get('store_iterates', False)
 
         if check_sym:
             if not check_symmetric(self.matvec):
@@ -72,6 +75,10 @@ class CG( KrylovMethod ):
         # Initial guess
         guess_supplied = 'guess' in kwargs.keys()
         x = kwargs.get('guess', np.zeros(n))
+
+        if store_iterates:
+            self.iterates.append(x.copy())
+
         matvec_max = kwargs.get('matvec_max', 2*n)
 
         # Initial residual vector
@@ -122,6 +129,9 @@ class CG( KrylovMethod ):
             # Update estimate and residual
             x += alpha * p
             r += alpha * Ap
+
+            if store_iterates:
+                self.iterates.append(x.copy())
 
             # Compute preconditioned residual
             if self.precon is not None:
