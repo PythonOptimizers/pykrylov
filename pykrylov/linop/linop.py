@@ -1,6 +1,5 @@
 import numpy as np
 import logging
-#import inspect
 
 __docformat__ = 'restructuredtext'
 
