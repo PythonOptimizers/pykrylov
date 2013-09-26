@@ -122,11 +122,10 @@ class BlockDiagonalLinearOperator(LinearOperator):
     The blocks may be specified as one list, e.g., `[A, B, C]`.
     """
 
-    def __init__(self, blocks, symmetric=False, **kwargs):
-        if symmetric:
-            for blk in blocks:
-                if not blk.symmetric:
-                    raise ValueError('Blocks on diagonal must be symmetric.')
+    def __init__(self, blocks, **kwargs):
+
+        symmetric = reduce(lambda x,y: x and y,
+                           [blk.symmetric for blk in blocks])
 
         self._blocks = blocks
 
