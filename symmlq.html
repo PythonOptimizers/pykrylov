@@ -25,7 +25,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://d3eoax9i5htok0.cloudfront.net/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="top" title="PyKrylov 0.1 documentation" href="index.html" />
     <link rel="next" title="Benchmarking Solvers" href="bmark.html" />
     <link rel="prev" title="The Transpose-Free Quasi-Minimal Residual Method" href="tfqmr.html" /> 
@@ -61,9 +61,11 @@
 <div class="section" id="module-symmlq">
 <span id="the-symmlq-module"></span><h2>The <a class="reference internal" href="#module-symmlq" title="symmlq"><tt class="xref py py-mod docutils literal"><span class="pre">symmlq</span></tt></a> Module<a class="headerlink" href="#module-symmlq" title="Permalink to this headline">¶</a></h2>
 <p>A Python implementation of SYMMLQ.</p>
+<p>This is a line-by-line translation from Matlab code
+available at <a class="reference external" href="http://www.stanford.edu/group/SOL/software/symmlq.htm">http://www.stanford.edu/group/SOL/software/symmlq.htm</a>.</p>
 <dl class="class">
-<dt id="symmlq.SYMMLQ">
-<em class="property">class </em><tt class="descclassname">symmlq.</tt><tt class="descname">SYMMLQ</tt><big>(</big><em>matvec</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#symmlq.SYMMLQ" title="Permalink to this definition">¶</a></dt>
+<dt id="symmlq.Symmlq">
+<em class="property">class </em><tt class="descclassname">symmlq.</tt><tt class="descname">Symmlq</tt><big>(</big><em>matvec</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#symmlq.Symmlq" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">pykrylov.generic.generic.KrylovMethod</span></tt></p>
 <p>SYMMLQ is designed to solve the system of linear equations A x = b
 where A is an n by n symmetric matrix and b is a given vector.</p>
@@ -115,8 +117,8 @@ Analysis, <strong>12</strong> (4), pp. 617&#8211;629, 1975.</td></tr>
 </tbody>
 </table>
 <dl class="method">
-<dt id="symmlq.SYMMLQ.solve">
-<tt class="descname">solve</tt><big>(</big><em>rhs</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#symmlq.SYMMLQ.solve" title="Permalink to this definition">¶</a></dt>
+<dt id="symmlq.Symmlq.solve">
+<tt class="descname">solve</tt><big>(</big><em>rhs</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#symmlq.Symmlq.solve" title="Permalink to this definition">¶</a></dt>
 <dd><p>Solve a linear system with <cite>rhs</cite> as right-hand side by the SYMMLQ
 method.</p>
 <table class="docutils field-list" frame="void" rules="none">

@@ -25,7 +25,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://d3eoax9i5htok0.cloudfront.net/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="top" title="PyKrylov 0.1 documentation" href="index.html" />
     <link rel="next" title="Generic Template for Krylov Methods" href="generic.html" />
     <link rel="prev" title="Introduction to PyKrylov" href="introduction.html" /> 
@@ -92,9 +92,17 @@ than by subclassing to define classes of more specific linear operators.</p>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
 <p>A linear operator is a linear mapping x -&gt; A(x) such that the size of the
 input vector x is <cite>nargin</cite> and the size of the output is <cite>nargout</cite>. It can
-be visualized as a matrix of shape (<cite>nargout</cite>, <cite>nargin</cite>).</p>
+be visualized as a matrix of shape (<cite>nargout</cite>, <cite>nargin</cite>). Its type is any
+valid Numpy <cite>dtype</cite>. By default, it has <cite>dtype</cite> <cite>numpy.float</cite> but this can
+be changed to, e.g., <cite>numpy.complex</cite> via the <cite>dtype</cite> keyword argument and
+attribute.</p>
 <p>A logger may be attached to the linear operator via the <cite>logger</cite> keyword
 argument.</p>
+<dl class="attribute">
+<dt id="linop.BaseLinearOperator.dtype">
+<tt class="descname">dtype</tt><a class="headerlink" href="#linop.BaseLinearOperator.dtype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="attribute">
 <dt id="linop.BaseLinearOperator.nMatvec">
 <tt class="descname">nMatvec</tt><a class="headerlink" href="#linop.BaseLinearOperator.nMatvec" title="Permalink to this definition">¶</a></dt>
@@ -183,6 +191,11 @@ ignored. All other keyword arguments are passed directly to the superclass.</p>
 </dd></dl>
 
 <dl class="attribute">
+<dt id="linop.LinearOperator.dtype">
+<tt class="descname">dtype</tt><a class="headerlink" href="#linop.LinearOperator.dtype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
 <dt id="linop.LinearOperator.nMatvec">
 <tt class="descname">nMatvec</tt><a class="headerlink" href="#linop.LinearOperator.nMatvec" title="Permalink to this definition">¶</a></dt>
 <dd><p>The number of products with vectors computed so far.</p>
@@ -237,6 +250,11 @@ and a class for diagonal operators.</p>
 </dd></dl>
 
 <dl class="attribute">
+<dt id="linop.IdentityOperator.dtype">
+<tt class="descname">dtype</tt><a class="headerlink" href="#linop.IdentityOperator.dtype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
 <dt id="linop.IdentityOperator.nMatvec">
 <tt class="descname">nMatvec</tt><a class="headerlink" href="#linop.IdentityOperator.nMatvec" title="Permalink to this definition">¶</a></dt>
 <dd><p>The number of products with vectors computed so far.</p>
@@ -286,6 +304,11 @@ and a class for diagonal operators.</p>
 </dd></dl>
 
 <dl class="attribute">
+<dt id="linop.ZeroOperator.dtype">
+<tt class="descname">dtype</tt><a class="headerlink" href="#linop.ZeroOperator.dtype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
 <dt id="linop.ZeroOperator.nMatvec">
 <tt class="descname">nMatvec</tt><a class="headerlink" href="#linop.ZeroOperator.nMatvec" title="Permalink to this definition">¶</a></dt>
 <dd><p>The number of products with vectors computed so far.</p>
@@ -333,12 +356,19 @@ example:</p>
 <dt id="linop.DiagonalOperator">
 <em class="property">class </em><tt class="descclassname">linop.</tt><tt class="descname">DiagonalOperator</tt><big>(</big><em>diag</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#linop.DiagonalOperator" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#linop.LinearOperator" title="linop.LinearOperator"><tt class="xref py py-class docutils literal"><span class="pre">linop.LinearOperator</span></tt></a></p>
-<p>A diagonal linear operator defined by its diagonal <cite>diag</cite> (a Numpy array.)</p>
+<p>A diagonal linear operator defined by its diagonal <cite>diag</cite> (a Numpy array.)
+The type must be specified in the <cite>diag</cite> argument, e.g.,
+<cite>np.ones(5, dtype=np.complex)</cite> or <cite>np.ones(5).astype(np.complex)</cite>.</p>
 <dl class="attribute">
 <dt id="linop.DiagonalOperator.T">
 <tt class="descname">T</tt><a class="headerlink" href="#linop.DiagonalOperator.T" title="Permalink to this definition">¶</a></dt>
 <dd><p>The transpose operator.</p>
 </dd></dl>
+
+<dl class="attribute">
+<dt id="linop.DiagonalOperator.dtype">
+<tt class="descname">dtype</tt><a class="headerlink" href="#linop.DiagonalOperator.dtype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="attribute">
 <dt id="linop.DiagonalOperator.nMatvec">
@@ -518,6 +548,11 @@ diagonal must be square and symmetric.</p>
 </dd></dl>
 
 <dl class="attribute">
+<dt id="blkop.BlockLinearOperator.dtype">
+<tt class="descname">dtype</tt><a class="headerlink" href="#blkop.BlockLinearOperator.dtype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
 <dt id="blkop.BlockLinearOperator.nMatvec">
 <tt class="descname">nMatvec</tt><a class="headerlink" href="#blkop.BlockLinearOperator.nMatvec" title="Permalink to this definition">¶</a></dt>
 <dd><p>The number of products with vectors computed so far.</p>
@@ -566,7 +601,7 @@ specified as symmetric, each block must be symmetric. For example:</p>
 </div>
 <dl class="class">
 <dt id="blkop.BlockDiagonalLinearOperator">
-<em class="property">class </em><tt class="descclassname">blkop.</tt><tt class="descname">BlockDiagonalLinearOperator</tt><big>(</big><em>blocks</em>, <em>symmetric=False</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#blkop.BlockDiagonalLinearOperator" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">blkop.</tt><tt class="descname">BlockDiagonalLinearOperator</tt><big>(</big><em>blocks</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#blkop.BlockDiagonalLinearOperator" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">pykrylov.linop.linop.LinearOperator</span></tt></p>
 <p>A block diagonal linear operator. Each block must be a linear operator.
 The blocks may be specified as one list, e.g., <cite>[A, B, C]</cite>.</p>
@@ -581,6 +616,11 @@ The blocks may be specified as one list, e.g., <cite>[A, B, C]</cite>.</p>
 <tt class="descname">blocks</tt><a class="headerlink" href="#blkop.BlockDiagonalLinearOperator.blocks" title="Permalink to this definition">¶</a></dt>
 <dd><p>The list of blocks defining the block diagonal operator.</p>
 </dd></dl>
+
+<dl class="attribute">
+<dt id="blkop.BlockDiagonalLinearOperator.dtype">
+<tt class="descname">dtype</tt><a class="headerlink" href="#blkop.BlockDiagonalLinearOperator.dtype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="attribute">
 <dt id="blkop.BlockDiagonalLinearOperator.nMatvec">
