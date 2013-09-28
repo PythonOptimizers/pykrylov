@@ -68,7 +68,7 @@ class BlockLinearOperator(LinearOperator):
             self.logger.debug('nargin=%d, nargout=%d' % (nargin, nargout))
             if nx != nargin:
                 raise ShapeError('Multiplying with vector of wrong shape.')
-            y = np.zeros(nargout)
+            y = np.zeros(nargout, dtype=x.dtype)
 
             nblk_row = len(blks)
             nblk_col = len(blks[0])
@@ -155,7 +155,7 @@ class BlockDiagonalLinearOperator(LinearOperator):
             self.logger.debug('nargin=%d, nargout=%d' % (nargin, nargout))
             if nx != nargin:
                 raise ShapeError('Multiplying with vector of wrong shape.')
-            y = np.empty(nargout)
+            y = np.empty(nargout, dtype=x.dtype)
 
             nblks = len(blks)
 
