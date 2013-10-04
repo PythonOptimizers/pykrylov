@@ -2,7 +2,6 @@
 __docformat__ = 'restructuredtext'
 
 import numpy as np
-from math import sqrt
 
 from pykrylov.tools.utils import check_symmetric
 from pykrylov.generic import KrylovMethod
@@ -97,7 +96,7 @@ class CG( KrylovMethod ):
             self.resids.append(y.copy())
 
         ry = np.dot(r,y)
-        self.residNorm0 = residNorm = sqrt(ry)
+        self.residNorm0 = residNorm = np.sqrt(ry)
         self.residHistory.append(self.residNorm0)
         threshold = max(self.abstol, self.reltol * self.residNorm0)
 
@@ -151,7 +150,7 @@ class CG( KrylovMethod ):
             p -= r
 
             ry = ry_next
-            residNorm = sqrt(ry)
+            residNorm = np.sqrt(ry)
             self.residHistory.append(residNorm)
 
             info = '%6d  %7.1e  %8.1e' % (nMatvec, residNorm, pAp)

@@ -68,7 +68,9 @@ class BlockLinearOperator(LinearOperator):
             self.logger.debug('nargin=%d, nargout=%d' % (nargin, nargout))
             if nx != nargin:
                 raise ShapeError('Multiplying with vector of wrong shape.')
-            y = np.zeros(nargout)
+
+            result_type = np.result_type(self.dtype, x.dtype)
+            y = np.zeros(nargout, dtype=result_type)
 
             nblk_row = len(blks)
             nblk_col = len(blks[0])
@@ -88,10 +90,14 @@ class BlockLinearOperator(LinearOperator):
 
             return y
 
+        blk_dtypes = [blk.dtype for blk in blocks]
+        op_dtype = np.result_type(*blk_dtypes)
+
         super(BlockLinearOperator, self).__init__(nargin, nargout,
                                 symmetric=symmetric,
                                 matvec=lambda x: blk_matvec(x, self._blocks),
-                                matvec_transp=lambda x: blk_matvec(x, blocksT))
+                                matvec_transp=lambda x: blk_matvec(x, blocksT),
+                                dtype=op_type)
 
         self.T._blocks = blocksT
 
@@ -122,11 +128,10 @@ class BlockDiagonalLinearOperator(LinearOperator):
     The blocks may be specified as one list, e.g., `[A, B, C]`.
     """
 
-    def __init__(self, blocks, symmetric=False, **kwargs):
-        if symmetric:
-            for blk in blocks:
-                if not blk.symmetric:
-                    raise ValueError('Blocks on diagonal must be symmetric.')
+    def __init__(self, blocks, **kwargs):
+
+        symmetric = reduce(lambda x,y: x and y,
+                           [blk.symmetric for blk in blocks])
 
         self._blocks = blocks
 
@@ -155,7 +160,9 @@ class BlockDiagonalLinearOperator(LinearOperator):
             self.logger.debug('nargin=%d, nargout=%d' % (nargin, nargout))
             if nx != nargin:
                 raise ShapeError('Multiplying with vector of wrong shape.')
-            y = np.empty(nargout)
+
+            result_type = np.result_type(self.dtype, x.dtype)
+            y = np.empty(nargout, dtype=result_type)
 
             nblks = len(blks)
 
@@ -175,10 +182,14 @@ class BlockDiagonalLinearOperator(LinearOperator):
 
             return y
 
+        blk_dtypes = [blk.dtype for blk in blocks]
+        op_dtype = np.result_type(*blk_dtypes)
+
         super(BlockDiagonalLinearOperator, self).__init__(nargin, nargout,
                                 symmetric=symmetric,
                                 matvec=lambda x: blk_matvec(x, self._blocks),
-                                matvec_transp=lambda x: blk_matvec(x, blocksT))
+                                matvec_transp=lambda x: blk_matvec(x, blocksT),
+                                dtype=op_dtype)
 
         self.T._blocks = blocksT
 

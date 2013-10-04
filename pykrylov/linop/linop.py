@@ -1,6 +1,5 @@
 import numpy as np
 import logging
-#import inspect
 
 __docformat__ = 'restructuredtext'
 
@@ -15,7 +14,10 @@ class BaseLinearOperator(object):
     """
     A linear operator is a linear mapping x -> A(x) such that the size of the
     input vector x is `nargin` and the size of the output is `nargout`. It can
-    be visualized as a matrix of shape (`nargout`, `nargin`).
+    be visualized as a matrix of shape (`nargout`, `nargin`). Its type is any
+    valid Numpy `dtype`. By default, it has `dtype` `numpy.float` but this can
+    be changed to, e.g., `numpy.complex` via the `dtype` keyword argument and
+    attribute.
 
     A logger may be attached to the linear operator via the `logger` keyword
     argument.
@@ -26,6 +28,7 @@ class BaseLinearOperator(object):
         self.__nargout = nargout
         self.__symmetric = symmetric
         self.__shape = (nargout, nargin)
+        self.__dtype = kwargs.get('dtype', np.float)
         self._nMatvec = 0
 
         # Log activity.
@@ -54,6 +57,19 @@ class BaseLinearOperator(object):
         return self.__shape
 
     @property
+    def dtype(self):
+        return self.__dtype
+
+    @dtype.setter
+    def dtype(self, value):
+        allowed_types = np.core.numerictypes.typeDict.keys() + \
+                            [np.float, np.complex, np.int, np.uint]
+        if value in allows_types:
+            self.__dtype = value
+        else:
+            raise TypeError('Not a Numpy type')
+
+    @property
     def nMatvec(self):
         "The number of products with vectors computed so far."
         return self._nMatvec
@@ -71,10 +87,11 @@ class BaseLinearOperator(object):
 
     def __repr__(self):
         if self.symmetric:
-            s = 'Symmetric <'
+            s = 'Symmetric'
         else:
-            s = 'Unsymmetric <'
-        s += self.__class__.__name__ + '>'
+            s = 'Unsymmetric'
+        s += ' <' + self.__class__.__name__ + '>'
+        s += ' of type %s' % self.dtype
         s += ' with shape (%d,%d)' % (self.nargout, self.nargin)
         return s
 
@@ -130,10 +147,13 @@ class LinearOperator(BaseLinearOperator):
         def matvec_transp(y):
             return x * (self.T(y))
 
+        result_type = np.result_type(self.dtype, type(x))
+
         return LinearOperator(self.nargin, self.nargout,
                               symmetric=self.symmetric,
                               matvec=matvec,
-                              matvec_transp=matvec_transp)
+                              matvec_transp=matvec_transp,
+                              dtype=result_type)
 
     def __mul_linop(self, op):
         "Product between two linear operators."
@@ -146,15 +166,19 @@ class LinearOperator(BaseLinearOperator):
         def matvec_transp(x):
             return op.T(self.T(x))
 
+        result_type = np.result_type(self.dtype, op.dtype)
+
         return LinearOperator(op.nargin, self.nargout,
                               symmetric=False,   # Generally.
                               matvec=matvec,
-                              matvec_transp=matvec_transp)
+                              matvec_transp=matvec_transp,
+                              dtype=result_type)
 
     def __mul_vector(self, x):
         "Product between a linear operator and a vector."
         self._nMatvec += 1
-        return self.__matvec(x)
+        result_type = np.result_type(self.dtype, x.dtype)
+        return self.__matvec(x).astype(result_type)
 
     def __mul__(self, x):
         if np.isscalar(x):
@@ -182,10 +206,13 @@ class LinearOperator(BaseLinearOperator):
         def matvec_transp(x):
             return self.T(x) + other.T(x)
 
+        result_type = np.result_type(self.dtype, other.dtype)
+
         return LinearOperator(self.nargin, self.nargout,
                                   symmetric=self.symmetric and other.symmetric,
                                   matvec=matvec,
-                                  matvec_transp=matvec_transp)
+                                  matvec_transp=matvec_transp,
+                                  dtype=result_type)
 
     def __neg__(self):
         return self * (-1)
@@ -202,10 +229,13 @@ class LinearOperator(BaseLinearOperator):
         def matvec_transp(x):
             return self.T(x) - other.T(x)
 
+        result_type = np.result_type(self.dtype, other.dtype)
+
         return LinearOperator(self.nargin, self.nargout,
                                   symmetric=self.symmetric and other.symmetric,
                                   matvec=matvec,
-                                  matvec_transp=matvec_transp)
+                                  matvec_transp=matvec_transp,
+                                  dtype=result_type)
 
     def __div__(self, other):
         if not np.isscalar(other):
@@ -214,11 +244,11 @@ class LinearOperator(BaseLinearOperator):
 
     def __pow__(self, other):
         if not isinstance(other, int):
-            raise ValueError('Can only raise to integer power')
+            raise ShapeError('Can only raise to integer power')
         if other < 0:
-            raise ValueError('Can only raise to nonnegative power')
+            raise ShapeError('Can only raise to nonnegative power')
         if self.nargin != self.nargout:
-            raise ValueError('Can only raise square operators to a power')
+            raise ShapeError('Can only raise square operators to a power')
         if other == 0:
             return IdentityOperator(self.nargin)
         if other == 1:
@@ -246,6 +276,8 @@ class IdentityOperator(LinearOperator):
 class DiagonalOperator(LinearOperator):
     """
     A diagonal linear operator defined by its diagonal `diag` (a Numpy array.)
+    The type must be specified in the `diag` argument, e.g.,
+    `np.ones(5, dtype=np.complex)` or `np.ones(5).astype(np.complex)`.
     """
 
     def __init__(self, diag, **kwargs):
@@ -253,10 +285,13 @@ class DiagonalOperator(LinearOperator):
             kwargs.pop('symmetric')
         if 'matvec' in kwargs:
             kwargs.pop('matvec')
+        if 'dtype' in kwargs:
+            kwargs.pop('dtype')
 
         super(DiagonalOperator, self).__init__(diag.shape[0], diag.shape[0],
                                                symmetric=True,
                                                matvec=lambda x: diag*x,
+                                               dtype=diag.dtype,
                                                **kwargs)
 
 
