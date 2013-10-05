@@ -97,7 +97,7 @@ class CG( KrylovMethod ):
             self.resids.append(y.copy())
 
         ry = np.dot(r,y)
-        self.residNorm0 = residNorm = np.sqrt(ry)
+        self.residNorm0 = residNorm = np.abs(np.sqrt(ry))
         self.residHistory.append(self.residNorm0)
         threshold = max(self.abstol, self.reltol * self.residNorm0)
 
@@ -117,7 +117,7 @@ class CG( KrylovMethod ):
             pAp = np.dot(p, Ap)
 
             if check_curvature:
-                if pAp <= 0:
+                if np.imag(pAp) > 1.0e-8 * np.abs(pAp) or np.real(pAp) <= 0:
                     self.logger.error('Coefficient operator is not positive definite')
                     self.infiniteDescent = p
                     definite = False
@@ -151,10 +151,10 @@ class CG( KrylovMethod ):
             p -= r
 
             ry = ry_next
-            residNorm = np.sqrt(ry)
+            residNorm = np.abs(np.sqrt(ry))
             self.residHistory.append(residNorm)
 
-            info = '%6d  %7.1e  %8.1e' % (nMatvec, residNorm, pAp)
+            info = '%6d  %7.1e  %8.1e' % (nMatvec, residNorm, np.real(pAp))
             self.logger.info(info)
 
 
