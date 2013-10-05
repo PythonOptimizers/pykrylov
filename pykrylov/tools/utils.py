@@ -69,8 +69,8 @@ def check_symmetric(op, repeats=10):
     np.random.seed(1)
     for k in xrange(repeats):
         x = np.random.random(n)
-        w = op(x)
-        r = op(w)
+        w = op * x
+        r = op * w
         s = np.dot(w, w)
         t = np.dot(x, r)
         z = abs(s - t)
