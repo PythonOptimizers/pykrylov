@@ -2,7 +2,7 @@
 __docformat__ = 'restructuredtext'
 
 import numpy as np
-from math import sqrt
+
 
 from pykrylov.generic import KrylovMethod
 
@@ -14,9 +14,9 @@ class BiCGSTAB( KrylovMethod ):
 
         A x = b
 
-    where the matrix A is unsymmetric and nonsingular.
+    where the operator A is unsymmetric and nonsingular.
 
-    Bi-CGSTAB requires 2 matrix-vector products, 6 dot products and 6 daxpys
+    Bi-CGSTAB requires 2 operator-vector products, 6 dot products and 6 daxpys
     per iteration.
 
     In addition, if a preconditioner is supplied, it needs to solve 2
@@ -33,8 +33,8 @@ class BiCGSTAB( KrylovMethod ):
                    Computing **13** (2), pp. 631--644, 1992.
     """
 
-    def __init__(self, matvec, **kwargs):
-        KrylovMethod.__init__(self, matvec, **kwargs)
+    def __init__(self, op, **kwargs):
+        KrylovMethod.__init__(self, op, **kwargs)
 
         self.name = 'Bi-Conjugate Gradient Stabilized'
         self.acronym = 'Bi-CGSTAB'
@@ -53,19 +53,20 @@ class BiCGSTAB( KrylovMethod ):
         nMatvec = 0
 
         # Initial guess is zero unless one is supplied
+        result_type = np.result_type(self.op.dtype, rhs.dtype)
         guess_supplied = 'guess' in kwargs.keys()
-        x = kwargs.get('guess', np.zeros(n))
+        x = kwargs.get('guess', np.zeros(n)).astype(result_type)
         matvec_max = kwargs.get('matvec_max', 2*n)
 
         # Initial residual is the fixed vector
         r0 = rhs
         if guess_supplied:
-            r0 = rhs - self.matvec(x)
+            r0 = rhs - self.op * x
             nMatvec += 1
 
         rho = alpha = omega = 1.0
         rho_next = np.dot(r0,r0)
-        residNorm = self.residNorm0 = sqrt(rho_next)
+        residNorm = self.residNorm0 = np.abs(np.sqrt(rho_next))
         threshold = max( self.abstol, self.reltol * self.residNorm0 )
 
         finished = (residNorm <= threshold or nMatvec >= matvec_max)
@@ -78,8 +79,8 @@ class BiCGSTAB( KrylovMethod ):
 
         if not finished:
             r = r0.copy()
-            p = np.zeros(n)
-            v = np.zeros(n)
+            p = np.zeros(n, dtype=result_type)
+            v = np.zeros(n, dtype=result_type)
 
         while not finished:
 
@@ -93,17 +94,17 @@ class BiCGSTAB( KrylovMethod ):
 
             # Compute preconditioned search direction
             if self.precon is not None:
-                q = self.precon(p)
+                q = self.precon * p
             else:
                 q = p
 
-            v = self.matvec(q) ; nMatvec += 1
+            v = self.op * q ; nMatvec += 1
 
             alpha = rho/np.dot(r0, v)
             s = r - alpha * v
 
             # Check for CGS termination
-            residNorm = sqrt(np.dot(s,s))
+            residNorm = np.linalg.norm(s)
 
             self.logger.info('%6d  %8.2e' % (nMatvec, residNorm))
 
@@ -117,11 +118,11 @@ class BiCGSTAB( KrylovMethod ):
                 continue
 
             if self.precon is not None:
-                z = self.precon(s)
+                z = self.precon * s
             else:
                 z = s
 
-            t = self.matvec(z) ; nMatvec += 1
+            t = self.op * z ; nMatvec += 1
             omega = np.dot(t,s)/np.dot(t,t)
             rho_next = -omega * np.dot(r0,t)
 
@@ -135,7 +136,7 @@ class BiCGSTAB( KrylovMethod ):
             x += z
             x += alpha * q
 
-            residNorm = sqrt(np.dot(r,r))
+            residNorm = np.linalg.norm(r)
 
             self.logger.info('%6d  %8.2e' % (nMatvec, residNorm))
 

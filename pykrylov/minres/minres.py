@@ -16,8 +16,7 @@ available at http://www.stanford.edu/group/SOL/software/minres.htm.
 from pykrylov.generic import KrylovMethod
 import numpy as np
 from numpy.linalg import norm
-from numpy import zeros, dot, empty
-from math import sqrt
+from numpy import zeros, dot, empty, sqrt
 from pykrylov.tools.utils import check_symmetric
 
 
@@ -28,7 +27,7 @@ class Minres(KrylovMethod):
     This class implements the Minres iterative solver of Paige and Saunders.
     Minres solves the system of linear equations Ax = b
     or the least squares problem           min ||Ax - b||_2^2,
-    where A is a symmetric matrix (possibly indefinite or singular)
+    where A is a symmetric operator (possibly indefinite or singular)
     and b is a given vector.
 
     ``A`` should be given as a ``LinearOperator`` or as an explicit matrix such
@@ -79,7 +78,7 @@ class Minres(KrylovMethod):
 #    17 Oct 2003: f77 version converted to MATLAB.
 #    11 Jan 2008: MATLAB version converted to Python.
 
-    def __init__(self, matvec, **kwargs):
+    def __init__(self, op, **kwargs):
 
         #  Initialize
         self.acronym = 'MINRES'
@@ -98,7 +97,7 @@ class Minres(KrylovMethod):
                     ' Mname  does not define a pos-def preconditioner   ',     #  9
                     'The truncated direct error is small enough, given etol']  # 10
 
-        KrylovMethod.__init__(self, matvec, **kwargs)
+        KrylovMethod.__init__(self, op, **kwargs)
 
         self.name = 'Minimum Residual'
         self.acronym = 'MINRES'
@@ -115,7 +114,7 @@ class Minres(KrylovMethod):
 
     def solve(self, b, **kwargs):
 
-        A = self.matvec
+        A = self.op
         n = b.shape[0]
 
         # Read keyword arguments
@@ -133,7 +132,8 @@ class Minres(KrylovMethod):
         self.dir_errors_window = []  # Direct error estimates.
         self.iterates = []
 
-        x = zeros(n)
+        result_type = np.result_type(A.dtype, b.dtype)
+        x = zeros(n, dtype=result_type)
         xNrgNorm2 = 0.0          # Squared energy norm of final solution.
         dErr = zeros(window)     # Truncated direct error terms.
         trncDirErr = 0           # Truncated direct error.
@@ -160,7 +160,7 @@ class Minres(KrylovMethod):
         #------------------------------------------------------------------
         r1 = b
         if precon is not None:
-            y = precon(b)
+            y = precon * b
         else:
             y = b.copy()
         beta1 = dot(b,y)
@@ -184,14 +184,14 @@ class Minres(KrylovMethod):
 
         # See if A is symmetric.
         if check:
-            if not check_symmetric(A):  #, x=y):
+            if not check_symmetric(A):
                 istop = 7
                 done  = True
                 self.show = True
 
         # See if preconditioner is symmetric.
         if check and (precon is not None):
-            if not check_symmetric(precon):  #, y):
+            if not check_symmetric(precon):
                 istop = 8
                 show = True
                 done = True
@@ -203,8 +203,8 @@ class Minres(KrylovMethod):
         qrnorm = beta1;   phibar = beta1;   rhs1   = beta1;   Arnorm = 0.0
         rhs2   = 0.0;     tnorm2 = 0.0;     ynorm2 = 0.0
         cs     = -1.0;    sn     = 0.0
-        w  = zeros(n)
-        w2 = zeros(n)
+        w  = zeros(n, dtype=result_type)
+        w2 = zeros(n, dtype=result_type)
         r2 = r1.copy()
 
         if show:
@@ -236,31 +236,31 @@ class Minres(KrylovMethod):
                 s = 1.0/beta                # Normalize previous vector (in y).
                 v = s*y                     # v = vk if P = I
 
-                y = A * v   #self.applyA(v,y)
-                y -= shift*v  #y = (- shift)*v + y
+                y = A * v
+                y -= shift*v
 
                 if itn >= 2:
                     y = y - (beta/oldb)*r1
 
-                alfa = dot(v,y)           # alphak
+                alfa = dot(v,y)
                 y    = (- alfa/beta)*r2 + y
                 r1   = r2.copy()
                 r2   = y.copy()
-                if precon is not None: y = precon(r2)
-                oldb   = beta               # oldb = betak
-                beta   = dot(r2,y)          # beta = betak+1^2
+                if precon is not None: y = precon * r2
+                oldb   = beta
+                beta   = dot(r2,y)
                 if beta < 0:
                     istop = 6
                     break
                 beta   = sqrt(beta)
                 tnorm2 = tnorm2 + alfa**2 + oldb**2 + beta**2
 
-                if itn==1:                  # Initialize a few things.
+                if itn==1:                    # Initialize a few things.
                     if beta/beta1 <= 10*eps:  # beta2 = 0 or ~ 0.
                         istop = -1            # Terminate later.
 
                     # tnorm2 = alfa**2  ??
-                    gmax   = abs(alfa)      # alpha1
+                    gmax   = abs(alfa)        # alpha1
                     gmin   = gmax             # alpha1
 
                 # Apply previous rotation Qk-1 to get
