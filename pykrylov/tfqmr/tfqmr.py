@@ -1,7 +1,6 @@
 __docformat__ = 'restructuredtext'
 
 import numpy as np
-from math import sqrt
 
 from pykrylov.generic import KrylovMethod
 
@@ -13,10 +12,10 @@ class TFQMR( KrylovMethod ):
 
         `A x = b`
 
-    where the matrix `A` may be unsymmetric.
+    where the operator `A` may be unsymmetric.
 
-    TFQMR requires 2 matrix-vector products with `A`, 4 dot products and
-    10 daxpys per iteration. It does not require products with the transpose
+    TFQMR requires 2 operator-vector products with `A`, 4 dot products and
+    10 daxpys per iteration. It does not require products with the adjoint
     of `A`.
 
     If a preconditioner is supplied, TFQMR needs to solve 2 preconditioning
@@ -30,8 +29,8 @@ class TFQMR( KrylovMethod ):
                 Computing, **14** (2), pp. 470--482, 1993.
     """
 
-    def __init__(self, matvec, **kwargs):
-        KrylovMethod.__init__(self, matvec, **kwargs)
+    def __init__(self, op, **kwargs):
+        KrylovMethod.__init__(self, op, **kwargs)
 
         self.name = 'Transpose-Free Quasi-Minimum Residual'
         self.acronym = 'TFQMR'
@@ -50,16 +49,17 @@ class TFQMR( KrylovMethod ):
         nMatvec = 0
 
         # Initial guess is zero unless one is supplied
+        result_type = np.result_type(self.op.dtype, rhs.dtype)
         guess_supplied = 'guess' in kwargs.keys()
-        x = kwargs.get('guess', np.zeros(n))
+        x = kwargs.get('guess', np.zeros(n)).astype(result_type)
         matvec_max = kwargs.get('matvec_max', 2*n)
 
         r0 = rhs  # Fixed vector throughout
         if guess_supplied:
-            r0 = rhs - self.matvec(x)
+            r0 = rhs - self.op * x
 
         rho = np.dot(r0,r0)
-        residNorm = sqrt(rho)
+        residNorm = np.abs(np.sqrt(rho))
         self.residNorm0 = residNorm
         threshold = max( self.abstol, self.reltol * self.residNorm0 )
         self.logger.info('Initial residual = %8.2e' % self.residNorm0)
@@ -70,16 +70,16 @@ class TFQMR( KrylovMethod ):
         if not finished:
             y = r0.copy()   # Initial residual vector
             w = r0.copy()
-            d = np.zeros(n)
+            d = np.zeros(n, dtype=result_type)
             theta = 0.0
             eta = 0.0
             k = 0
             if self.precon is not None:
-                z = self.precon(y)
+                z = self.precon * y
             else:
                 z = y
 
-            u = self.matvec(z) ; nMatvec += 1
+            u = self.op * z ; nMatvec += 1
             v = u.copy()
 
         while not finished:
@@ -93,12 +93,12 @@ class TFQMR( KrylovMethod ):
             d *= theta * theta * eta / alpha
             d += z
             theta = np.linalg.norm(w)/residNorm
-            c = 1.0/sqrt(1 + theta*theta)
+            c = 1.0 / np.sqrt(1 + theta*theta)
             residNorm *= theta * c
             eta = c * c * alpha
             x += eta * d
             m = 2.0 * k - 1.0
-            if residNorm * sqrt(m+1) < threshold or nMatvec >= matvec_max:
+            if residNorm * np.sqrt(m+1) < threshold or nMatvec >= matvec_max:
                 finished = True
                 continue
 
@@ -107,20 +107,20 @@ class TFQMR( KrylovMethod ):
             y -= alpha * v
 
             if self.precon is not None:
-                z = self.precon(y)
+                z = self.precon * y
             else:
                 z = y
 
-            u = self.matvec(z) ; nMatvec += 1
+            u = self.op * z ; nMatvec += 1
             w -= alpha * u
             d *= theta * theta * eta / alpha
             d += z
             theta = np.linalg.norm(w)/residNorm
-            c = 1.0/sqrt(1 + theta*theta)
+            c = 1.0 / np.sqrt(1 + theta*theta)
             residNorm *= theta * c
             eta = c * c * alpha
             x += eta * d
-            if residNorm * sqrt(m+1) < threshold or nMatvec >= matvec_max:
+            if residNorm * np.sqrt(m+1) < threshold or nMatvec >= matvec_max:
                 finished = True
                 continue
 
@@ -140,11 +140,11 @@ class TFQMR( KrylovMethod ):
 
             # Update u
             if self.precon is not None:
-                z = self.precon(y)
+                z = self.precon * y
             else:
                 z = y
 
-            u = self.matvec(z) ; nMatvec += 1
+            u = self.op * z ; nMatvec += 1
 
             # Complete update of v
             v += u
@@ -153,7 +153,7 @@ class TFQMR( KrylovMethod ):
             self.logger.info('%5d  %8.2e' % (nMatvec, residNorm))
 
 
-        self.converged = residNorm * sqrt(m+1) < threshold
+        self.converged = residNorm * np.sqrt(m+1) < threshold
         self.nMatvec = nMatvec
         self.bestSolution = self.x = x
         self.residNorm = residNorm
