@@ -2,7 +2,6 @@
 __docformat__ = 'restructuredtext'
 
 import numpy as np
-from math import sqrt
 
 from pykrylov.generic import KrylovMethod
 
@@ -14,10 +13,10 @@ class CGS( KrylovMethod ):
 
         A x = b
 
-    where the matrix A may be unsymmetric.
+    where the operator A may be unsymmetric.
 
-    CGS requires 2 matrix-vector products with A, 3 dot products and 7 daxpys
-    per iteration. It does not require products with the transpose of A.
+    CGS requires 2 operator-vector products with A, 3 dot products and 7 daxpys
+    per iteration. It does not require products with the adjoint of A.
 
     If a preconditioner is supplied, CGS needs to solve two preconditioning
     systems per iteration. The original description appears in [Sonn89]_, which
@@ -31,8 +30,8 @@ class CGS( KrylovMethod ):
                 Computing **10** (1), pp. 36--52, 1989.
     """
 
-    def __init__(self, matvec, **kwargs):
-        KrylovMethod.__init__(self, matvec, **kwargs)
+    def __init__(self, op, **kwargs):
+        KrylovMethod.__init__(self, op, **kwargs)
 
         self.name = 'Conjugate Gradient Squared'
         self.acronym = 'CGS'
@@ -51,16 +50,17 @@ class CGS( KrylovMethod ):
         nMatvec = 0
 
         # Initial guess is zero unless one is supplied
+        result_type = np.result_type(self.op.dtype, rhs.dtype)
         guess_supplied = 'guess' in kwargs.keys()
-        x = kwargs.get('guess', np.zeros(n))
+        x = kwargs.get('guess', np.zeros(n)).astype(result_type)
         matvec_max = kwargs.get('matvec_max', 2*n)
 
         r0 = rhs  # Fixed vector throughout
         if guess_supplied:
-            r0 = rhs - self.matvec(x)
+            r0 = rhs - self.op * x
 
         rho = np.dot(r0,r0)
-        residNorm = sqrt(rho)
+        residNorm = np.abs(np.sqrt(rho))
         self.residNorm0 = residNorm
         threshold = max( self.abstol, self.reltol * self.residNorm0 )
         self.logger.info('Initial residual = %8.2e\n' % self.residNorm0)
@@ -76,27 +76,27 @@ class CGS( KrylovMethod ):
         while not finished:
 
             if self.precon is not None:
-                y = self.precon(p)
+                y = self.precon * p
             else:
                 y = p
 
-            v = self.matvec(y) ; nMatvec += 1
+            v = self.op * y ; nMatvec += 1
             sigma = np.dot(r0,v)
             alpha = rho/sigma
             q = u - alpha * v
 
             if self.precon is not None:
-                z = self.precon(u+q)
+                z = self.precon * (u+q)
             else:
                 z = u+q
 
             # Update solution and residual
             x += alpha * z
-            Az = self.matvec(z) ; nMatvec += 1
+            Az = self.op * z ; nMatvec += 1
             r -= alpha * Az
 
             # Update residual norm and check convergence
-            residNorm = sqrt(np.dot(r,r))
+            residNorm = np.linalg.norm(r)
 
             if residNorm <= threshold or nMatvec >= matvec_max:
                 finished = True
