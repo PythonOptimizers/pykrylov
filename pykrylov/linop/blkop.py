@@ -1,6 +1,7 @@
 from pykrylov.linop import BaseLinearOperator, LinearOperator
 from pykrylov.linop import ShapeError, null_log
 import numpy as np
+import itertools
 
 
 class BlockLinearOperator(LinearOperator):
@@ -90,14 +91,15 @@ class BlockLinearOperator(LinearOperator):
 
             return y
 
-        blk_dtypes = [blk.dtype for blk in blocks]
+        flat_blocks = list(itertools.chain(*blocks))
+        blk_dtypes = [blk.dtype for blk in flat_blocks]
         op_dtype = np.result_type(*blk_dtypes)
 
         super(BlockLinearOperator, self).__init__(nargin, nargout,
                                 symmetric=symmetric,
                                 matvec=lambda x: blk_matvec(x, self._blocks),
                                 matvec_transp=lambda x: blk_matvec(x, blocksT),
-                                dtype=op_type)
+                                dtype=op_dtype)
 
         self.T._blocks = blocksT
 

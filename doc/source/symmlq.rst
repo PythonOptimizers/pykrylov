@@ -10,7 +10,7 @@ The :mod:`symmlq` Module
 
 .. automodule:: symmlq
 
-.. autoclass:: SYMMLQ
+.. autoclass:: Symmlq
    :show-inheritance:
    :members:
    :inherited-members:
