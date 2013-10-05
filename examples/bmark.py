@@ -3,12 +3,13 @@
 # The test matrix may be obtained from http://math.nist.gov/MatrixMarket
 
 import numpy as np
+from pykrylov.linop import PysparseLinearOperator
 from pykrylov.cgs import CGS
 from pykrylov.tfqmr import TFQMR
 from pykrylov.bicgstab import BiCGSTAB
 from pysparse import spmatrix
 from pysparse.sparse.pysparseMatrix import PysparseMatrix as sp
-from math import sqrt
+import sys
 
 class DiagonalPrec:
 
@@ -30,9 +31,9 @@ if __name__ == '__main__':
     print hdr
     print '-' * len(hdr)
 
-    #AA = spmatrix.ll_mat_from_mtx('mcca.mtx')
-    AA = spmatrix.ll_mat_from_mtx('jpwh_991.mtx')
+    AA = spmatrix.ll_mat_from_mtx(sys.argv[1])
     A = sp(matrix=AA)
+    op = PysparseLinearOperator(A)
 
     # Create diagonal preconditioner
     dp = DiagonalPrec(A)
@@ -42,13 +43,13 @@ if __name__ == '__main__':
     rhs = A*e
 
     for KSolver in [CGS, TFQMR, BiCGSTAB]:
-        ks = KSolver( lambda v: A*v,
+        ks = KSolver( op,
                       #precon = dp,
                       #verbose=False,
                       reltol = 1.0e-8
                       )
-        ks.solve(rhs, guess = 1+np.arange(n, dtype=np.float), matvec_max=2*n)
+        ks.solve(rhs, guess = 1+np.arange(n, dtype=op.dtype), matvec_max=2*n)
 
-        err = np.linalg.norm(ks.bestSolution-e)/sqrt(n)
+        err = np.linalg.norm(ks.bestSolution-e)/np.sqrt(n)
         print fmt % (ks.acronym, ks.nMatvec, ks.residNorm0, ks.residNorm, err)
 
