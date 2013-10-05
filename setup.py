@@ -16,7 +16,7 @@ CLASSIFIERS = """\
 Development Status :: 4 - Beta
 Intended Audience :: Science/Research
 Intended Audience :: Developers
-License :: LGPL
+License :: OSI Approved
 Programming Language :: Python
 Topic :: Software Development
 Topic :: Scientific/Engineering
