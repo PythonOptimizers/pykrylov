@@ -25,10 +25,7 @@ def configuration(parent_package='',top_path=None):
                        quiet=True)
 
     config.add_subpackage('pykrylov')
-
-    # Set config.version
     config.get_version(os.path.join('pykrylov','version.py'))
-
     return config
 
 def setup_package():
@@ -44,14 +41,14 @@ def setup_package():
 
     try:
         setup(
-            name = 'pykrylov',
-            maintainer = "PyKrylov Developers",
-            maintainer_email = "dominique.orban@gmail.com",
-            description = "Krylov Methods in Pure Python",
-            long_description = "\n".join(DOCLINES[2:]),
-            url = "http://github.com/dpo/pykrylov/tree/master",
-            download_url = "http://github.com/dpo/pykrylov/tree/master",
-            license = 'LGPL',
+            name='pykrylov',
+            maintainer="PyKrylov Developers",
+            maintainer_email="dominique.orban@gmail.com",
+            description="Krylov Methods in Pure Python",
+            long_description="\n".join(DOCLINES[2:]),
+            url="http://github.com/dpo/pykrylov/tree/master",
+            download_url="http://github.com/dpo/pykrylov/tarball/0.1.1",
+            license='LGPL',
             classifiers=[
                 "Development Status :: 4 - Beta",
                 "Intended Audience :: Science/Research",
@@ -65,8 +62,8 @@ def setup_package():
                 "Operating System :: Unix",
                 "Operating System :: MacOS",
             ],
-            platforms = ["Windows", "Linux", "Solaris", "Mac OS-X", "Unix"],
-            configuration=configuration )
+            platforms=["Windows", "Linux", "Solaris", "Mac OS-X", "Unix"],
+            configuration=configuration)
     finally:
         del sys.path[0]
         os.chdir(old_path)
