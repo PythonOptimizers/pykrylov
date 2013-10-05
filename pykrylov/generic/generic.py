@@ -74,7 +74,6 @@ class KrylovMethod(object):
         self.abstol = kwargs.get('abstol', 1.0e-8)
         self.reltol = kwargs.get('reltol', 1.0e-6)
         self.precon = kwargs.get('precon', None)
-        #self.matvec_max = kwargs.get('matvec_max', None)
         self.logger = kwargs.get('logger', null_log)
 
         self.residNorm  = None
