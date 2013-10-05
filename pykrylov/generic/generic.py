@@ -16,9 +16,11 @@ class KrylovMethod(object):
 
     :parameters:
 
-        :matvec:  an operator describing the coefficient matrix `A`.
-                  `y = matvec(x)` must return the matrix-vector product
-                  `y = Ax` for any given vector `x`.
+            :op:  an operator describing the coefficient matrix `A`.
+                  `y = op * x` must return the operator-vector product
+                  `y = Ax` for any given vector `x`. If required by
+                  the method, `y = op.T * x` must return the operator-vector
+                  product with the adjoint operator.
 
     :keywords:
 
@@ -60,13 +62,13 @@ class KrylovMethod(object):
                    Philadelphia, 1993.
     """
 
-    def __init__(self, matvec, **kwargs):
+    def __init__(self, op, **kwargs):
 
         self.prefix = 'Generic: '
         self.name   = 'Generic Krylov Method (must be subclassed)'
 
         # Mandatory arguments
-        self.matvec = matvec
+        self.op = op
 
         # Optional keyword arguments
         self.abstol = kwargs.get('abstol', 1.0e-8)
