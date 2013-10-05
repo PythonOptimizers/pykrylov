@@ -61,7 +61,7 @@ def setup_package():
             name = 'pykrylov',
             maintainer = "PyKrylov Developers",
             maintainer_email = "dominique.orban@gmail.com",
-            description = DOCLINES[0],
+            description = "Krylov Methods in Pure Python",
             long_description = "\n".join(DOCLINES[2:]),
             url = "http://github.com/dpo/pykrylov/tree/master",
             download_url = "http://github.com/dpo/pykrylov/tree/master",
