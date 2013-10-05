@@ -10,7 +10,6 @@ available at http://www.stanford.edu/group/SOL/software/symmlq.htm.
 __docformat__ = 'restructuredtext'
 
 import numpy as np
-from math import sqrt
 
 from pykrylov.generic import KrylovMethod
 from pykrylov.tools   import machine_epsilon
@@ -18,11 +17,11 @@ from pykrylov.tools   import machine_epsilon
 class Symmlq(KrylovMethod) :
     """
     SYMMLQ is designed to solve the system of linear equations A x = b
-    where A is an n by n symmetric matrix and b is a given vector.
+    where A is an n by n symmetric operator and b is a given vector.
 
     If shift is nonzero, SYMMLQ solves (A - shift I) x = b.
 
-    SYMMLQ requires one matrix-vector products with `A`, 2 dot products and
+    SYMMLQ requires one operator-vector products with `A`, 2 dot products and
     4 daxpys per iteration.
 
     If a preconditioner is supplied, SYMMLQ needs to solve one preconditioning
@@ -33,13 +32,13 @@ class Symmlq(KrylovMethod) :
 
     :parameters:
 
-        :matvec:  an operator describing the coefficient matrix `A`.
-                  `y = matvec(x)` must return the matrix-vector product
+            :op:  an operator describing the coefficient operator `A`.
+                  `y = op * x` must return the operator-vector product
                   `y = Ax` for any given vector `x`.
 
     :keywords:
 
-        :precon:  optional preconditioner. If not `None`, `y = precon(x)`
+        :precon:  optional preconditioner. If not `None`, `y = precon * x`
                   returns the vector `y` solution of the linear system
                   `M y = x`. The preconditioner must be symmetric and
                   positive definite.
@@ -54,8 +53,8 @@ class Symmlq(KrylovMethod) :
                   Analysis, **12** (4), pp. 617--629, 1975.
     """
 
-    def __init__(self, matvec, **kwargs):
-        KrylovMethod.__init__(self, matvec, **kwargs)
+    def __init__(self, op, **kwargs):
+        KrylovMethod.__init__(self, op, **kwargs)
 
         self.name = 'Symmetric Indefinite Lanczos with Orthogonal Factorization'
         self.acronym = 'SYMMLQ'
@@ -129,7 +128,7 @@ class Symmlq(KrylovMethod) :
 
         r1 = rhs.copy()
         if self.precon is not None:
-            y = self.precon(r1)
+            y = self.precon * r1
         else:
             y = rhs.copy()
         b1 = y[0] ; beta1 = np.dot(r1, y)
@@ -137,10 +136,10 @@ class Symmlq(KrylovMethod) :
         # Ensure preconditioner is symmetric.
 
         if check and self.precon is not None:
-            r2 = self.precon(y)
+            r2 = self.precon * y
             s = np.dot(y,y)
             t = np.dot(r1,r2)
-            z = abs(s-t)
+            z = np.abs(s-t)
             epsa = (s+eps) * eps**(1.0/3)
             if z > epsa:
                 istop = 7
@@ -156,13 +155,13 @@ class Symmlq(KrylovMethod) :
             done = True
 
         if beta1 > 0:
-            beta1 = sqrt(beta1)
+            beta1 = np.sqrt(beta1)
             s     = 1.0 / beta1
             v     = s * y
 
             y = self.matvec(v) ; nMatvec += 1
             if check:
-                r2 = self.matvec(y)  # Do not count this matrix-vector product
+                r2 = self.op * y  # Do not count this matrix-vector product
                 s = np.dot(y,y)
                 t = np.dot(v,r2)
                 z = abs(s-t)
@@ -186,7 +185,7 @@ class Symmlq(KrylovMethod) :
             y -= (z / s) * v
             r2 = y.copy()
 
-            if self.precon is not None: y = self.precon(r2)
+            if self.precon is not None: y = self.precon * r2
             oldb   = beta1
             beta   = np.dot(r2, y)
             if beta < 0:
@@ -195,13 +194,13 @@ class Symmlq(KrylovMethod) :
 
             #  Cause termination (later) if beta is essentially zero.
 
-            beta = sqrt(beta)
+            beta = np.sqrt(beta)
             if beta <= eps:
                 istop = -1
 
             #  See if the local reorthogonalization achieved anything.
 
-            denom = sqrt(s) * np.linalg.norm(r2) + eps
+            denom = np.sqrt(s) * np.linalg.norm(r2) + eps
             s = z / denom
             t = np.dot(v, r2)
             t = t / denom
@@ -213,7 +212,7 @@ class Symmlq(KrylovMethod) :
             #  Initialize other quantities.
             cgnorm = beta1 ; rhs2   = 0 ; tnorm  = alfa**2 + beta**2
             gbar   = alfa  ; bstep  = 0 ; ynorm2 = 0
-            dbar   = beta  ; snprod = 1 ; gmax   = abs(alfa) + eps
+            dbar   = beta  ; snprod = 1 ; gmax   = np.abs(alfa) + eps
             rhs1   = beta1 ; x1cg   = 0 ; gmin   = gmax
             qrnorm = beta1
 
@@ -233,10 +232,10 @@ class Symmlq(KrylovMethod) :
         # Estimate various norms and test for convergence.
 
         if not done:
-            while nMatvec < matvec_max: #itn < maxit:
+            while nMatvec < matvec_max:
                 itn    = itn  +  1
-                anorm  = sqrt(tnorm)
-                ynorm  = sqrt(ynorm2)
+                anorm  = np.sqrt(tnorm)
+                ynorm  = np.sqrt(ynorm2)
                 epsa   = anorm * eps
                 epsx   = anorm * ynorm * eps
                 epsr   = anorm * ynorm * rtol
@@ -244,9 +243,9 @@ class Symmlq(KrylovMethod) :
 
                 if diag == 0: diag = epsa
 
-                lqnorm = sqrt(rhs1**2 + rhs2**2)
+                lqnorm = np.sqrt(rhs1**2 + rhs2**2)
                 qrnorm = snprod * beta1
-                cgnorm = qrnorm * beta / abs(diag)
+                cgnorm = qrnorm * beta / np.abs(diag)
 
                 # Estimate  Cond(A).
                 # In this version we look at the diagonals of  L  in the
@@ -257,7 +256,7 @@ class Symmlq(KrylovMethod) :
                 if lqnorm < cgnorm:
                     acond  = gmax / gmin
                 else:
-                    denom  = min(gmin, abs(diag))
+                    denom  = min(gmin, np.abs(diag))
                     acond  = gmax / denom
 
                 zbar = rhs1 / diag
@@ -300,14 +299,14 @@ class Symmlq(KrylovMethod) :
 
                 s = 1/beta
                 v = s * y
-                y = self.matvec(v) ; nMatvec += 1
+                y = self.op * v ; nMatvec += 1
                 if shift is not None: y -= shift * v
                 y -= (beta / oldb) * r1
                 alfa = np.dot(v, y)
                 y -= (alfa / beta) * r2
                 r1 = r2.copy()
                 r2 = y.copy()
-                if self.precon is not None: y = self.precon(r2)
+                if self.precon is not None: y = self.precon * r2
                 oldb = beta
                 beta = np.dot(r2, y)
 
@@ -315,12 +314,12 @@ class Symmlq(KrylovMethod) :
                     istop = 6
                     break
 
-                beta  = sqrt(beta);
-                tnorm = tnorm  +  alfa**2  +  oldb**2  +  beta**2;
+                beta  = np.sqrt(beta)
+                tnorm = tnorm  +  alfa**2  +  oldb**2  +  beta**2
 
                 # Compute the next plane rotation for Q.
 
-                gamma  = sqrt(gbar**2 + oldb**2)
+                gamma  = np.sqrt(gbar**2 + oldb**2)
                 cs     = gbar / gamma
                 sn     = oldb / gamma
                 delta  = cs * dbar  +  sn * alfa
@@ -362,21 +361,21 @@ class Symmlq(KrylovMethod) :
         if cgnorm < lqnorm:
             zbar   = rhs1 / diag
             bstep  = snprod * zbar + bstep
-            ynorm  = sqrt(ynorm2 + zbar**2)
+            ynorm  = np.sqrt(ynorm2 + zbar**2)
             x     += zbar * w
 
         # Add the step along b.
 
         bstep  = bstep / beta1
         if self.precon is not None:
-            y = self.precon(rhs)
+            y = self.precon * rhs
         else:
             y = rhs.copy()
         x += bstep * y
 
         # Compute the final residual,  r1 = b - (A - shift*I)*x.
 
-        y = self.matvec(x) ; nMatvec += 1
+        y = self.op * x ; nMatvec += 1
         if shift is not None: y -= shift * x
         r1 = rhs - y
         rnorm = np.linalg.norm(r1)
