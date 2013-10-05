@@ -14,7 +14,7 @@ class CG( KrylovMethod ):
 
         A x = b
 
-    where the matrix A is square, symmetric and positive definite. This is
+    where the operator A is square, symmetric and positive definite. This is
     equivalent to solving the unconstrained convex quadratic optimization
     problem
 
@@ -22,7 +22,7 @@ class CG( KrylovMethod ):
 
     in the variable x.
 
-    CG performs 1 matrix-vector product, 2 dot products and 3 daxpys per
+    CG performs 1 operator-vector product, 2 dot products and 3 daxpys per
     iteration.
 
     If a preconditioner is supplied, it needs to solve one preconditioning
@@ -30,8 +30,8 @@ class CG( KrylovMethod ):
     and [Templates]_.
     """
 
-    def __init__(self, matvec, **kwargs):
-        KrylovMethod.__init__(self, matvec, **kwargs)
+    def __init__(self, op, **kwargs):
+        KrylovMethod.__init__(self, op, **kwargs)
 
         self.name = 'Conjugate Gradient'
         self.acronym = 'CG'
@@ -51,9 +51,9 @@ class CG( KrylovMethod ):
         :Keywords:
 
            :guess:           Initial guess (Numpy array). Default: 0.
-           :matvec_max:      Max. number of matrix-vector produts. Default: 2n.
-           :check_symmetric: Ensure matrix is symmetric. Default: False.
-           :check_curvature: Ensure matrix is positive definite. Default: True.
+           :matvec_max:      Max. number of operator-vector produts. Default: 2n.
+           :check_symmetric: Ensure operator is symmetric. Default: False.
+           :check_curvature: Ensure operator is positive definite. Default: True.
            :store_resids:    Store full residual vector history. Default: False.
            :store_iterates:  Store full iterate history. Default: False.
 
@@ -67,13 +67,14 @@ class CG( KrylovMethod ):
         store_iterates = kwargs.get('store_iterates', False)
 
         if check_sym:
-            if not check_symmetric(self.matvec):
-                self.logger.error('Coefficient matrix is not symmetric')
+            if not check_symmetric(self.op):
+                self.logger.error('Coefficient operator is not symmetric')
                 return
 
         # Initial guess
+        result_type = np.result_type(self.op.dtype, rhs.dtype)
         guess_supplied = 'guess' in kwargs.keys()
-        x = kwargs.get('guess', np.zeros(n))
+        x = kwargs.get('guess', np.zeros(n)).astype(result_type)
 
         if store_iterates:
             self.iterates.append(x.copy())
@@ -83,12 +84,12 @@ class CG( KrylovMethod ):
         # Initial residual vector
         r = -rhs
         if guess_supplied:
-            r += self.matvec(x)
+            r += self.op * x
             nMatvec += 1
 
         # Initial preconditioned residual vector
         if self.precon is not None:
-            y = self.precon(r)
+            y = self.precon * r
         else:
             y = r
 
@@ -111,13 +112,13 @@ class CG( KrylovMethod ):
 
         while residNorm > threshold and nMatvec < matvec_max and definite:
 
-            Ap  = self.matvec(p)
+            Ap  = self.op * p
             nMatvec += 1
             pAp = np.dot(p, Ap)
 
             if check_curvature:
                 if pAp <= 0:
-                    self.logger.error('Coefficient matrix is not positive definite')
+                    self.logger.error('Coefficient operator is not positive definite')
                     self.infiniteDescent = p
                     definite = False
                     continue
@@ -134,7 +135,7 @@ class CG( KrylovMethod ):
 
             # Compute preconditioned residual
             if self.precon is not None:
-                y = self.precon(r)
+                y = self.precon * r
             else:
                 y = r
 
