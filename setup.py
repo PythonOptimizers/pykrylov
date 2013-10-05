@@ -12,20 +12,6 @@ DOCLINES = __doc__.split("\n")
 import os
 import sys
 
-CLASSIFIERS = """\
-Development Status :: 4 - Beta
-Intended Audience :: Science/Research
-Intended Audience :: Developers
-License :: OSI Approved
-Programming Language :: Python
-Topic :: Software Development
-Topic :: Scientific/Engineering
-Operating System :: Microsoft :: Windows
-Operating System :: POSIX
-Operating System :: Unix
-Operating System :: MacOS
-"""
-
 # BEFORE importing distutils, remove MANIFEST. distutils doesn't properly
 # update it when the contents of directories change.
 if os.path.exists('MANIFEST'): os.remove('MANIFEST')
@@ -66,7 +52,19 @@ def setup_package():
             url = "http://github.com/dpo/pykrylov/tree/master",
             download_url = "http://github.com/dpo/pykrylov/tree/master",
             license = 'LGPL',
-            classifiers=filter(None, CLASSIFIERS.split('\n')),
+            classifiers=[
+                "Development Status :: 4 - Beta",
+                "Intended Audience :: Science/Research",
+                "Intended Audience :: Developers",
+                "License :: OSI Approved",
+                "Programming Language :: Python",
+                "Topic :: Software Development",
+                "Topic :: Scientific/Engineering",
+                "Operating System :: Microsoft :: Windows",
+                "Operating System :: POSIX",
+                "Operating System :: Unix",
+                "Operating System :: MacOS",
+            ],
             platforms = ["Windows", "Linux", "Solaris", "Mac OS-X", "Unix"],
             configuration=configuration )
     finally:
