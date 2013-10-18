@@ -139,6 +139,14 @@ class LinearOperator(BaseLinearOperator):
         "The transpose operator."
         return self.__T
 
+    def to_array(self):
+        n,m = self.shape
+        H = np.empty((n,m))
+        for j in xrange(m):
+            ej = np.zeros(m) ; ej[j] = 1.0
+            H[:,j] = self * ej
+        return H
+
     def __mul_scalar(self, x):
         "Product between a linear operator and a scalar."
         def matvec(y):
