@@ -32,7 +32,7 @@ class BlockLinearOperator(LinearOperator):
 
             self._blocks = blocks[:]
             for i in range(1, nrow):
-                for j in range(i):
+                for j in range(i-1,-1,-1):
                     self._blocks[i].insert(0, self._blocks[j][i].T)
 
         else:
@@ -261,12 +261,18 @@ if __name__ == '__main__':
                        matvec_transp=lambda v: np.concatenate((v, np.zeros(2))))
     E = LinearOperator(nargin=4, nargout=4,
                        matvec=lambda v: -v, symmetric=True)
+    E = LinearOperator(nargin=4, nargout=4,
+                       matvec=lambda v: -v, symmetric=True)
+    F = LinearOperator(nargin=2, nargout=2,
+                       matvec=lambda v: v, symmetric=True)
+
 
     print A.shape, A.T.shape
     print B.shape, B.T.shape
     print C.shape, C.T.shape
     print D.shape, D.T.shape
     print E.shape, E.T.shape
+    print F.shape, F.T.shape
 
     # Build [A  B].
     K1 = BlockLinearOperator([[A, B]], logger=log)
@@ -298,3 +304,14 @@ if __name__ == '__main__':
     print 'K4*e = ', K4y
     K4Ty = K4.T * y
     print 'K4.T*e = ', K4Ty
+
+    # Build [A  B  C']
+    #       [B' E  D']
+    #       [C  D  F ]
+    K5 = BlockLinearOperator([[A, B, C.T], [E, D.T], [F]], symmetric=True, logger=log)
+    y = np.ones(K5.shape[0])
+    K5y = K5 * y
+    print 'K5 = \n', K5.to_array()
+    print 'K5*e = ', K5y
+    K5Ty = K5.T * y
+    print 'K5.T*e = ', K5Ty
