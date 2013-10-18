@@ -48,7 +48,7 @@ def setup_package():
             long_description="\n".join(DOCLINES[2:]),
             url="http://github.com/dpo/pykrylov/tree/master",
             download_url="http://github.com/dpo/pykrylov/tarball/0.1.1",
-            license='LGPL',
+            license='LICENSE',
             classifiers=[
                 "Development Status :: 4 - Beta",
                 "Intended Audience :: Science/Research",
@@ -63,6 +63,9 @@ def setup_package():
                 "Operating System :: MacOS",
             ],
             platforms=["Windows", "Linux", "Solaris", "Mac OS-X", "Unix"],
+            install_requires=[
+                "Numpy >= 1.7.1",
+            ],
             configuration=configuration)
     finally:
         del sys.path[0]
