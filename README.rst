@@ -69,14 +69,11 @@ The html documentation is in doc/build/html and the PDF manual is in
 doc/build/latex. Obviously, if you don't have a working LaTeX distribution such
 as TeXLive, only issue the first two commands.
 
+Contributing
+============
 
-Bugs, Comments, Feature Requests
-================================
-
-Please send bugs, comments, feature requests, test cases, chocolate and coffee
-via Github Issues or the `Lighthouse PyKrylov page
-<http://pykrylov.lighthouseapp.com/projects/21441-pykrylov>`_.
-
+See the wiki page on `contributing
+<https://github.com/dpo/pykrylov/wiki/How-to-Contribute>`_.
 
 References
 ==========
