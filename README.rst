@@ -89,3 +89,9 @@ References
   J. Dongarra, V. Eijkhout, R. Pozo, C. Romine and
   H. Van der Vorst, *Templates for the Solution of Linear Systems:
   Building Blocks for Iterative Methods*, SIAM, Philadelphia, 1993.
+
+
+.. image:: https://d2weczhvl823v0.cloudfront.net/dpo/pykrylov/trend.png
+   :alt: Bitdeli badge
+   :target: https://bitdeli.com/free
+
