@@ -198,6 +198,8 @@ class LinearOperator(BaseLinearOperator):
         raise ValueError('Cannot multiply')
 
     def __rmul__(self, x):
+        if np.isscalar(x):
+            return self.__mul_scalar(x)
         if isinstance(x, BaseLinearOperator):
             return x.__mul_linop(self)
         raise ValueError('Cannot multiply')
