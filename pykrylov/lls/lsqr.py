@@ -463,12 +463,12 @@ if __name__ == '__main__':
     #  [ 2  1 ] [x] = [2]
     #  [ 1 -3 ] [y]   [0]
 
-    from pykrylov.linop import SimpleLinearOperator
+    from pykrylov.linop import LinearOperator
     import numpy as np
 
-    A = SimpleLinearOperator(1, 1, matvec=lambda u: u/2, symmetric=True)
-    C = SimpleLinearOperator(1, 1, matvec=lambda v: v/3, symmetric=True)
-    B = SimpleLinearOperator(1, 1, matvec=lambda x: x.copy(), symmetric=True)
+    A = LinearOperator(1, 1, matvec=lambda u: u/2, symmetric=True)
+    C = LinearOperator(1, 1, matvec=lambda v: v/3, symmetric=True)
+    B = LinearOperator(1, 1, matvec=lambda x: x.copy(), symmetric=True)
     rhs = np.array([2.0])
     lsqr = LSQRFramework(B)
     lsqr.solve(rhs, M=A, N=C, show=True)
