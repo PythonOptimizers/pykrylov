@@ -42,7 +42,7 @@ class CRAIGFramework(KrylovMethod):
     Equivalently, solve the symmetric and quasi-definite linear system
 
     [ M   A ] [ r ]   [ b ]
-    [ A' -C ] [ x ] = [ 0 ]
+    [ A' -N ] [ x ] = [ 0 ]
 
     where M := inv(D).
 
@@ -531,12 +531,12 @@ if __name__ == '__main__':
     # Solution: x = 6/7 = 0.857142857143
     #           y = 2/7 = 0.285714285714
 
-    from pykrylov.linop import SimpleLinearOperator
+    from pykrylov.linop import LinearOperator
     import numpy as np
 
-    A = SimpleLinearOperator(1, 1, matvec=lambda u: u/2, symmetric=True)
-    C = SimpleLinearOperator(1, 1, matvec=lambda v: v/3, symmetric=True)
-    B = SimpleLinearOperator(1, 1, matvec=lambda x: x.copy(), symmetric=True)
+    A = LinearOperator(1, 1, matvec=lambda u: u/2, symmetric=True)
+    C = LinearOperator(1, 1, matvec=lambda v: v/3, symmetric=True)
+    B = LinearOperator(1, 1, matvec=lambda x: x.copy(), symmetric=True)
     rhs = np.array([2.0])
     craig = CRAIGFramework(B)
     craig.solve(rhs, M=A, N=C, show=True)
