@@ -109,13 +109,12 @@ class BlockLinearOperator(LinearOperator):
         return self._blocks
 
     def update_block(self, row, column, new_block):
-	if new_block.shape != self._blocks[row][column].shape:
-	    raise ShapeError('The new block should have the same shape as the block you are trying to replace')
-
-	self._blocks[row][column] = new_block
-	if self.symmetric:
-	    self._blocks[column][row] = new_block.T
-	return	
+        if new_block.shape != self._blocks[row][column].shape:
+            raise ShapeError('The new block should have the same shape as the block you are trying to replace')
+        self._blocks[row][column] = new_block
+        if self.symmetric:
+            self._blocks[column][row] = new_block.T
+        return
 
     def __getitem__(self, indices):
         blks = np.matrix(self._blocks, dtype=object)[indices]
