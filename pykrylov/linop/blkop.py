@@ -116,6 +116,14 @@ class BlockLinearOperator(LinearOperator):
             self._blocks[column][row] = new_block.T
         return
 
+
+    def __setitem__(self, idx, new_block):
+        row = idx[0]; column = idx[1]        
+        self._blocks[row][column] = new_block
+        if self.symmetric:
+            self._blocks[column][row] = new_block.T
+        return
+
     def __getitem__(self, indices):
         blks = np.matrix(self._blocks, dtype=object)[indices]
         # If indexing narrowed it down to a single block, return it.
