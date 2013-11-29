@@ -149,13 +149,17 @@ class LinearOperator(BaseLinearOperator):
 
     def __mul_scalar(self, x):
         "Product between a linear operator and a scalar."
+        result_type = np.result_type(self.dtype, type(x))
+
+        if x == 0:
+            return ZeroOperator(self.nargin, self.nargout,
+                                dtype=result_type)
+
         def matvec(y):
             return x * (self(y))
 
         def matvec_transp(y):
             return x * (self.T(y))
-
-        result_type = np.result_type(self.dtype, type(x))
 
         return LinearOperator(self.nargin, self.nargout,
                               symmetric=self.symmetric,
