@@ -1,5 +1,6 @@
 from pykrylov.linop import BaseLinearOperator, LinearOperator
 from pykrylov.linop import ShapeError, null_log
+from copy import copy
 import numpy as np
 import itertools
 
@@ -30,13 +31,13 @@ class BlockLinearOperator(LinearOperator):
                 if not block_row[0].symmetric:
                     raise ValueError('Blocks on diagonal must be symmetric.')
 
-            self._blocks = blocks[:]
+            self._blocks = copy(blocks)
             for i in range(1, nrow):
                 for j in range(i-1,-1,-1):
                     self._blocks[i].insert(0, self._blocks[j][i].T)
 
         else:
-            self._blocks = blocks
+            self._blocks = copy(blocks)
 
         log = kwargs.get('logger', null_log)
         log.debug('Building new BlockLinearOperator')
@@ -57,7 +58,7 @@ class BlockLinearOperator(LinearOperator):
         nargout = sum([out[0] for out in nargouts])
 
         # Create blocks of transpose operator.
-        blocksT = map(lambda *row: [blk.T for blk in row], *self._blocks)
+        self._blocksT = map(lambda *row: [blk.T for blk in row], *self._blocks)
 
         def blk_matvec(x, blks):
             nargins = [[blk.shape[-1] for blk in blkrow] for blkrow in blks]
@@ -98,10 +99,10 @@ class BlockLinearOperator(LinearOperator):
         super(BlockLinearOperator, self).__init__(nargin, nargout,
                                 symmetric=symmetric,
                                 matvec=lambda x: blk_matvec(x, self._blocks),
-                                matvec_transp=lambda x: blk_matvec(x, blocksT),
+                                matvec_transp=lambda x: blk_matvec(x, self._blocksT),
                                 dtype=op_dtype)
 
-        self.T._blocks = blocksT
+        self.T._blocks = self._blocksT
 
     @property
     def blocks(self):
@@ -109,12 +110,24 @@ class BlockLinearOperator(LinearOperator):
         return self._blocks
 
     def __getitem__(self, indices):
-        blks = np.matrix(self._blocks, dtype=object)[indices]
+        blks_mat = np.matrix(self._blocks, dtype=object)
+        blks = blks_mat.__getitem__(indices)
         # If indexing narrowed it down to a single block, return it.
         if isinstance(blks, BaseLinearOperator):
             return blks
-        # Otherwise, we have a matrix of blocks.
+        # Otherwise, we have a block operator.
         return BlockLinearOperator(blks.tolist(), symmetric=False)
+
+    def __setitem__(self, indices, val):
+        blks_mat = np.matrix(self._blocks, dtype=object)
+        blks_mat.__setitem__(indices, val)
+        self._blocks = blks_mat.tolist()
+        if self.symmetric:
+            for i in range(1, len(self._blocks)):
+                for j in range(i):
+                    self._blocks[i][j] = self._blocks[j][i].T
+        else:
+            self._blocksT = map(lambda *row: [blk.T for blk in row], *self._blocks)
 
     def __contains__(self, op):
         return op in self._blocks
@@ -150,7 +163,7 @@ class BlockDiagonalLinearOperator(LinearOperator):
         nargout = sum(nargouts)
 
         # Create blocks of transpose operator.
-        blocksT = [blk.T for blk in blocks]
+        self._blocksT = [blk.T for blk in blocks]
 
         def blk_matvec(x, blks):
             nx = len(x)
@@ -190,10 +203,10 @@ class BlockDiagonalLinearOperator(LinearOperator):
         super(BlockDiagonalLinearOperator, self).__init__(nargin, nargout,
                                 symmetric=symmetric,
                                 matvec=lambda x: blk_matvec(x, self._blocks),
-                                matvec_transp=lambda x: blk_matvec(x, blocksT),
+                                matvec_transp=lambda x: blk_matvec(x, self._blocksT),
                                 dtype=op_dtype)
 
-        self.T._blocks = blocksT
+        self.T._blocks = self._blocksT
 
     @property
     def blocks(self):
@@ -201,7 +214,7 @@ class BlockDiagonalLinearOperator(LinearOperator):
         return self._blocks
 
     def __getitem__(self, idx):
-        blks = self._blocks[idx]
+        blks = self._blocks.__getitem__(idx)
         if isinstance(idx, slice):
             return BlockDiagonalLinearOperator(blks, symmetric=self.symmetric)
         return blks
@@ -214,7 +227,9 @@ class BlockDiagonalLinearOperator(LinearOperator):
                         msg  = 'Block operators can only contain'
                         msg += ' linear operators'
                         raise ValueError(msg)
-        self._blocks[idx] = ops
+        self._blocks.__setitem__(idx, ops)
+        if not self.symmetric:
+            self._blocksT = [blk.T for blk in self._blocks]
 
 
 class BlockPreconditioner(BlockLinearOperator):
