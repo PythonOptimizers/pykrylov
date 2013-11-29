@@ -365,7 +365,8 @@ def ReducedLinearOperator(op, row_indices, col_indices):
         return y[col_indices]
 
     return LinearOperator(nargin, nargout, matvec=matvec, symmetric=False,
-                          matvec_transp=matvec_transp)
+                          matvec_transp=matvec_transp,
+                          dtype=op.dtype)
 
 
 def SymmetricallyReducedLinearOperator(op, indices):
@@ -388,7 +389,8 @@ def SymmetricallyReducedLinearOperator(op, indices):
         return y[indices]
 
     return LinearOperator(nargin, nargin, matvec=matvec,
-                          symmetric=op.symmetric, matvec_transp=matvec_transp)
+                          symmetric=op.symmetric, matvec_transp=matvec_transp,
+                          dtype=op.dtype)
 
 
 class ShapeError(Exception):
