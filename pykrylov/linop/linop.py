@@ -250,7 +250,12 @@ class LinearOperator(BaseLinearOperator):
     def __div__(self, other):
         if not np.isscalar(other):
             raise ValueError('Cannot divide')
-        return self * (1./other)
+        return self * (1 / other)
+
+    def __truediv__(self, other):
+        if not np.isscalar(other):
+            raise ValueError('Cannot divide')
+        return self * (1 ./ other)
 
     def __pow__(self, other):
         if not isinstance(other, int):
