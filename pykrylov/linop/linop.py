@@ -307,6 +307,8 @@ class DiagonalOperator(LinearOperator):
         if 'dtype' in kwargs:
             kwargs.pop('dtype')
 
+        diag = np.asarray(diag)
+
         super(DiagonalOperator, self).__init__(diag.shape[0], diag.shape[0],
                                                symmetric=True,
                                                matvec=lambda x: diag*x,
