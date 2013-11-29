@@ -149,13 +149,17 @@ class LinearOperator(BaseLinearOperator):
 
     def __mul_scalar(self, x):
         "Product between a linear operator and a scalar."
+        result_type = np.result_type(self.dtype, type(x))
+
+        if x == 0:
+            return ZeroOperator(self.nargin, self.nargout,
+                                dtype=result_type)
+
         def matvec(y):
             return x * (self(y))
 
         def matvec_transp(y):
             return x * (self.T(y))
-
-        result_type = np.result_type(self.dtype, type(x))
 
         return LinearOperator(self.nargin, self.nargout,
                               symmetric=self.symmetric,
@@ -250,7 +254,12 @@ class LinearOperator(BaseLinearOperator):
     def __div__(self, other):
         if not np.isscalar(other):
             raise ValueError('Cannot divide')
-        return self * (1./other)
+        return self * (1 / other)
+
+    def __truediv__(self, other):
+        if not np.isscalar(other):
+            raise ValueError('Cannot divide')
+        return self * (1 ./ other)
 
     def __pow__(self, other):
         if not isinstance(other, int):
@@ -297,6 +306,8 @@ class DiagonalOperator(LinearOperator):
             kwargs.pop('matvec')
         if 'dtype' in kwargs:
             kwargs.pop('dtype')
+
+        diag = np.asarray(diag)
 
         super(DiagonalOperator, self).__init__(diag.shape[0], diag.shape[0],
                                                symmetric=True,
@@ -356,7 +367,8 @@ def ReducedLinearOperator(op, row_indices, col_indices):
         return y[col_indices]
 
     return LinearOperator(nargin, nargout, matvec=matvec, symmetric=False,
-                          matvec_transp=matvec_transp)
+                          matvec_transp=matvec_transp,
+                          dtype=op.dtype)
 
 
 def SymmetricallyReducedLinearOperator(op, indices):
@@ -379,7 +391,8 @@ def SymmetricallyReducedLinearOperator(op, indices):
         return y[indices]
 
     return LinearOperator(nargin, nargin, matvec=matvec,
-                          symmetric=op.symmetric, matvec_transp=matvec_transp)
+                          symmetric=op.symmetric, matvec_transp=matvec_transp,
+                          dtype=op.dtype)
 
 
 class ShapeError(Exception):
@@ -434,7 +447,7 @@ def linop_from_ndarray(A):
     return LinearOperator(A.shape[1], A.shape[0],
                           lambda v: np.dot(A, v),
                           matvec_transp=lambda u: np.dot(A.T, u),
-                          symmetric=False)
+                          symmetric=False, dtype=A.dtype)
 
 
 if __name__ == '__main__':
