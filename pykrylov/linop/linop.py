@@ -447,7 +447,7 @@ def linop_from_ndarray(A):
     return LinearOperator(A.shape[1], A.shape[0],
                           lambda v: np.dot(A, v),
                           matvec_transp=lambda u: np.dot(A.T, u),
-                          symmetric=False)
+                          symmetric=False, dtype=A.dtype)
 
 
 if __name__ == '__main__':
