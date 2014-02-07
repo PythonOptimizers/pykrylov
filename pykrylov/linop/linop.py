@@ -1,3 +1,4 @@
+from pykrylov.tools.types import *
 import numpy as np
 import logging
 
@@ -23,10 +24,11 @@ class BaseLinearOperator(object):
     argument.
     """
 
-    def __init__(self, nargin, nargout, symmetric=False, **kwargs):
+    def __init__(self, nargin, nargout, symmetric=False, hermitian=False, **kwargs):
         self.__nargin = nargin
         self.__nargout = nargout
         self.__symmetric = symmetric
+        self.__hermitian = hermitian
         self.__shape = (nargout, nargin)
         self.__dtype = kwargs.get('dtype', np.float)
         self._nMatvec = 0
@@ -48,8 +50,13 @@ class BaseLinearOperator(object):
 
     @property
     def symmetric(self):
-        "Indicates whether the operator is symmetric or not."
+        "Indicates whether the operator is symmetric."
         return self.__symmetric
+
+    @property
+    def hermitian(self):
+        "Indicates whether the operator is Hermitian."
+        return self.__hermitian
 
     @property
     def shape(self):
@@ -62,9 +69,7 @@ class BaseLinearOperator(object):
 
     @dtype.setter
     def dtype(self, value):
-        allowed_types = np.core.numerictypes.typeDict.keys() + \
-                            [np.float, np.complex, np.int, np.uint]
-        if value in allows_types:
+        if value in allowed_types:
             self.__dtype = value
         else:
             raise TypeError('Not a Numpy type')
@@ -90,6 +95,8 @@ class BaseLinearOperator(object):
             s = 'Symmetric'
         else:
             s = 'Unsymmetric'
+        if self.hermitian:
+            s += ' Hermitian'
         s += ' <' + self.__class__.__name__ + '>'
         s += ' of type %s' % self.dtype
         s += ' with shape (%d,%d)' % (self.nargout, self.nargin)
@@ -103,49 +110,139 @@ class LinearOperator(BaseLinearOperator):
     ignored. All other keyword arguments are passed directly to the superclass.
     """
 
-    def __init__(self, nargin, nargout, matvec, matvec_transp=None, **kwargs):
+    def __init__(self, nargin, nargout, matvec, matvec_transp=None, matvec_adj=None, **kwargs):
 
         super(LinearOperator, self).__init__(nargin, nargout, **kwargs)
-        self.__transposed = kwargs.get('transposed', False)
-        transpose_of = kwargs.get('transpose_of', None)
+
+        self.__transposed = kwargs.pop('transposed') if 'transposed' in kwargs else False
+        transpose_of = kwargs.pop('transpose_of') if 'transpose_of' in kwargs else None
+        self.__T = None
+
+        self.__adjoint = kwargs.pop('adjoint') if 'adjoint' in kwargs else False
+        adjoint_of = kwargs.pop('adjoint_of') if 'adjoint_of' in kwargs else None
+        self.__H = None
 
         self.__matvec = matvec
 
+        self.__set_transpose(matvec, transpose_of, matvec_transp, **kwargs)
+        self.__set_adjoint(matvec, adjoint_of, matvec_adj, **kwargs)
+
+        # For non-complex operators, transpose = adjoint.
+        if (self.dtype in integer_types + real_types):
+            if self.__T is not None and self.__H is None:
+                self.__H = self.__T
+            elif self.__T is None and self.__H is not None:
+                self.__T = self.__H
+
+    def __set_transpose(self, matvec, transpose_of=None, matvec_transp=None, **kwargs):
+
         if self.symmetric:
             self.__T = self
+            return
+
+        if transpose_of is None:
+            if matvec_transp is not None:
+                # Create 'pointer' to transpose operator.
+                self.__T = LinearOperator(self.nargout, self.nargin,
+                                          matvec_transp,
+                                          matvec_transp=matvec,
+                                          transposed=not self.__transposed,
+                                          transpose_of=self,
+                                          **kwargs)
         else:
-            if transpose_of is None:
-                if matvec_transp is not None:
-                    # Create 'pointer' to transpose operator.
-                    self.__T = LinearOperator(nargout, nargin,
-                                              matvec_transp,
-                                              matvec_transp=matvec,
-                                              transposed=not self.__transposed,
-                                              transpose_of=self,
-                                              **kwargs)
-                else:
-                    self.__T = None
+            # Use operator supplied as transpose operator.
+            if isinstance(transpose_of, BaseLinearOperator):
+                self.__T = transpose_of
             else:
-                # Use operator supplied as transpose operator.
-                if isinstance(transpose_of, BaseLinearOperator):
-                    self.__T = transpose_of
-                else:
-                    msg = 'kwarg transposed_of must be a BaseLinearOperator.'
-                    msg += ' Got ' + str(transpose_of.__class__)
-                    raise ValueError(msg)
+                msg = 'kwarg transpose_of must be a BaseLinearOperator.'
+                msg += ' Got ' + str(transpose_of.__class__)
+                raise ValueError(msg)
+
+    def __set_adjoint(self, matvec, adjoint_of=None, matvec_adj=None, **kwargs):
+
+        if self.hermitian:
+            self.__H = self
+            return
+
+        if adjoint_of is None:
+            if matvec_adj is not None:
+                # Create 'pointer' to adjoint operator.
+                self.__H = LinearOperator(self.nargout, self.nargin,
+                                          matvec_adj,
+                                          matvec_adj=matvec,
+                                          adjoint=not self.__adjoint,
+                                          adjoint_of=self,
+                                          **kwargs)
+        else:
+            # Use operator supplied as adjoint operator.
+            if isinstance(adjoint_of, BaseLinearOperator):
+                self.__H = adjoint_of
+            else:
+                msg = 'kwarg adjoint_of must be a BaseLinearOperator.'
+                msg += ' Got ' + str(adjoint_of.__class__)
+                raise ValueError(msg)
 
     @property
     def T(self):
         "The transpose operator."
         return self.__T
 
+    @property
+    def H(self):
+        "The adjoint operator."
+        return self.__H
+
+    def conjugate(self):
+        "Return the complex conjugate operator."
+        if not self.dtype in complex_types:
+            return self
+
+        # conj(A) * x = conj(A * conj(x))
+        def matvec(x):
+            if x.dtype not in complex_types:
+                return (self * x).conjugate()
+            return (self * x.conjugate()).conjugate()
+
+        # conj(A).T * x = A.H * x = conj(A.T * conj(x))
+        # conj(A).H * x = A.T * x = conj(A.H * conj(x))
+        if self.H is not None:
+            matvec_transp = self.H.__matvec
+
+            def matvec_adj(x):
+                if x.dtype not in complex_types:
+                    return (self.H * x).conjugate()
+                return (self.H * x.conjugate()).conjugate()
+
+        elif self.T is not None:
+            matvec_adj = self.T.__matvec
+
+            def matvec_transp(x):
+                if x.dtype not in complex_types:
+                    return (self.T * x).conjugate()
+                return (self.T * x.conjugate()).conjugate()
+
+        return LinearOperator(self.nargin, self.nargout,
+                              matvec=matvec,
+                              matvec_transp=matvec_transp,
+                              matvec_adj=matvec_adj,
+                              transpose_of=self.H,
+                              adjoint_of=self.T,
+                              dtype=self.dtype)
+
     def to_array(self):
-        n,m = self.shape
-        H = np.empty((n,m))
+        "Convert operator to a dense matrix."
+        n, m = self.shape
+        H = np.empty((n, m), dtype=self.dtype)
+        e = np.zeros(m, dtype=self.dtype)
         for j in xrange(m):
-            ej = np.zeros(m) ; ej[j] = 1.0
-            H[:,j] = self * ej
+            e[j] = 1
+            H[:, j] = self * e
+            e[j] = 0
         return H
+
+    def full(self):
+        "Convert operator to a dense matrix."
+        return self.to_array()
 
     def __mul_scalar(self, x):
         "Product between a linear operator and a scalar."
@@ -223,10 +320,10 @@ class LinearOperator(BaseLinearOperator):
         result_type = np.result_type(self.dtype, other.dtype)
 
         return LinearOperator(self.nargin, self.nargout,
-                                  symmetric=self.symmetric and other.symmetric,
-                                  matvec=matvec,
-                                  matvec_transp=matvec_transp,
-                                  dtype=result_type)
+                              symmetric=self.symmetric and other.symmetric,
+                              matvec=matvec,
+                              matvec_transp=matvec_transp,
+                              dtype=result_type)
 
     def __neg__(self):
         return self * (-1)
@@ -246,10 +343,10 @@ class LinearOperator(BaseLinearOperator):
         result_type = np.result_type(self.dtype, other.dtype)
 
         return LinearOperator(self.nargin, self.nargout,
-                                  symmetric=self.symmetric and other.symmetric,
-                                  matvec=matvec,
-                                  matvec_transp=matvec_transp,
-                                  dtype=result_type)
+                              symmetric=self.symmetric and other.symmetric,
+                              matvec=matvec,
+                              matvec_transp=matvec_transp,
+                              dtype=result_type)
 
     def __div__(self, other):
         if not np.isscalar(other):
@@ -259,7 +356,7 @@ class LinearOperator(BaseLinearOperator):
     def __truediv__(self, other):
         if not np.isscalar(other):
             raise ValueError('Cannot divide')
-        return self * (1 ./ other)
+        return self * (1. / other)
 
     def __pow__(self, other):
         if not isinstance(other, int):
@@ -442,12 +539,27 @@ def PysparseLinearOperator(A):
                           matvec_transp=matvec_transp, symmetric=symmetric)
 
 
-def linop_from_ndarray(A):
+def linop_from_ndarray(A, symmetric=False, hermitian=False):
     "Return a linear operator from a Numpy `ndarray`."
+
+    if A.dtype in complex_types:
+        return LinearOperator(A.shape[1], A.shape[0],
+                              lambda v: np.dot(A, v),
+                              matvec_transp=lambda u: np.dot(A.T, u),
+                              matvec_adj=lambda w: np.dot(A.conjugate().T, w),
+                              symmetric=symmetric,
+                              hermitian=hermitian,
+                              dtype=A.dtype)
+
+    if symmetric ^ hermitian:
+        raise ValueError('For non-complex operators, transpose = adjoint.')
+
     return LinearOperator(A.shape[1], A.shape[0],
                           lambda v: np.dot(A, v),
                           matvec_transp=lambda u: np.dot(A.T, u),
-                          symmetric=False, dtype=A.dtype)
+                          symmetric=symmetric or hermitian,
+                          hermitian=symmetric or hermitian,
+                          dtype=A.dtype)
 
 
 if __name__ == '__main__':
