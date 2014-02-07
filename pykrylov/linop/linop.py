@@ -258,10 +258,15 @@ class LinearOperator(BaseLinearOperator):
         def matvec_transp(y):
             return x * (self.T(y))
 
+        def matvec_adj(y):
+            return x.conjugate() * (self.H(y))
+
         return LinearOperator(self.nargin, self.nargout,
                               symmetric=self.symmetric,
+                              hermitian=(x.dtype not in complex_types),
                               matvec=matvec,
                               matvec_transp=matvec_transp,
+                              matvec_adj=matvec_adj,
                               dtype=result_type)
 
     def __mul_linop(self, op):
@@ -275,12 +280,17 @@ class LinearOperator(BaseLinearOperator):
         def matvec_transp(x):
             return op.T(self.T(x))
 
+        def matvec_adj(x):
+            return op.H(self.H(x))
+
         result_type = np.result_type(self.dtype, op.dtype)
 
         return LinearOperator(op.nargin, self.nargout,
                               symmetric=False,   # Generally.
+                              hermitian=False,   # Generally.
                               matvec=matvec,
                               matvec_transp=matvec_transp,
+                              matvec_adj=matvec_adj,
                               dtype=result_type)
 
     def __mul_vector(self, x):
@@ -317,12 +327,17 @@ class LinearOperator(BaseLinearOperator):
         def matvec_transp(x):
             return self.T(x) + other.T(x)
 
+        def matvec_adj(x):
+            return self.H(x) + other.H(x)
+
         result_type = np.result_type(self.dtype, other.dtype)
 
         return LinearOperator(self.nargin, self.nargout,
                               symmetric=self.symmetric and other.symmetric,
+                              hermitian=self.hermitian and other.hermitian,
                               matvec=matvec,
                               matvec_transp=matvec_transp,
+                              matvec_adj=matvec_adj,
                               dtype=result_type)
 
     def __neg__(self):
@@ -340,12 +355,17 @@ class LinearOperator(BaseLinearOperator):
         def matvec_transp(x):
             return self.T(x) - other.T(x)
 
+        def matvec_adj(x):
+            return self.H(x) - other.H(x)
+
         result_type = np.result_type(self.dtype, other.dtype)
 
         return LinearOperator(self.nargin, self.nargout,
                               symmetric=self.symmetric and other.symmetric,
+                              hermitian=self.hermitian and other.hermitian,
                               matvec=matvec,
                               matvec_transp=matvec_transp,
+                              matvec_adj=matvec_adj,
                               dtype=result_type)
 
     def __div__(self, other):
@@ -385,6 +405,7 @@ class IdentityOperator(LinearOperator):
 
         super(IdentityOperator, self).__init__(nargin, nargin,
                                                symmetric=True,
+                                               hermitian=True,
                                                matvec=lambda x: x,
                                                **kwargs)
 
@@ -399,8 +420,12 @@ class DiagonalOperator(LinearOperator):
     def __init__(self, diag, **kwargs):
         if 'symmetric' in kwargs:
             kwargs.pop('symmetric')
+        if 'hermitian' in kwargs:
+            kwargs.pop('hermitian')
         if 'matvec' in kwargs:
             kwargs.pop('matvec')
+        if 'matvec_adj' in kwargs:
+            kwargs.pop('matvec_adj')
         if 'dtype' in kwargs:
             kwargs.pop('dtype')
 
@@ -408,7 +433,9 @@ class DiagonalOperator(LinearOperator):
 
         super(DiagonalOperator, self).__init__(diag.shape[0], diag.shape[0],
                                                symmetric=True,
+                                               hermitian=(diag.dtype not in complex_types),
                                                matvec=lambda x: diag*x,
+                                               matvec_adj=lambda x: diag.conjugate()*x,
                                                dtype=diag.dtype,
                                                **kwargs)
 
@@ -429,18 +456,22 @@ class ZeroOperator(LinearOperator):
                 msg = 'Input has shape ' + str(x.shape)
                 msg += ' instead of (%d,)' % self.nargin
                 raise ValueError(msg)
-            return np.zeros(nargout)
+            result_type = np.result_type(self.dtype, x.dtype)
+            return np.zeros(nargout, dtype=result_type)
 
         def matvec_transp(x):
             if x.shape != (nargout,):
                 msg = 'Input has shape ' + str(x.shape)
                 msg += ' instead of (%d,)' % self.nargout
                 raise ValueError(msg)
-            return np.zeros(nargin)
+            result_type = np.result_type(self.dtype, x.dtype)
+            return np.zeros(nargin, dtype=result_type)
 
         super(ZeroOperator, self).__init__(nargin, nargout,
+                                           symmetric=(nargin == nargout),
                                            matvec=matvec,
                                            matvec_transp=matvec_transp,
+                                           matvec_adj=matvec_transp,
                                            **kwargs)
 
 
@@ -454,17 +485,26 @@ def ReducedLinearOperator(op, row_indices, col_indices):
     m, n = op.shape    # Shape of non-reduced operator.
 
     def matvec(x):
-        z = np.zeros(n) ; z[col_indices] = x[:]
+        z = np.zeros(n, dtype=x.dtype) ; z[col_indices] = x[:]
         y = op * z
         return y[row_indices]
 
     def matvec_transp(x):
-        z = np.zeros(m) ; z[row_indices] = x[:]
+        z = np.zeros(m, dtype=x.dtype) ; z[row_indices] = x[:]
         y = op.T * z
         return y[col_indices]
 
-    return LinearOperator(nargin, nargout, matvec=matvec, symmetric=False,
+    def matvec_adj(x):
+        z = np.zeros(m, dtype=x.dtype) ; z[row_indices] = x[:]
+        y = op.H * z
+        return y[col_indices]
+
+    return LinearOperator(nargin, nargout,
+                          symmetric=False,
+                          hermitian=False,
+                          matvec=matvec,
                           matvec_transp=matvec_transp,
+                          matvec_adj=matvec_adj,
                           dtype=op.dtype)
 
 
@@ -478,17 +518,26 @@ def SymmetricallyReducedLinearOperator(op, indices):
     m, n = op.shape    # Shape of non-reduced operator.
 
     def matvec(x):
-        z = np.zeros(n) ; z[indices] = x[:]
+        z = np.zeros(n, dtype=x.dtype) ; z[indices] = x[:]
         y = op * z
         return y[indices]
 
     def matvec_transp(x):
-        z = np.zeros(m) ; z[indices] = x[:]
-        y = op * z
+        z = np.zeros(m, dtype=x.dtype) ; z[indices] = x[:]
+        y = op.T * z
         return y[indices]
 
-    return LinearOperator(nargin, nargin, matvec=matvec,
-                          symmetric=op.symmetric, matvec_transp=matvec_transp,
+    def matvec_adj(x):
+        z = np.zeros(m, dtype=x.dtype) ; z[indices] = x[:]
+        y = op.H * z
+        return y[indices]
+
+    return LinearOperator(nargin, nargin,
+                          symmetric=op.symmetric,
+                          hermitian=op.hermitian,
+                          matvec=matvec,
+                          matvec_transp=matvec_transp,
+                          matvec_adj=matvec_adj,
                           dtype=op.dtype)
 
 
