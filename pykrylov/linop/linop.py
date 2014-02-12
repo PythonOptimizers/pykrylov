@@ -619,8 +619,10 @@ def PysparseLinearOperator(A):
                           matvec_transp=matvec_transp, symmetric=symmetric)
 
 
-def linop_from_ndarray(A, symmetric=False, hermitian=False):
+def linop_from_ndarray(A, symmetric=False, **kwargs):
     "Return a linear operator from a Numpy `ndarray`."
+
+    hermitian = kwargs.get('hermitian', symmetric)
 
     if A.dtype in complex_types:
         return LinearOperator(A.shape[1], A.shape[0],
