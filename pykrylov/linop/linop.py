@@ -472,6 +472,7 @@ class DiagonalOperator(LinearOperator):
         diag = np.asarray(diag)
         if diag.ndim != 1:
             raise ValueError('Input must be 1-d array')
+        self.__diag = diag
 
         super(DiagonalOperator, self).__init__(diag.shape[0], diag.shape[0],
                                                symmetric=True,
@@ -480,6 +481,14 @@ class DiagonalOperator(LinearOperator):
                                                matvec_adj=lambda x: diag.conjugate()*x,
                                                dtype=diag.dtype,
                                                **kwargs)
+
+    def __abs__(self):
+        return DiagonalOperator(np.abs(self.__diag))
+
+    def _sqrt(self):
+        if self.dtype not in complex_types and np.any(self.__diag < 0):
+            raise ValueError('Math domain error')
+        return DiagonalOperator(np.sqrt(self.__diag))
 
 
 class ZeroOperator(LinearOperator):
@@ -515,6 +524,12 @@ class ZeroOperator(LinearOperator):
                                            matvec_transp=matvec_transp,
                                            matvec_adj=matvec_transp,
                                            **kwargs)
+
+    def __abs__(self):
+        return self
+
+    def _sqrt(self):
+        return self
 
 
 def ReducedLinearOperator(op, row_indices, col_indices):
@@ -654,6 +669,10 @@ def linop_from_ndarray(A, symmetric=False, **kwargs):
                           hermitian=symmetric or hermitian,
                           dtype=A.dtype)
 
+
+def sqrt(op):
+    "Return the square root of a linear operator, if defined."
+    return op._sqrt()
 
 if __name__ == '__main__':
     from pykrylov.tools import check_symmetric
