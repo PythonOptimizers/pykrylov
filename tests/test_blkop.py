@@ -77,10 +77,11 @@ class TestBlockLinearOperator(TestCase):
                              [6, 5, 0, 0, 0],
                              [4, 3, 0, 1, 0],
                              [2, 1, 0, 0, 2]])
-        x = np.ones(M.shape[1])
-        assert_equal(M * x, np.dot(matrix_M, x))
-        x = np.ones(M.T.shape[1])
-        assert_equal(M.T * x, np.dot(matrix_M.T, x))
+        x = np.random.random(M.shape[1])
+        assert_(np.allclose(M * x, np.dot(matrix_M, x)))
+        x = np.random.random(M.T.shape[1])
+        assert_(np.allclose(M.T * x, np.dot(matrix_M.T, x)))
+        assert_(np.allclose(M.H * x, np.dot(matrix_M.T, x)))
 
         M = bo.BlockLinearOperator([[self.A, self.B], [self.C]], symmetric=True)
         matrix_M = np.array([[1, 0, 1, 2, 3],
@@ -88,20 +89,22 @@ class TestBlockLinearOperator(TestCase):
                              [1, 4, 0, 0, 0],
                              [2, 5, 0, 1, 0],
                              [3, 6, 0, 0, 2]])
-        x = np.ones(M.shape[1])
-        assert_equal(M * x, np.dot(matrix_M, x))
-        x = np.ones(M.T.shape[1])
-        assert_equal(M.T * x, np.dot(matrix_M.T, x))
+        x = np.random.random(M.shape[1])
+        assert_(np.allclose(M * x, np.dot(matrix_M, x)))
+        x = np.random.random(M.T.shape[1])
+        assert_(np.allclose(M.T * x, np.dot(matrix_M.T, x)))
+        assert_(np.allclose(M.H * x, np.dot(matrix_M.T, x)))
 
         M = bo.BlockLinearOperator([[self.A, self.B], [self.A, self.B]])
         matrix_M = np.array([[1, 0, 1, 2, 3],
                              [0, 1, 4, 5, 6],
                              [1, 0, 1, 2, 3],
                              [0, 1, 4, 5, 6]])
-        x = np.ones(M.shape[1])
-        assert_equal(M * x, np.dot(matrix_M, x))
-        x = np.ones(M.T.shape[1])
-        assert_equal(M.T * x, np.dot(matrix_M.T, x))
+        x = np.random.random(M.shape[1])
+        assert_(np.allclose(M * x, np.dot(matrix_M, x)))
+        x = np.random.random(M.T.shape[1])
+        assert_(np.allclose(M.T * x, np.dot(matrix_M.T, x)))
+        assert_(np.allclose(M.H * x, np.dot(matrix_M.T, x)))
 
     def test_dtypes(self):
         pass
