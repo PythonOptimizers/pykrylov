@@ -18,23 +18,28 @@ class BlockLinearOperator(LinearOperator):
     diagonal must be square and symmetric.
     """
 
-    def __init__(self, blocks, symmetric=False, **kwargs):
-        # If building a symmetric operator, fill in the blanks.
+    def __init__(self, blocks, symmetric=False, hermitian=False, **kwargs):
+        # If building a symmetric or hermitian operator, fill in the blanks.
         # They're just references to existing objects.
-        if symmetric:
+        if symmetric or hermitian:
             nrow = len(blocks)
             ncol = len(blocks[0])
             if nrow != ncol:
                 raise ShapeError('Inconsistent shape.')
 
             for block_row in blocks:
-                if not block_row[0].symmetric:
+                if symmetric and not block_row[0].symmetric:
                     raise ValueError('Blocks on diagonal must be symmetric.')
+                if hermitian and not block_row[0].hermitian:
+                    raise ValueError('Blocks on diagonal must be hermitian.')
 
             self._blocks = copy(blocks)
             for i in range(1, nrow):
-                for j in range(i-1,-1,-1):
-                    self._blocks[i].insert(0, self._blocks[j][i].T)
+                for j in range(i - 1, -1, -1):
+                    if symmetric:
+                        self._blocks[i].insert(0, self._blocks[j][i].T)
+                    else:
+                        self._blocks[i].insert(0, self._blocks[j][i].H)
 
         else:
             self._blocks = copy(blocks)
@@ -59,6 +64,7 @@ class BlockLinearOperator(LinearOperator):
 
         # Create blocks of transpose operator.
         self._blocksT = map(lambda *row: [blk.T for blk in row], *self._blocks)
+        self._blocksH = map(lambda *row: [blk.H for blk in row], *self._blocks)
 
         def blk_matvec(x, blks):
             nargins = [[blk.shape[-1] for blk in blkrow] for blkrow in blks]
@@ -96,13 +102,17 @@ class BlockLinearOperator(LinearOperator):
         blk_dtypes = [blk.dtype for blk in flat_blocks]
         op_dtype = np.result_type(*blk_dtypes)
 
-        super(BlockLinearOperator, self).__init__(nargin, nargout,
-                                symmetric=symmetric,
-                                matvec=lambda x: blk_matvec(x, self._blocks),
-                                matvec_transp=lambda x: blk_matvec(x, self._blocksT),
-                                dtype=op_dtype)
+        super(BlockLinearOperator, self).__init__(
+            nargin, nargout,
+            symmetric=symmetric,
+            hermitian=hermitian,
+            matvec=lambda x: blk_matvec(x, self._blocks),
+            matvec_transp=lambda x: blk_matvec(x, self._blocksT),
+            matvec_adj=lambda x: blk_matvec(x, self._blocksH),
+            dtype=op_dtype)
 
         self.T._blocks = self._blocksT
+        self.H._blocks = self._blocksH
 
     @property
     def blocks(self):
@@ -116,21 +126,25 @@ class BlockLinearOperator(LinearOperator):
         if isinstance(blks, BaseLinearOperator):
             return blks
         # Otherwise, we have a block operator.
-        return BlockLinearOperator(blks.tolist(), symmetric=False)
+        return BlockLinearOperator(blks.tolist(), symmetric=False, hermitian=False)
 
     def __setitem__(self, indices, val):
         blks_mat = np.matrix(self._blocks, dtype=object)
         blks_mat.__setitem__(indices, val)
         self._blocks = blks_mat.tolist()
-        if self.symmetric:
+        if self.symmetric or self.hermitian:
             for i in range(1, len(self._blocks)):
                 for j in range(i):
-                    self._blocks[i][j] = self._blocks[j][i].T
+                    if self.symmetric:
+                        self._blocks[i][j] = self._blocks[j][i].T
+                    else:
+                        self._blocks[i][j] = self._blocks[j][i].H
         else:
             self._blocksT = map(lambda *row: [blk.T for blk in row], *self._blocks)
+            self._blocksH = map(lambda *row: [blk.H for blk in row], *self._blocks)
 
     def __contains__(self, op):
-        return op in self._blocks
+        return op in list(itertools.chain(*self.blocks))
 
     def __iter__(self):
         for block in self._blocks:
@@ -145,8 +159,10 @@ class BlockDiagonalLinearOperator(LinearOperator):
 
     def __init__(self, blocks, **kwargs):
 
-        symmetric = reduce(lambda x,y: x and y,
+        symmetric = reduce(lambda x, y: x and y,
                            [blk.symmetric for blk in blocks])
+        hermitian = reduce(lambda x, y: x and y,
+                           [blk.hermitian for blk in blocks])
 
         self._blocks = blocks
 
@@ -162,8 +178,9 @@ class BlockDiagonalLinearOperator(LinearOperator):
         nargin = sum(nargins)
         nargout = sum(nargouts)
 
-        # Create blocks of transpose operator.
+        # Create blocks of transpose and adjoint operators.
         self._blocksT = [blk.T for blk in blocks]
+        self._blocksH = [blk.H for blk in blocks]
 
         def blk_matvec(x, blks):
             nx = len(x)
@@ -200,13 +217,17 @@ class BlockDiagonalLinearOperator(LinearOperator):
         blk_dtypes = [blk.dtype for blk in blocks]
         op_dtype = np.result_type(*blk_dtypes)
 
-        super(BlockDiagonalLinearOperator, self).__init__(nargin, nargout,
-                                symmetric=symmetric,
-                                matvec=lambda x: blk_matvec(x, self._blocks),
-                                matvec_transp=lambda x: blk_matvec(x, self._blocksT),
-                                dtype=op_dtype)
+        super(BlockDiagonalLinearOperator, self).__init__(
+            nargin, nargout,
+            symmetric=symmetric,
+            hermitian=hermitian,
+            matvec=lambda x: blk_matvec(x, self._blocks),
+            matvec_transp=lambda x: blk_matvec(x, self._blocksT),
+            matvec_adj=lambda x: blk_matvec(x, self._blocksH),
+            dtype=op_dtype)
 
         self.T._blocks = self._blocksT
+        self.H._blocks = self._blocksH
 
     @property
     def blocks(self):
@@ -216,7 +237,9 @@ class BlockDiagonalLinearOperator(LinearOperator):
     def __getitem__(self, idx):
         blks = self._blocks.__getitem__(idx)
         if isinstance(idx, slice):
-            return BlockDiagonalLinearOperator(blks, symmetric=self.symmetric)
+            return BlockDiagonalLinearOperator(blks,
+                                               symmetric=self.symmetric,
+                                               hermitian=self.hermitian)
         return blks
 
     def __setitem__(self, idx, ops):
@@ -224,12 +247,13 @@ class BlockDiagonalLinearOperator(LinearOperator):
             if isinstance(ops, list) or isinstance(ops, tuple):
                 for op in ops:
                     if not isinstance(op, BaseLinearOperator):
-                        msg  = 'Block operators can only contain'
-                        msg += ' linear operators'
+                        msg = 'Block operators can only contain linear operators'
                         raise ValueError(msg)
         self._blocks.__setitem__(idx, ops)
         if not self.symmetric:
             self._blocksT = [blk.T for blk in self._blocks]
+        if not self.hermitian:
+            self._blocksH = [blk.H for blk in self._blocks]
 
 
 class BlockPreconditioner(BlockLinearOperator):
