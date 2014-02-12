@@ -114,16 +114,11 @@ class LinearOperator(BaseLinearOperator):
 
         super(LinearOperator, self).__init__(nargin, nargout, **kwargs)
 
-        self.__transposed = kwargs.pop('transposed') if 'transposed' in kwargs else False
         transpose_of = kwargs.pop('transpose_of') if 'transpose_of' in kwargs else None
-        self.__T = None
-
-        self.__adjoint = kwargs.pop('adjoint') if 'adjoint' in kwargs else False
         adjoint_of = kwargs.pop('adjoint_of') if 'adjoint_of' in kwargs else None
-        self.__H = None
+        conjugate_of = kwargs.pop('conjugate_of') if 'conjugate_of' in kwargs else None
 
         self.__matvec = matvec
-
         self.__set_transpose(matvec, transpose_of, matvec_transp, **kwargs)
         self.__set_adjoint(matvec, adjoint_of, matvec_adj, **kwargs)
 
@@ -133,9 +128,18 @@ class LinearOperator(BaseLinearOperator):
                 self.__H = self.__T
             elif self.__T is None and self.__H is not None:
                 self.__T = self.__H
+        else:
+            if transpose_of is None and adjoint_of is None and conjugate_of is None:
+                # We're not in a recursive instantiation.
+                __conj = self.conjugate()
+                if self.T is not None:
+                    self.__T.__H = __conj
+                if self.H is not None:
+                    self.__H.__T = __conj
 
     def __set_transpose(self, matvec, transpose_of=None, matvec_transp=None, **kwargs):
 
+        self.__T = None
         if self.symmetric:
             self.__T = self
             return
@@ -146,7 +150,6 @@ class LinearOperator(BaseLinearOperator):
                 self.__T = LinearOperator(self.nargout, self.nargin,
                                           matvec_transp,
                                           matvec_transp=matvec,
-                                          transposed=not self.__transposed,
                                           transpose_of=self,
                                           **kwargs)
         else:
@@ -160,6 +163,7 @@ class LinearOperator(BaseLinearOperator):
 
     def __set_adjoint(self, matvec, adjoint_of=None, matvec_adj=None, **kwargs):
 
+        self.__H = None
         if self.hermitian:
             self.__H = self
             return
@@ -170,7 +174,6 @@ class LinearOperator(BaseLinearOperator):
                 self.__H = LinearOperator(self.nargout, self.nargin,
                                           matvec_adj,
                                           matvec_adj=matvec,
-                                          adjoint=not self.__adjoint,
                                           adjoint_of=self,
                                           **kwargs)
         else:
@@ -208,10 +211,13 @@ class LinearOperator(BaseLinearOperator):
         if self.H is not None:
             matvec_transp = self.H.__matvec
 
-            def matvec_adj(x):
-                if x.dtype not in complex_types:
-                    return (self.H * x).conjugate()
-                return (self.H * x.conjugate()).conjugate()
+            if self.T is not None:
+                matvec_adj = self.T.__matvec
+            else:
+                def matvec_adj(x):
+                    if x.dtype not in complex_types:
+                        return (self.H * x).conjugate()
+                    return (self.H * x.conjugate()).conjugate()
 
         elif self.T is not None:
             matvec_adj = self.T.__matvec
@@ -221,12 +227,17 @@ class LinearOperator(BaseLinearOperator):
                     return (self.T * x).conjugate()
                 return (self.T * x.conjugate()).conjugate()
 
+        else:
+            # Cannot infer transpose or adjoint of conjugate operator.
+            matvec_transp = matvec_adj = None
+
         return LinearOperator(self.nargin, self.nargout,
                               matvec=matvec,
                               matvec_transp=matvec_transp,
                               matvec_adj=matvec_adj,
                               transpose_of=self.H,
                               adjoint_of=self.T,
+                              conjugate_of=self,
                               dtype=self.dtype)
 
     def to_array(self):
