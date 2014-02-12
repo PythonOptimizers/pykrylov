@@ -244,6 +244,35 @@ class LinearOperator(BaseLinearOperator):
         "Convert operator to a dense matrix."
         return self.to_array()
 
+    def _matvec(self, x):
+        """
+        Matrix-vector multiplication.
+
+        Encapsulates the matvec routine specified at
+        construct time, to ensure the consistency of the input and output
+        arrays with the operator's shape.
+        """
+        x = np.asanyarray(x)
+        nargout, nargin = self.shape
+
+        # check input data consistency
+        try:
+            x = x.reshape(nargin)
+        except ValueError:
+            msg = 'input array size incompatible with operator dimensions'
+            raise ValueError(msg)
+
+        y = self.__matvec(x)
+
+        # check output data consistency
+        try:
+            y = y.reshape(nargout)
+        except ValueError:
+            msg = 'output array size incompatible with operator dimensions'
+            raise ValueError(msg)
+
+        return y
+
     def __mul_scalar(self, x):
         "Product between a linear operator and a scalar."
         result_type = np.result_type(self.dtype, type(x))
@@ -297,7 +326,7 @@ class LinearOperator(BaseLinearOperator):
         "Product between a linear operator and a vector."
         self._nMatvec += 1
         result_type = np.result_type(self.dtype, x.dtype)
-        return self.__matvec(x).astype(result_type)
+        return self._matvec(x).astype(result_type)
 
     def __mul__(self, x):
         if np.isscalar(x):
