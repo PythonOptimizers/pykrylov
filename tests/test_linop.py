@@ -31,27 +31,13 @@ from numpy.testing import TestCase, assert_, assert_equal, assert_raises
 import numpy as np
 import pykrylov.linop as lo
 from pykrylov.linop import ShapeError
+from pykrylov.tools.types import allowed_types
 
 
 def get_matvecs(A):
     return {'shape': A.shape,
             'matvec': lambda x: np.dot(A, x),
             'matvec_transp': lambda x: np.dot(A.T, x)}
-
-
-def get_dtypes():
-    return ((np.int64, np.int64),
-            (np.uint64, np.uint64),
-            (np.float64, np.float64),
-            (np.complex128, np.complex128),
-            (np.float32, np.float32),
-            (np.uint64, np.int64),
-            (np.int64, np.uint64),
-            (np.float32, np.float64),
-            (np.float64, np.float32),
-            (np.float64, np.float32),
-            (np.float64, np.complex128),
-            (np.complex128, np.float64))
 
 
 class TestLinearOperator(TestCase):
@@ -168,18 +154,18 @@ class TestLinearOperator(TestCase):
         assert_raises(ValueError, pow_C, 2.1)
 
     def test_dtypes(self):
-        for dtypes in get_dtypes():
-            dtype_op, dtype_in = dtypes
-            dtype_out = np.result_type(dtype_op, dtype_in)
+        for dtype_op in allowed_types:
+            for dtype_in in allowed_types:
+                dtype_out = np.result_type(dtype_op, dtype_in)
 
-            matvecs = get_matvecs(self.A)
-            A = lo.LinearOperator(nargin=matvecs['shape'][1],
-                                  nargout=matvecs['shape'][0],
-                                  matvec=matvecs['matvec'],
-                                  matvec_transp=matvecs['matvec_transp'],
-                                  dtype=dtype_op)
-            x = np.array([1, 1, 1]).astype(dtype_in)
-            assert_((A * x).dtype == dtype_out)
+                matvecs = get_matvecs(self.A)
+                A = lo.LinearOperator(nargin=matvecs['shape'][1],
+                                      nargout=matvecs['shape'][0],
+                                      matvec=matvecs['matvec'],
+                                      matvec_transp=matvecs['matvec_transp'],
+                                      dtype=dtype_op)
+                x = np.array([1, 1, 1]).astype(dtype_in)
+                assert_((A * x).dtype == dtype_out)
 
 
 class TestIdentityOperator(TestCase):
@@ -191,12 +177,12 @@ class TestIdentityOperator(TestCase):
         assert_(A.H is A)
 
     def test_dtypes(self):
-        for dtypes in get_dtypes():
-            dtype_op, dtype_in = dtypes
-            dtype_out = np.result_type(dtype_op, dtype_in)
-            A = lo.IdentityOperator(3, dtype=dtype_op)
-            x = np.array([1, 1, 1]).astype(dtype_in)
-            assert_((A * x).dtype == dtype_out)
+        for dtype_op in allowed_types:
+            for dtype_in in allowed_types:
+                dtype_out = np.result_type(dtype_op, dtype_in)
+                A = lo.IdentityOperator(3, dtype=dtype_op)
+                x = np.array([1, 1, 1]).astype(dtype_in)
+                assert_((A * x).dtype == dtype_out)
 
 
 class TestDiagonalOperator(TestCase):
@@ -218,13 +204,13 @@ class TestDiagonalOperator(TestCase):
         assert_raises(ValueError, lo.DiagonalOperator, np.eye(3))
 
     def test_dtypes(self):
-        for dtypes in get_dtypes():
-            dtype_op, dtype_in = dtypes
-            dtype_out = np.result_type(dtype_op, dtype_in)
-            diag = np.array([1, 2, 3]).astype(dtype_op)
-            A = lo.DiagonalOperator(diag)
-            x = np.array([1, 1, 1]).astype(dtype_in)
-            assert_((A * x).dtype == dtype_out)
+        for dtype_op in allowed_types:
+            for dtype_in in allowed_types:
+                dtype_out = np.result_type(dtype_op, dtype_in)
+                diag = np.array([1, 2, 3]).astype(dtype_op)
+                A = lo.DiagonalOperator(diag)
+                x = np.array([1, 1, 1]).astype(dtype_in)
+                assert_((A * x).dtype == dtype_out)
 
 
 class TestZeroOperator(TestCase):
@@ -237,12 +223,12 @@ class TestZeroOperator(TestCase):
         assert_equal(A.H * x, [0, 0])
 
     def test_dtypes(self):
-        for dtypes in get_dtypes():
-            dtype_op, dtype_in = dtypes
-            dtype_out = np.result_type(dtype_op, dtype_in)
-            A = lo.ZeroOperator(3, 3, dtype=dtype_op)
-            x = np.array([1, 1, 1]).astype(dtype_in)
-            assert_((A * x).dtype == dtype_out)
+        for dtype_op in allowed_types:
+            for dtype_in in allowed_types:
+                dtype_out = np.result_type(dtype_op, dtype_in)
+                A = lo.ZeroOperator(3, 3, dtype=dtype_op)
+                x = np.array([1, 1, 1]).astype(dtype_in)
+                assert_((A * x).dtype == dtype_out)
 
 
 class TestReducedLinearOperator(TestCase):
