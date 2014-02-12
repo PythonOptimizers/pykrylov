@@ -284,6 +284,13 @@ class LinearOperator(BaseLinearOperator):
 
         return y
 
+    def rmatvec(self, x):
+        """
+        Product with the conjugate transpose. This method is included for
+        compatibility with Scipy only. Please use the `H` attribute instead.
+        """
+        return self.__H.__mul__(x)
+
     def __mul_scalar(self, x):
         "Product between a linear operator and a scalar."
         result_type = np.result_type(self.dtype, type(x))
