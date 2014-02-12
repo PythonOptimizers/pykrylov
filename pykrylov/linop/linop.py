@@ -409,9 +409,9 @@ class LinearOperator(BaseLinearOperator):
 
     def __pow__(self, other):
         if not isinstance(other, int):
-            raise ShapeError('Can only raise to integer power')
+            raise ValueError('Can only raise to integer power')
         if other < 0:
-            raise ShapeError('Can only raise to nonnegative power')
+            raise ValueError('Can only raise to nonnegative power')
         if self.nargin != self.nargout:
             raise ShapeError('Can only raise square operators to a power')
         if other == 0:
