@@ -292,7 +292,7 @@ class LinearOperator(BaseLinearOperator):
 
         return LinearOperator(self.nargin, self.nargout,
                               symmetric=self.symmetric,
-                              hermitian=(x.dtype not in complex_types),
+                              hermitian=(result_type not in complex_types) and self.hermitian,
                               matvec=matvec,
                               matvec_transp=matvec_transp,
                               matvec_adj=matvec_adj,
