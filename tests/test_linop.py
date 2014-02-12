@@ -125,6 +125,7 @@ class TestLinearOperator(TestCase):
                               dtype=self.G.dtype)
         x = np.random.random(G.shape[1]) + 1j * np.random.random(G.shape[1])
         assert_(np.allclose(G * x, G.H * x))
+        assert_(np.allclose(G.T.H * x, G.H.T * x))
 
         matvecs = get_matvecs(self.H)
         H = lo.LinearOperator(nargin=matvecs['shape'][1],
@@ -135,6 +136,7 @@ class TestLinearOperator(TestCase):
                               dtype=self.H.dtype)
         x = np.random.random(H.shape[1]) + 1j * np.random.random(H.shape[1])
         assert_(np.allclose(H * x, H.T * x))
+        assert_(np.allclose(H * x, H.T.T * x))
 
     def test_runtime(self):
         matvecs = get_matvecs(self.A)
@@ -245,14 +247,16 @@ class TestDiagonalOperator(TestCase):
         self.assertTrue(A.hermitian)
 
     def test_runtime(self):
-        A = lo.DiagonalOperator([1, 2, 3])
+        A = lo.DiagonalOperator([1, -2, 3])
         x = np.array([1, 1, 1])
-        assert_equal(A * x, [1, 2, 3])
-        assert_equal(A.H * x, [1, 2, 3])
+        assert_equal(A * x, [1, -2, 3])
+        assert_equal(A.H * x, [1, -2, 3])
         assert_(A.T is A)
         assert_(A.H is A)
+        assert_equal(abs(A) * x, [1, 2, 3])
         assert_raises(ValueError, lo.DiagonalOperator, 10)
         assert_raises(ValueError, lo.DiagonalOperator, np.eye(3))
+        assert_raises(ValueError, lo.sqrt, A)
 
     def test_dtypes(self):
         for dtype_op in allowed_types:
