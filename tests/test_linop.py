@@ -108,6 +108,7 @@ class TestLinearOperator(TestCase):
                               dtype=self.E.dtype)
         x = np.random.random(E.shape[1]) + 1j * np.random.random(E.shape[1])
         assert_(np.allclose(E * x, D.T * x))
+        assert_(np.allclose(E.H * x, E.rmatvec(x)))
 
         F = lo.LinearOperator(nargin=matvecs['shape'][0],
                               nargout=matvecs['shape'][1],
