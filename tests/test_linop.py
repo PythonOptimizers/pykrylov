@@ -37,18 +37,32 @@ from pykrylov.tools.types import allowed_types
 def get_matvecs(A):
     return {'shape': A.shape,
             'matvec': lambda x: np.dot(A, x),
-            'matvec_transp': lambda x: np.dot(A.T, x)}
+            'matvec_transp': lambda x: np.dot(A.T, x),
+            'matvec_adj': lambda x: np.dot(A.T.conjugate(), x)}
 
 
 class TestLinearOperator(TestCase):
     def setUp(self):
         self.A = np.array([[1, 2, 3],
                            [4, 5, 6]])
-        self.B = np.array([[1, 2],
-                           [3, 4],
-                           [5, 6]])
+        self.B = np.array([[1, 4],
+                           [2, 5],
+                           [3, 6]])
         self.C = np.array([[1, 2],
                            [3, 4]])
+
+        self.D = np.array([[1 + 1j, 2 - 2j, 3 + 1j],
+                           [4 - 2j, 5 + 3j, 6     ]])
+        self.E = np.array([[1 + 1j, 4 - 2j],
+                           [2 - 2j, 5 + 3j],
+                           [3 + 1j, 6     ]])  # E = D.T
+        self.F = np.array([[1 - 1j, 4 + 2j],
+                           [2 + 2j, 5 - 3j],
+                           [3 - 1j, 6     ]])  # F = D.H
+        self.G = np.array([[1,      2 - 2j],
+                           [2 + 2j, 4     ]])  # G = G.H
+        self.H = np.array([[1,      2 - 2j],
+                           [2 - 2j, 4     ]])  # H = H.T
 
     def test_init(self):
         matvecs = get_matvecs(self.A)
@@ -69,21 +83,58 @@ class TestLinearOperator(TestCase):
 
         A = lo.LinearOperator(nargin=matvecs['shape'][1],
                               nargout=matvecs['shape'][0],
-                              matvec=matvecs['matvec'])
+                              matvec=matvecs['matvec'],
+                              matvec_transp=matvecs['matvec_transp'])
         B = lo.LinearOperator(nargin=matvecs['shape'][0],
                               nargout=matvecs['shape'][1],
-                              matvec=matvecs['matvec_transp'],
-                              transpose_of=A)
-        assert_(B.T is A)
+                              matvec=matvecs['matvec_transp'])
+        x = np.random.random(A.shape[0])
+        assert_(np.allclose(B * x, A.T * x))
+        assert_(np.allclose(B * x, A.H * x))
 
-        A = lo.LinearOperator(nargin=matvecs['shape'][1],
+        matvecs = get_matvecs(self.D)
+        D = lo.LinearOperator(nargin=matvecs['shape'][1],
                               nargout=matvecs['shape'][0],
-                              matvec=matvecs['matvec'])
-        B = lo.LinearOperator(nargin=matvecs['shape'][0],
+                              matvec=matvecs['matvec'],
+                              matvec_transp=matvecs['matvec_transp'],
+                              matvec_adj=matvecs['matvec_adj'],
+                              dtype=self.D.dtype)
+        assert_(D.T is not None)
+        assert_(D.H is not None)
+
+        E = lo.LinearOperator(nargin=matvecs['shape'][0],
                               nargout=matvecs['shape'][1],
                               matvec=matvecs['matvec_transp'],
-                              transpose_of=A)
-        assert_(B.H is A)
+                              dtype=self.E.dtype)
+        x = np.random.random(E.shape[1]) + 1j * np.random.random(E.shape[1])
+        assert_(np.allclose(E * x, D.T * x))
+
+        F = lo.LinearOperator(nargin=matvecs['shape'][0],
+                              nargout=matvecs['shape'][1],
+                              matvec=matvecs['matvec_adj'],
+                              dtype=self.F.dtype)
+        x = np.random.random(F.shape[1]) + 1j * np.random.random(F.shape[1])
+        assert_(np.allclose(F * x, D.H * x))
+
+        matvecs = get_matvecs(self.G)
+        G = lo.LinearOperator(nargin=matvecs['shape'][1],
+                              nargout=matvecs['shape'][0],
+                              matvec=matvecs['matvec'],
+                              matvec_transp=matvecs['matvec_transp'],
+                              matvec_adj=matvecs['matvec_adj'],
+                              dtype=self.G.dtype)
+        x = np.random.random(G.shape[1]) + 1j * np.random.random(G.shape[1])
+        assert_(np.allclose(G * x, G.H * x))
+
+        matvecs = get_matvecs(self.H)
+        H = lo.LinearOperator(nargin=matvecs['shape'][1],
+                              nargout=matvecs['shape'][0],
+                              matvec=matvecs['matvec'],
+                              matvec_transp=matvecs['matvec_transp'],
+                              matvec_adj=matvecs['matvec_adj'],
+                              dtype=self.H.dtype)
+        x = np.random.random(H.shape[1]) + 1j * np.random.random(H.shape[1])
+        assert_(np.allclose(H * x, H.T * x))
 
     def test_runtime(self):
         matvecs = get_matvecs(self.A)
