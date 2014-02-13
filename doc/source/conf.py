@@ -26,6 +26,9 @@ sys.path.append(os.path.abspath('../../pykrylov/tfqmr'))
 sys.path.append(os.path.abspath('../../pykrylov/symmlq'))
 sys.path.append('sphinxext')
 
+# Theme
+import sphinx_bootstrap_theme
+
 # Import support for ipython console session syntax highlighting (lives
 # in the sphinxext directory defined above)
 import ipython_console_highlighting
@@ -58,7 +61,7 @@ master_doc = 'contents'
 
 # General information about the project.
 project = u'PyKrylov'
-copyright = u'2008, D. Orban'
+copyright = u'2014, D. Orban'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -112,7 +115,13 @@ pygments_style = 'sphinx'
 # must exist either in Sphinx' static/ path, or in one of the custom paths
 # given in html_static_path.
 #html_style = 'default.css'
-html_theme = "agogo"
+html_theme = "bootstrap"
+html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
+html_theme_options = {
+  'source_link_position': "footer",
+  # Bootswatch (http://bootswatch.com/) theme.
+  # 'bootswatch_theme': "spacelab",
+}
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
