@@ -65,6 +65,7 @@ class BaseLinearOperator(object):
 
     @property
     def dtype(self):
+        "The data type of the operator."
         return self.__dtype
 
     @dtype.setter
@@ -241,7 +242,7 @@ class LinearOperator(BaseLinearOperator):
                               dtype=self.dtype)
 
     def to_array(self):
-        "Convert operator to a dense matrix."
+        "Convert operator to a dense matrix. This is the same as `full`."
         n, m = self.shape
         H = np.empty((n, m), dtype=self.dtype)
         e = np.zeros(m, dtype=self.dtype)
@@ -252,7 +253,7 @@ class LinearOperator(BaseLinearOperator):
         return H
 
     def full(self):
-        "Convert operator to a dense matrix."
+        "Convert operator to a dense matrix. This is the same as `to_array`."
         return self.to_array()
 
     def _matvec(self, x):
