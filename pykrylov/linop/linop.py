@@ -203,6 +203,11 @@ class LinearOperator(BaseLinearOperator):
         "The adjoint operator."
         return self.__H
 
+    @property
+    def bar(self):
+        "The complex conjugate operator."
+        return self.conjugate()
+
     def conjugate(self):
         "Return the complex conjugate operator."
         if not self.dtype in complex_types:
