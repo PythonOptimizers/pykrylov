@@ -132,11 +132,18 @@ class LinearOperator(BaseLinearOperator):
         else:
             if transpose_of is None and adjoint_of is None and conjugate_of is None:
                 # We're not in a recursive instantiation.
+                # Try to infer missing operators.
                 __conj = self.conjugate()
                 if self.T is not None:
                     self.__T.__H = __conj
+                    if self.H is None and __conj is not None:
+                        self.logger.debug('Inferring .H')
+                        self.__H = __conj.T
                 if self.H is not None:
                     self.__H.__T = __conj
+                    if self.T is None and __conj is not None:
+                        self.logger.debug('Inferring .T')
+                        self.__T = __conj.H
 
     def __set_transpose(self, matvec, transpose_of=None, matvec_transp=None, **kwargs):
 
