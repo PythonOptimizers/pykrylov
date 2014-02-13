@@ -105,10 +105,13 @@ class TestLinearOperator(TestCase):
         E = lo.LinearOperator(nargin=matvecs['shape'][0],
                               nargout=matvecs['shape'][1],
                               matvec=matvecs['matvec_transp'],
+                              matvec_transp=matvecs['matvec'],
                               dtype=self.E.dtype)
         x = np.random.random(E.shape[1]) + 1j * np.random.random(E.shape[1])
         assert_(np.allclose(E * x, D.T * x))
-        assert_(np.allclose(E.H * x, E.rmatvec(x)))
+        assert_(E.H is not None)  # E.H was inferred.
+        y = np.random.random(E.shape[0]) + 1j * np.random.random(E.shape[0])
+        assert_(np.allclose(E.H * y, E.rmatvec(y)))
 
         F = lo.LinearOperator(nargin=matvecs['shape'][0],
                               nargout=matvecs['shape'][1],
