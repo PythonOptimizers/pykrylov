@@ -32,7 +32,7 @@ import sphinx_bootstrap_theme
 # Import support for ipython console session syntax highlighting (lives
 # in the sphinxext directory defined above)
 import ipython_console_highlighting
-import inheritance_diagram
+# import inheritance_diagram
 import mathjax
 
 # General configuration
@@ -43,7 +43,7 @@ import mathjax
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest']
 extensions += ['sphinx.ext.todo']
 extensions += ['ipython_console_highlighting']
-extensions += ['inheritance_diagram']
+# extensions += ['inheritance_diagram']
 extensions += ['mathjax']
 mathjax_path = 'https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'
 
@@ -120,7 +120,7 @@ html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
 html_theme_options = {
   'source_link_position': "footer",
   # Bootswatch (http://bootswatch.com/) theme.
-  # 'bootswatch_theme': "spacelab",
+  'bootswatch_theme': "spacelab",
 }
 
 # The name for this set of Sphinx documents.  If None, it defaults to
