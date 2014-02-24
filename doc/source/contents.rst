@@ -26,6 +26,7 @@ Contents
 ========
 
 .. toctree::
+   :numbered:
 
    Introduction <introduction>
    Linear Operators <linop>

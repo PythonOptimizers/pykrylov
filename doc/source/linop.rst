@@ -28,6 +28,10 @@ computed using, e.g., ``A.T * u``. If ``A`` represents a symmetric operator
 More generally, since :math:`(A^T)^T = A`, the Python statement ``A.T.T is A``
 always evaluates to ``True``, which means that they are the *same* object.
 
+For complex systems, the operator API also gives access to ``A.H``. The result is a linear operator such that ``A.H * y`` is the product of the conjugate transpose of ``A`` with ``y``, i.e., :math:`A^H y`. If ``A.hermitian`` is ``True``, then ``A.H`` and ``A`` are the same object.
+
+It is important to note that for complex operators, ``A.T`` and ``A.H`` are typically different operators. Users can provide a function or a method to compute the product with the transpose and well as a function or method to compute products with the conjugate transpose. However, if the product with the transpose is defined, the product with the conjugate transpose may be inferred automatically, and the `linop` module tries to infer what it can. Any operator ``A`` possesses a ``conjugate`` method, which returns the operator ``B`` such that ``B * x == (A * x.conjugate()).conjugate()``, and ``A.H`` is the same as ``B.T``. An alias for the conjugate of ``A`` is ``A.bar``, which is reminiscent of the notation :math:`\bar{A}` for the conjugate of :math:`A`.
+
 In the next two sections, we describe generic linear operators and linear
 operators constructed by blocks.
 
@@ -110,13 +114,11 @@ and a class for diagonal operators.
 .. autoclass:: IdentityOperator
    :show-inheritance:
    :members:
-   :inherited-members:
    :undoc-members:
 
 .. autoclass:: ZeroOperator
    :show-inheritance:
    :members:
-   :inherited-members:
    :undoc-members:
 
 Diagonal operators are simply defined by their diagonal as a Numpy array. For
@@ -130,7 +132,6 @@ example:
 .. autoclass:: DiagonalOperator
    :show-inheritance:
    :members:
-   :inherited-members:
    :undoc-members:
 
 Convenience Functions
@@ -177,6 +178,10 @@ Note that there is normally no need to build linear operators from Numpy
 matrices or from Scipy sparse matrices since they already support product and
 transposition.
 
+Certain operators implement :py:meth:`abs`. It is the case of diagonal operators. Note that ``abs`` is not implemented by default because it is not intended to represent the "elementwise" absolute value, as Numpy does with matrices. It is intended to represent the operator whose eigenvalues are the absolute values of the original operator. Thus, ``abs`` should be implemented on a case-by-case basis, as necessary.
+
+The `linop` module provides a :py:func:`sqrt` function. This function simply calls the :py:meth:`_sqrt` method of the operator passed as argument. If implemented, this method should return the "square root operator", i.e., ``sqrt(A)`` should return an operator ``B`` such that ``B * B`` is the same operator as ``A``.
+
 Exceptions
 ----------
 
@@ -216,6 +221,7 @@ defines a block row. If the block operator is specified as symmetric, each
 block on the diagonal must be symmetric. For example:
 
 .. code-block:: python
+   :linenos:
 
     A = LinearOperator(nargin=3, nargout=3,
                     matvec=lambda v: 2*v, symmetric=True)
@@ -247,7 +253,6 @@ block on the diagonal must be symmetric. For example:
 .. autoclass:: BlockLinearOperator
    :show-inheritance:
    :members:
-   :inherited-members:
    :undoc-members:
 
 Block Diagonal Operators
@@ -264,12 +269,14 @@ specified as symmetric, each block must be symmetric. For example:
 .. autoclass:: BlockDiagonalLinearOperator
    :show-inheritance:
    :members:
-   :inherited-members:
    :undoc-members:
 
 
 Operations with Operators
 =========================
+
+Arithmetic Operations
+---------------------
 
 Linear operators, whether defined by blocks or not, may be added together or
 composed following the usual rules of linear algebra. An operator may be
@@ -286,6 +293,9 @@ example:
     AA = A * A.T
     G  = E + 2 * B.T * B
 
+Indexing and Iterating
+----------------------
+
 Block operators also support iteration and indexing. Iterating over a block
 operator amounts to iterating row-wise over its blocks. Iterating over a block
 diagonal operator amounts to iterating over its diagonal blocks. Indexing works
@@ -294,16 +304,24 @@ when indexing a matrix, while indexing a block diagonal operator requires a
 single indices. For example:
 
 .. code-block:: python
+   :linenos:
 
     K2 = BlockLinearOperator([[A, B], [C, D]])
-    K2[0,:]   # Returns the block operator defined by [[A, B]].
-    K2[:,1]   # Returns the block operator defined by [[C], [D]].
-    K2[1,1]   # Returns the linear operator D.
+    K2[0,:]      # Returns the block operator defined by [[A, B]].
+    K2[:,1]      # Returns the block operator defined by [[C], [D]].
+    K2[1,1]      # Returns the linear operator D.
+    C.T in K2    # Returns True.
 
     K4 = BlockLinearOperator([[A, B], [E]], symmetric=True)
-    K4[0,1]   # Returns the linear operator B.T.
+    K4[0,1]      # Returns the linear operator B.T.
+    for block in K4:
+        print block   # Iterates over all blocks (in both triangles).
 
-    K5 = BlockDiagonalLinearOperator([A, E], symmetric=True)
-    K5[0]     # Returns the linear operator A.
-    K5[1]     # Returns the linear operator B.
-    K5[:]     # Returns the diagonal operator defines by [A, E].
+    K5 = BlockDiagonalLinearOperator([A, E, D], symmetric=True)
+    K5[0]        # Returns the linear operator A.
+    K5[1]        # Returns the linear operator B.
+    K5[1] = E.T  # Updates the middle block.
+    K5[:2]       # Returns the diagonal operator defined by [A, E].
+    D in K5      # Returns True
+    for block in K5:
+        print block   # Iterates over all diagonal blocks.
