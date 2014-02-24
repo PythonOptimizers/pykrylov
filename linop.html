@@ -1,22 +1,21 @@
-
-
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Linear Operators &mdash; PyKrylov 0.1 documentation</title>
+    <title>2. Linear Operators &mdash; PyKrylov 0.2 documentation</title>
     
-    <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
+    <link rel="stylesheet" href="_static/basic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bootswatch-3.1.0/spacelab/bootstrap.min.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '',
-        VERSION:     '0.1',
+        URL_ROOT:    './',
+        VERSION:     '0.2',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,40 +25,145 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="PyKrylov 0.1 documentation" href="index.html" />
-    <link rel="next" title="Generic Template for Krylov Methods" href="generic.html" />
-    <link rel="prev" title="Introduction to PyKrylov" href="introduction.html" /> 
+    <script type="text/javascript" src="_static/js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="_static/js/jquery-fix.js"></script>
+    <script type="text/javascript" src="_static/bootstrap-3.1.0/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="_static/bootstrap-sphinx.js"></script>
+    <link rel="top" title="PyKrylov 0.2 documentation" href="index.html" />
+    <link rel="next" title="3. Generic Template for Krylov Methods" href="generic.html" />
+    <link rel="prev" title="1. Introduction to PyKrylov" href="introduction.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
   </head>
   <body>
-    <div class="header-wrapper">
-      <div class="header">
-        <div class="headertitle"><a
-          href="contents.html">PyKrylov 0.1 documentation</a></div>
-        <div class="rel">
-          <a href="introduction.html" title="Introduction to PyKrylov"
-             accesskey="P">previous</a> |
-          <a href="generic.html" title="Generic Template for Krylov Methods"
-             accesskey="N">next</a> |
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |
-          <a href="genindex.html" title="General Index"
-             accesskey="I">index</a>
-        </div>
-       </div>
-    </div>
+  
+  <a href="https://github.com/dpo/pykrylov"
+     class="visible-desktop"><img
+    style="position: absolute; top: 40px; right: 0; border: 0;"
+    src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png"
+    alt="Fork me on GitHub"></a>
 
-    <div class="content-wrapper">
-      <div class="content">
-        <div class="document">
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="contents.html">
+          PyKrylov</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.2</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            <li class="divider-vertical"></li>
             
-      <div class="documentwrapper">
-        <div class="bodywrapper">
-          <div class="body">
             
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="contents.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"><ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">1. Introduction</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">2. Linear Operators</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generic.html">3. Generic Template</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cg.html">4. Conjugate Gradient</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cgs.html">5. Conjugate Gradient Squared</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bicgstab.html">6. Bi-Conjugate Gradient Stabilized</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tfqmr.html">7. Transpose-Free Quasi-Minimum Residual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="symmlq.html">8. Symmetric Indefinite Method with Orthogonal Factorization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bmark.html">9. Benchmarking Solvers</a></li>
+</ul>
+</ul>
+</li>
+              
+                <li class="dropdown">
+  <a role="button"
+     id="dLabelLocalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="#">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"
+      role="menu"
+      aria-labelledby="dLabelLocalToc"><ul>
+<li><a class="reference internal" href="#">2. Linear Operators</a><ul>
+<li><a class="reference internal" href="#introduction">2.1. Introduction</a></li>
+<li><a class="reference internal" href="#module-linop">2.2. The <tt class="docutils literal"><span class="pre">linop</span></tt> Module</a><ul>
+<li><a class="reference internal" href="#base-class-for-linear-operators">2.2.1. Base Class for Linear Operators</a></li>
+<li><a class="reference internal" href="#linear-operators-defined-by-functions">2.2.2. Linear Operators Defined by Functions</a></li>
+<li><a class="reference internal" href="#simple-common-predefined-linear-operators">2.2.3. Simple Common Predefined Linear Operators</a></li>
+<li><a class="reference internal" href="#convenience-functions">2.2.4. Convenience Functions</a></li>
+<li><a class="reference internal" href="#exceptions">2.2.5. Exceptions</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#block-linear-operators-the-blkop-module">2.3. Block Linear Operators: The <tt class="docutils literal"><span class="pre">blkop</span></tt> Module</a><ul>
+<li><a class="reference internal" href="#general-block-operators">2.3.1. General Block Operators</a></li>
+<li><a class="reference internal" href="#block-diagonal-operators">2.3.2. Block Diagonal Operators</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#operations-with-operators">2.4. Operations with Operators</a><ul>
+<li><a class="reference internal" href="#arithmetic-operations">2.4.1. Arithmetic Operations</a></li>
+<li><a class="reference internal" href="#indexing-and-iterating">2.4.2. Indexing and Iterating</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</ul>
+</li>
+              
+            
+            
+              
+                
+  <li>
+    <a href="introduction.html" title="Previous Chapter: 1. Introduction to PyKrylov"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm">&laquo; 1. Introduction ...</span>
+    </a>
+  </li>
+  <li>
+    <a href="generic.html" title="Next Chapter: 3. Generic Template for Krylov Methods"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm">3. Generic Templ... &raquo;</span>
+    </a>
+  </li>
+              
+            
+            
+            
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-12">
+      
   <div class="section" id="linear-operators">
-<span id="linop-page"></span><h1>Linear Operators<a class="headerlink" href="#linear-operators" title="Permalink to this headline">¶</a></h1>
+<span id="linop-page"></span><h1>2. Linear Operators<a class="headerlink" href="#linear-operators" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="introduction">
-<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<h2>2.1. Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
 <p>When working towards a solution of a linear system <span class="math">\(Ax=b\)</span>, Krylov methods
 do not need to know anything structural about the matrix <span class="math">\(A\)</span>; all they
 require is the ability to form matrix-vector products <span class="math">\(v \mapsto Av\)</span> and,
@@ -76,19 +180,21 @@ computed using, e.g., <tt class="docutils literal"><span class="pre">A.T</span> 
 <span class="math">\(A = A^T\)</span>, then <tt class="docutils literal"><span class="pre">A.T</span></tt> is simply a reference to <tt class="docutils literal"><span class="pre">A</span></tt> itself.</p>
 <p>More generally, since <span class="math">\((A^T)^T = A\)</span>, the Python statement <tt class="docutils literal"><span class="pre">A.T.T</span> <span class="pre">is</span> <span class="pre">A</span></tt>
 always evaluates to <tt class="docutils literal"><span class="pre">True</span></tt>, which means that they are the <em>same</em> object.</p>
+<p>For complex systems, the operator API also gives access to <tt class="docutils literal"><span class="pre">A.H</span></tt>. The result is a linear operator such that <tt class="docutils literal"><span class="pre">A.H</span> <span class="pre">*</span> <span class="pre">y</span></tt> is the product of the conjugate transpose of <tt class="docutils literal"><span class="pre">A</span></tt> with <tt class="docutils literal"><span class="pre">y</span></tt>, i.e., <span class="math">\(A^H y\)</span>. If <tt class="docutils literal"><span class="pre">A.hermitian</span></tt> is <tt class="docutils literal"><span class="pre">True</span></tt>, then <tt class="docutils literal"><span class="pre">A.H</span></tt> and <tt class="docutils literal"><span class="pre">A</span></tt> are the same object.</p>
+<p>It is important to note that for complex operators, <tt class="docutils literal"><span class="pre">A.T</span></tt> and <tt class="docutils literal"><span class="pre">A.H</span></tt> are typically different operators. Users can provide a function or a method to compute the product with the transpose and well as a function or method to compute products with the conjugate transpose. However, if the product with the transpose is defined, the product with the conjugate transpose may be inferred automatically, and the <cite>linop</cite> module tries to infer what it can. Any operator <tt class="docutils literal"><span class="pre">A</span></tt> possesses a <tt class="docutils literal"><span class="pre">conjugate</span></tt> method, which returns the operator <tt class="docutils literal"><span class="pre">B</span></tt> such that <tt class="docutils literal"><span class="pre">B</span> <span class="pre">*</span> <span class="pre">x</span> <span class="pre">==</span> <span class="pre">(A</span> <span class="pre">*</span> <span class="pre">x.conjugate()).conjugate()</span></tt>, and <tt class="docutils literal"><span class="pre">A.H</span></tt> is the same as <tt class="docutils literal"><span class="pre">B.T</span></tt>. An alias for the conjugate of <tt class="docutils literal"><span class="pre">A</span></tt> is <tt class="docutils literal"><span class="pre">A.bar</span></tt>, which is reminiscent of the notation <span class="math">\(\bar{A}\)</span> for the conjugate of <span class="math">\(A\)</span>.</p>
 <p>In the next two sections, we describe generic linear operators and linear
 operators constructed by blocks.</p>
 </div>
 <div class="section" id="module-linop">
-<span id="the-linop-module"></span><h2>The <a class="reference internal" href="#module-linop" title="linop"><tt class="xref py py-mod docutils literal"><span class="pre">linop</span></tt></a> Module<a class="headerlink" href="#module-linop" title="Permalink to this headline">¶</a></h2>
+<span id="the-linop-module"></span><h2>2.2. The <a class="reference internal" href="#module-linop" title="linop"><tt class="xref py py-mod docutils literal"><span class="pre">linop</span></tt></a> Module<a class="headerlink" href="#module-linop" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="base-class-for-linear-operators">
-<h3>Base Class for Linear Operators<a class="headerlink" href="#base-class-for-linear-operators" title="Permalink to this headline">¶</a></h3>
+<h3>2.2.1. Base Class for Linear Operators<a class="headerlink" href="#base-class-for-linear-operators" title="Permalink to this headline">¶</a></h3>
 <p>All linear operators derive from the base class <tt class="docutils literal"><span class="pre">BaseLinearOperator</span></tt>. This
 base class is not meant to be used directly to define linear operators, other
 than by subclassing to define classes of more specific linear operators.</p>
 <dl class="class">
 <dt id="linop.BaseLinearOperator">
-<em class="property">class </em><tt class="descclassname">linop.</tt><tt class="descname">BaseLinearOperator</tt><big>(</big><em>nargin</em>, <em>nargout</em>, <em>symmetric=False</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#linop.BaseLinearOperator" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">linop.</tt><tt class="descname">BaseLinearOperator</tt><big>(</big><em>nargin</em>, <em>nargout</em>, <em>symmetric=False</em>, <em>hermitian=False</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#linop.BaseLinearOperator" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
 <p>A linear operator is a linear mapping x -&gt; A(x) such that the size of the
 input vector x is <cite>nargin</cite> and the size of the output is <cite>nargout</cite>. It can
@@ -101,7 +207,14 @@ argument.</p>
 <dl class="attribute">
 <dt id="linop.BaseLinearOperator.dtype">
 <tt class="descname">dtype</tt><a class="headerlink" href="#linop.BaseLinearOperator.dtype" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>The data type of the operator.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="linop.BaseLinearOperator.hermitian">
+<tt class="descname">hermitian</tt><a class="headerlink" href="#linop.BaseLinearOperator.hermitian" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates whether the operator is Hermitian.</p>
+</dd></dl>
 
 <dl class="attribute">
 <dt id="linop.BaseLinearOperator.nMatvec">
@@ -136,14 +249,14 @@ argument.</p>
 <dl class="attribute">
 <dt id="linop.BaseLinearOperator.symmetric">
 <tt class="descname">symmetric</tt><a class="headerlink" href="#linop.BaseLinearOperator.symmetric" title="Permalink to this definition">¶</a></dt>
-<dd><p>Indicates whether the operator is symmetric or not.</p>
+<dd><p>Indicates whether the operator is symmetric.</p>
 </dd></dl>
 
 </dd></dl>
 
 </div>
 <div class="section" id="linear-operators-defined-by-functions">
-<h3>Linear Operators Defined by Functions<a class="headerlink" href="#linear-operators-defined-by-functions" title="Permalink to this headline">¶</a></h3>
+<h3>2.2.2. Linear Operators Defined by Functions<a class="headerlink" href="#linear-operators-defined-by-functions" title="Permalink to this headline">¶</a></h3>
 <p>It is intuitive to define an operator by its <em>action</em> on vectors. The
 <tt class="docutils literal"><span class="pre">LinearOperator</span></tt> class takes arguments <tt class="docutils literal"><span class="pre">matvec</span></tt> and <tt class="docutils literal"><span class="pre">matvec_transp</span></tt> to
 define the action of the operator and of its transpose.</p>
@@ -179,11 +292,17 @@ and <tt class="docutils literal"><span class="pre">B</span></tt> could be repres
 built.</p>
 <dl class="class">
 <dt id="linop.LinearOperator">
-<em class="property">class </em><tt class="descclassname">linop.</tt><tt class="descname">LinearOperator</tt><big>(</big><em>nargin</em>, <em>nargout</em>, <em>matvec</em>, <em>matvec_transp=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#linop.LinearOperator" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">linop.</tt><tt class="descname">LinearOperator</tt><big>(</big><em>nargin</em>, <em>nargout</em>, <em>matvec</em>, <em>matvec_transp=None</em>, <em>matvec_adj=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#linop.LinearOperator" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#linop.BaseLinearOperator" title="linop.BaseLinearOperator"><tt class="xref py py-class docutils literal"><span class="pre">linop.BaseLinearOperator</span></tt></a></p>
 <p>A linear operator constructed from a <cite>matvec</cite> and (possibly) a
 <cite>matvec_transp</cite> function. If <cite>symmetric</cite> is <cite>True</cite>, <cite>matvec_transp</cite> is
 ignored. All other keyword arguments are passed directly to the superclass.</p>
+<dl class="attribute">
+<dt id="linop.LinearOperator.H">
+<tt class="descname">H</tt><a class="headerlink" href="#linop.LinearOperator.H" title="Permalink to this definition">¶</a></dt>
+<dd><p>The adjoint operator.</p>
+</dd></dl>
+
 <dl class="attribute">
 <dt id="linop.LinearOperator.T">
 <tt class="descname">T</tt><a class="headerlink" href="#linop.LinearOperator.T" title="Permalink to this definition">¶</a></dt>
@@ -191,9 +310,34 @@ ignored. All other keyword arguments are passed directly to the superclass.</p>
 </dd></dl>
 
 <dl class="attribute">
+<dt id="linop.LinearOperator.bar">
+<tt class="descname">bar</tt><a class="headerlink" href="#linop.LinearOperator.bar" title="Permalink to this definition">¶</a></dt>
+<dd><p>The complex conjugate operator.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="linop.LinearOperator.conjugate">
+<tt class="descname">conjugate</tt><big>(</big><big>)</big><a class="headerlink" href="#linop.LinearOperator.conjugate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the complex conjugate operator.</p>
+</dd></dl>
+
+<dl class="attribute">
 <dt id="linop.LinearOperator.dtype">
 <tt class="descname">dtype</tt><a class="headerlink" href="#linop.LinearOperator.dtype" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>The data type of the operator.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="linop.LinearOperator.full">
+<tt class="descname">full</tt><big>(</big><big>)</big><a class="headerlink" href="#linop.LinearOperator.full" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert operator to a dense matrix. This is the same as <cite>to_array</cite>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="linop.LinearOperator.hermitian">
+<tt class="descname">hermitian</tt><a class="headerlink" href="#linop.LinearOperator.hermitian" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates whether the operator is Hermitian.</p>
+</dd></dl>
 
 <dl class="attribute">
 <dt id="linop.LinearOperator.nMatvec">
@@ -219,6 +363,13 @@ ignored. All other keyword arguments are passed directly to the superclass.</p>
 <dd><p>Reset operator/vector product counter to zero.</p>
 </dd></dl>
 
+<dl class="method">
+<dt id="linop.LinearOperator.rmatvec">
+<tt class="descname">rmatvec</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#linop.LinearOperator.rmatvec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Product with the conjugate transpose. This method is included for
+compatibility with Scipy only. Please use the <cite>H</cite> attribute instead.</p>
+</dd></dl>
+
 <dl class="attribute">
 <dt id="linop.LinearOperator.shape">
 <tt class="descname">shape</tt><a class="headerlink" href="#linop.LinearOperator.shape" title="Permalink to this definition">¶</a></dt>
@@ -228,14 +379,20 @@ ignored. All other keyword arguments are passed directly to the superclass.</p>
 <dl class="attribute">
 <dt id="linop.LinearOperator.symmetric">
 <tt class="descname">symmetric</tt><a class="headerlink" href="#linop.LinearOperator.symmetric" title="Permalink to this definition">¶</a></dt>
-<dd><p>Indicates whether the operator is symmetric or not.</p>
+<dd><p>Indicates whether the operator is symmetric.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="linop.LinearOperator.to_array">
+<tt class="descname">to_array</tt><big>(</big><big>)</big><a class="headerlink" href="#linop.LinearOperator.to_array" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert operator to a dense matrix. This is the same as <cite>full</cite>.</p>
 </dd></dl>
 
 </dd></dl>
 
 </div>
 <div class="section" id="simple-common-predefined-linear-operators">
-<h3>Simple Common Predefined Linear Operators<a class="headerlink" href="#simple-common-predefined-linear-operators" title="Permalink to this headline">¶</a></h3>
+<h3>2.2.3. Simple Common Predefined Linear Operators<a class="headerlink" href="#simple-common-predefined-linear-operators" title="Permalink to this headline">¶</a></h3>
 <p>A few common operators are predefined, such as the identity, the zero operator,
 and a class for diagonal operators.</p>
 <dl class="class">
@@ -243,53 +400,6 @@ and a class for diagonal operators.</p>
 <em class="property">class </em><tt class="descclassname">linop.</tt><tt class="descname">IdentityOperator</tt><big>(</big><em>nargin</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#linop.IdentityOperator" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#linop.LinearOperator" title="linop.LinearOperator"><tt class="xref py py-class docutils literal"><span class="pre">linop.LinearOperator</span></tt></a></p>
 <p>A linear operator representing the identity operator of size <cite>nargin</cite>.</p>
-<dl class="attribute">
-<dt id="linop.IdentityOperator.T">
-<tt class="descname">T</tt><a class="headerlink" href="#linop.IdentityOperator.T" title="Permalink to this definition">¶</a></dt>
-<dd><p>The transpose operator.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="linop.IdentityOperator.dtype">
-<tt class="descname">dtype</tt><a class="headerlink" href="#linop.IdentityOperator.dtype" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="linop.IdentityOperator.nMatvec">
-<tt class="descname">nMatvec</tt><a class="headerlink" href="#linop.IdentityOperator.nMatvec" title="Permalink to this definition">¶</a></dt>
-<dd><p>The number of products with vectors computed so far.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="linop.IdentityOperator.nargin">
-<tt class="descname">nargin</tt><a class="headerlink" href="#linop.IdentityOperator.nargin" title="Permalink to this definition">¶</a></dt>
-<dd><p>The size of an input vector.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="linop.IdentityOperator.nargout">
-<tt class="descname">nargout</tt><a class="headerlink" href="#linop.IdentityOperator.nargout" title="Permalink to this definition">¶</a></dt>
-<dd><p>The size of an output vector.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="linop.IdentityOperator.reset_counters">
-<tt class="descname">reset_counters</tt><big>(</big><big>)</big><a class="headerlink" href="#linop.IdentityOperator.reset_counters" title="Permalink to this definition">¶</a></dt>
-<dd><p>Reset operator/vector product counter to zero.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="linop.IdentityOperator.shape">
-<tt class="descname">shape</tt><a class="headerlink" href="#linop.IdentityOperator.shape" title="Permalink to this definition">¶</a></dt>
-<dd><p>The shape of the operator.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="linop.IdentityOperator.symmetric">
-<tt class="descname">symmetric</tt><a class="headerlink" href="#linop.IdentityOperator.symmetric" title="Permalink to this definition">¶</a></dt>
-<dd><p>Indicates whether the operator is symmetric or not.</p>
-</dd></dl>
-
 </dd></dl>
 
 <dl class="class">
@@ -297,53 +407,6 @@ and a class for diagonal operators.</p>
 <em class="property">class </em><tt class="descclassname">linop.</tt><tt class="descname">ZeroOperator</tt><big>(</big><em>nargin</em>, <em>nargout</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#linop.ZeroOperator" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#linop.LinearOperator" title="linop.LinearOperator"><tt class="xref py py-class docutils literal"><span class="pre">linop.LinearOperator</span></tt></a></p>
 <p>The zero linear operator of shape <cite>nargout</cite>-by-<cite>nargin</cite>.</p>
-<dl class="attribute">
-<dt id="linop.ZeroOperator.T">
-<tt class="descname">T</tt><a class="headerlink" href="#linop.ZeroOperator.T" title="Permalink to this definition">¶</a></dt>
-<dd><p>The transpose operator.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="linop.ZeroOperator.dtype">
-<tt class="descname">dtype</tt><a class="headerlink" href="#linop.ZeroOperator.dtype" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="linop.ZeroOperator.nMatvec">
-<tt class="descname">nMatvec</tt><a class="headerlink" href="#linop.ZeroOperator.nMatvec" title="Permalink to this definition">¶</a></dt>
-<dd><p>The number of products with vectors computed so far.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="linop.ZeroOperator.nargin">
-<tt class="descname">nargin</tt><a class="headerlink" href="#linop.ZeroOperator.nargin" title="Permalink to this definition">¶</a></dt>
-<dd><p>The size of an input vector.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="linop.ZeroOperator.nargout">
-<tt class="descname">nargout</tt><a class="headerlink" href="#linop.ZeroOperator.nargout" title="Permalink to this definition">¶</a></dt>
-<dd><p>The size of an output vector.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="linop.ZeroOperator.reset_counters">
-<tt class="descname">reset_counters</tt><big>(</big><big>)</big><a class="headerlink" href="#linop.ZeroOperator.reset_counters" title="Permalink to this definition">¶</a></dt>
-<dd><p>Reset operator/vector product counter to zero.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="linop.ZeroOperator.shape">
-<tt class="descname">shape</tt><a class="headerlink" href="#linop.ZeroOperator.shape" title="Permalink to this definition">¶</a></dt>
-<dd><p>The shape of the operator.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="linop.ZeroOperator.symmetric">
-<tt class="descname">symmetric</tt><a class="headerlink" href="#linop.ZeroOperator.symmetric" title="Permalink to this definition">¶</a></dt>
-<dd><p>Indicates whether the operator is symmetric or not.</p>
-</dd></dl>
-
 </dd></dl>
 
 <p>Diagonal operators are simply defined by their diagonal as a Numpy array. For
@@ -359,58 +422,11 @@ example:</p>
 <p>A diagonal linear operator defined by its diagonal <cite>diag</cite> (a Numpy array.)
 The type must be specified in the <cite>diag</cite> argument, e.g.,
 <cite>np.ones(5, dtype=np.complex)</cite> or <cite>np.ones(5).astype(np.complex)</cite>.</p>
-<dl class="attribute">
-<dt id="linop.DiagonalOperator.T">
-<tt class="descname">T</tt><a class="headerlink" href="#linop.DiagonalOperator.T" title="Permalink to this definition">¶</a></dt>
-<dd><p>The transpose operator.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="linop.DiagonalOperator.dtype">
-<tt class="descname">dtype</tt><a class="headerlink" href="#linop.DiagonalOperator.dtype" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="linop.DiagonalOperator.nMatvec">
-<tt class="descname">nMatvec</tt><a class="headerlink" href="#linop.DiagonalOperator.nMatvec" title="Permalink to this definition">¶</a></dt>
-<dd><p>The number of products with vectors computed so far.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="linop.DiagonalOperator.nargin">
-<tt class="descname">nargin</tt><a class="headerlink" href="#linop.DiagonalOperator.nargin" title="Permalink to this definition">¶</a></dt>
-<dd><p>The size of an input vector.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="linop.DiagonalOperator.nargout">
-<tt class="descname">nargout</tt><a class="headerlink" href="#linop.DiagonalOperator.nargout" title="Permalink to this definition">¶</a></dt>
-<dd><p>The size of an output vector.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="linop.DiagonalOperator.reset_counters">
-<tt class="descname">reset_counters</tt><big>(</big><big>)</big><a class="headerlink" href="#linop.DiagonalOperator.reset_counters" title="Permalink to this definition">¶</a></dt>
-<dd><p>Reset operator/vector product counter to zero.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="linop.DiagonalOperator.shape">
-<tt class="descname">shape</tt><a class="headerlink" href="#linop.DiagonalOperator.shape" title="Permalink to this definition">¶</a></dt>
-<dd><p>The shape of the operator.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="linop.DiagonalOperator.symmetric">
-<tt class="descname">symmetric</tt><a class="headerlink" href="#linop.DiagonalOperator.symmetric" title="Permalink to this definition">¶</a></dt>
-<dd><p>Indicates whether the operator is symmetric or not.</p>
-</dd></dl>
-
 </dd></dl>
 
 </div>
 <div class="section" id="convenience-functions">
-<h3>Convenience Functions<a class="headerlink" href="#convenience-functions" title="Permalink to this headline">¶</a></h3>
+<h3>2.2.4. Convenience Functions<a class="headerlink" href="#convenience-functions" title="Permalink to this headline">¶</a></h3>
 <p>Typically, linear operators don&#8217;t come alone and an operator is often used to
 define other operators. An example is reduction. Suppose <span class="math">\(A\)</span> is a linear
 operator from <span class="math">\(\mathbb{R}^n\)</span> into <span class="math">\(\mathbb{R^m}\)</span>,
@@ -456,16 +472,18 @@ following convenience functions build linear operators from <a class="reference 
 
 <dl class="function">
 <dt id="linop.linop_from_ndarray">
-<tt class="descclassname">linop.</tt><tt class="descname">linop_from_ndarray</tt><big>(</big><em>A</em><big>)</big><a class="headerlink" href="#linop.linop_from_ndarray" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">linop.</tt><tt class="descname">linop_from_ndarray</tt><big>(</big><em>A</em>, <em>symmetric=False</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#linop.linop_from_ndarray" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a linear operator from a Numpy <cite>ndarray</cite>.</p>
 </dd></dl>
 
 <p>Note that there is normally no need to build linear operators from Numpy
 matrices or from Scipy sparse matrices since they already support product and
 transposition.</p>
+<p>Certain operators implement <tt class="xref py py-meth docutils literal"><span class="pre">abs()</span></tt>. It is the case of diagonal operators. Note that <tt class="docutils literal"><span class="pre">abs</span></tt> is not implemented by default because it is not intended to represent the &#8220;elementwise&#8221; absolute value, as Numpy does with matrices. It is intended to represent the operator whose eigenvalues are the absolute values of the original operator. Thus, <tt class="docutils literal"><span class="pre">abs</span></tt> should be implemented on a case-by-case basis, as necessary.</p>
+<p>The <cite>linop</cite> module provides a <tt class="xref py py-func docutils literal"><span class="pre">sqrt()</span></tt> function. This function simply calls the <tt class="xref py py-meth docutils literal"><span class="pre">_sqrt()</span></tt> method of the operator passed as argument. If implemented, this method should return the &#8220;square root operator&#8221;, i.e., <tt class="docutils literal"><span class="pre">sqrt(A)</span></tt> should return an operator <tt class="docutils literal"><span class="pre">B</span></tt> such that <tt class="docutils literal"><span class="pre">B</span> <span class="pre">*</span> <span class="pre">B</span></tt> is the same operator as <tt class="docutils literal"><span class="pre">A</span></tt>.</p>
 </div>
 <div class="section" id="exceptions">
-<h3>Exceptions<a class="headerlink" href="#exceptions" title="Permalink to this headline">¶</a></h3>
+<h3>2.2.5. Exceptions<a class="headerlink" href="#exceptions" title="Permalink to this headline">¶</a></h3>
 <dl class="exception">
 <dt id="linop.ShapeError">
 <em class="property">exception </em><tt class="descclassname">linop.</tt><tt class="descname">ShapeError</tt><big>(</big><em>value</em><big>)</big><a class="headerlink" href="#linop.ShapeError" title="Permalink to this definition">¶</a></dt>
@@ -476,7 +494,7 @@ multiplying a linear operator with a vector of the wrong shape.</p>
 </div>
 </div>
 <div class="section" id="block-linear-operators-the-blkop-module">
-<h2>Block Linear Operators: The <a class="reference internal" href="#module-blkop" title="blkop"><tt class="xref py py-mod docutils literal"><span class="pre">blkop</span></tt></a> Module<a class="headerlink" href="#block-linear-operators-the-blkop-module" title="Permalink to this headline">¶</a></h2>
+<h2>2.3. Block Linear Operators: The <a class="reference internal" href="#module-blkop" title="blkop"><tt class="xref py py-mod docutils literal"><span class="pre">blkop</span></tt></a> Module<a class="headerlink" href="#block-linear-operators-the-blkop-module" title="Permalink to this headline">¶</a></h2>
 <p>Linear operators are sometimes defined by blocks. This is often the case in
 numerical optimization and the solution of partial-differential equations. An
 example of operator defined by blocks is</p>
@@ -493,40 +511,64 @@ above. If more structure is present, for example if the off-diagonal blocks are
 zero, <span class="math">\(K\)</span> is a block-diagonal operator and the class
 <tt class="docutils literal"><span class="pre">BlockDiagonalLinearOperator</span></tt> may be used to define it.</p>
 <span class="target" id="module-blkop"></span><div class="section" id="general-block-operators">
-<h3>General Block Operators<a class="headerlink" href="#general-block-operators" title="Permalink to this headline">¶</a></h3>
+<h3>2.3.1. General Block Operators<a class="headerlink" href="#general-block-operators" title="Permalink to this headline">¶</a></h3>
 <p>General block operators are defined using a list of lists, each of which
 defines a block row. If the block operator is specified as symmetric, each
 block on the diagonal must be symmetric. For example:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">A</span> <span class="o">=</span> <span class="n">LinearOperator</span><span class="p">(</span><span class="n">nargin</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">nargout</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
-                <span class="n">matvec</span><span class="o">=</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="mi">2</span><span class="o">*</span><span class="n">v</span><span class="p">,</span> <span class="n">symmetric</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-<span class="n">B</span> <span class="o">=</span> <span class="n">LinearOperator</span><span class="p">(</span><span class="n">nargin</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">nargout</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">matvec</span><span class="o">=</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="n">v</span><span class="p">[:</span><span class="mi">3</span><span class="p">],</span>
-                <span class="n">matvec_transp</span><span class="o">=</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">v</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">))))</span>
-<span class="n">C</span> <span class="o">=</span> <span class="n">LinearOperator</span><span class="p">(</span><span class="n">nargin</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">nargout</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">matvec</span><span class="o">=</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="n">v</span><span class="p">[:</span><span class="mi">2</span><span class="p">],</span>
-                <span class="n">matvec_transp</span><span class="o">=</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">v</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">))))</span>
-<span class="n">D</span> <span class="o">=</span> <span class="n">LinearOperator</span><span class="p">(</span><span class="n">nargin</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">nargout</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">matvec</span><span class="o">=</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="n">v</span><span class="p">[:</span><span class="mi">2</span><span class="p">],</span>
-                <span class="n">matvec_transp</span><span class="o">=</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">v</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">))))</span>
-<span class="n">E</span> <span class="o">=</span> <span class="n">LinearOperator</span><span class="p">(</span><span class="n">nargin</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">nargout</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
-                <span class="n">matvec</span><span class="o">=</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="o">-</span><span class="n">v</span><span class="p">,</span> <span class="n">symmetric</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25</pre></div></td><td class="code"><div class="highlight"><pre> <span class="n">A</span> <span class="o">=</span> <span class="n">LinearOperator</span><span class="p">(</span><span class="n">nargin</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">nargout</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+                 <span class="n">matvec</span><span class="o">=</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="mi">2</span><span class="o">*</span><span class="n">v</span><span class="p">,</span> <span class="n">symmetric</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+ <span class="n">B</span> <span class="o">=</span> <span class="n">LinearOperator</span><span class="p">(</span><span class="n">nargin</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">nargout</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">matvec</span><span class="o">=</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="n">v</span><span class="p">[:</span><span class="mi">3</span><span class="p">],</span>
+                 <span class="n">matvec_transp</span><span class="o">=</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">v</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">))))</span>
+ <span class="n">C</span> <span class="o">=</span> <span class="n">LinearOperator</span><span class="p">(</span><span class="n">nargin</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">nargout</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">matvec</span><span class="o">=</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="n">v</span><span class="p">[:</span><span class="mi">2</span><span class="p">],</span>
+                 <span class="n">matvec_transp</span><span class="o">=</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">v</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">))))</span>
+ <span class="n">D</span> <span class="o">=</span> <span class="n">LinearOperator</span><span class="p">(</span><span class="n">nargin</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">nargout</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">matvec</span><span class="o">=</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="n">v</span><span class="p">[:</span><span class="mi">2</span><span class="p">],</span>
+                 <span class="n">matvec_transp</span><span class="o">=</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">v</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">))))</span>
+ <span class="n">E</span> <span class="o">=</span> <span class="n">LinearOperator</span><span class="p">(</span><span class="n">nargin</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">nargout</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+                 <span class="n">matvec</span><span class="o">=</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="o">-</span><span class="n">v</span><span class="p">,</span> <span class="n">symmetric</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 
-<span class="c"># Build [A  B].</span>
-<span class="n">K1</span> <span class="o">=</span> <span class="n">BlockLinearOperator</span><span class="p">([[</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">]])</span>
+ <span class="c"># Build [A  B].</span>
+ <span class="n">K1</span> <span class="o">=</span> <span class="n">BlockLinearOperator</span><span class="p">([[</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">]])</span>
 
-<span class="c"># Build [A  B]</span>
-<span class="c">#       [C  D].</span>
-<span class="n">K2</span> <span class="o">=</span> <span class="n">BlockLinearOperator</span><span class="p">([[</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">],</span> <span class="p">[</span><span class="n">C</span><span class="p">,</span> <span class="n">D</span><span class="p">]])</span>
+ <span class="c"># Build [A  B]</span>
+ <span class="c">#       [C  D].</span>
+ <span class="n">K2</span> <span class="o">=</span> <span class="n">BlockLinearOperator</span><span class="p">([[</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">],</span> <span class="p">[</span><span class="n">C</span><span class="p">,</span> <span class="n">D</span><span class="p">]])</span>
 
-<span class="c"># Build [A]</span>
-<span class="c">#       [C].</span>
-<span class="n">K3</span> <span class="o">=</span> <span class="n">BlockLinearOperator</span><span class="p">([[</span><span class="n">A</span><span class="p">],</span> <span class="p">[</span><span class="n">C</span><span class="p">]])</span>
+ <span class="c"># Build [A]</span>
+ <span class="c">#       [C].</span>
+ <span class="n">K3</span> <span class="o">=</span> <span class="n">BlockLinearOperator</span><span class="p">([[</span><span class="n">A</span><span class="p">],</span> <span class="p">[</span><span class="n">C</span><span class="p">]])</span>
 
-<span class="c"># Build [A  B]</span>
-<span class="c">#       [B&#39; E].</span>
-<span class="n">K4</span> <span class="o">=</span> <span class="n">BlockLinearOperator</span><span class="p">([[</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">],</span> <span class="p">[</span><span class="n">E</span><span class="p">]],</span> <span class="n">symmetric</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+ <span class="c"># Build [A  B]</span>
+ <span class="c">#       [B&#39; E].</span>
+ <span class="n">K4</span> <span class="o">=</span> <span class="n">BlockLinearOperator</span><span class="p">([[</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">],</span> <span class="p">[</span><span class="n">E</span><span class="p">]],</span> <span class="n">symmetric</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 </pre></div>
-</div>
+</td></tr></table></div>
 <dl class="class">
 <dt id="blkop.BlockLinearOperator">
-<em class="property">class </em><tt class="descclassname">blkop.</tt><tt class="descname">BlockLinearOperator</tt><big>(</big><em>blocks</em>, <em>symmetric=False</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#blkop.BlockLinearOperator" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">blkop.</tt><tt class="descname">BlockLinearOperator</tt><big>(</big><em>blocks</em>, <em>symmetric=False</em>, <em>hermitian=False</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#blkop.BlockLinearOperator" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">pykrylov.linop.linop.LinearOperator</span></tt></p>
 <p>A linear operator defined by blocks. Each block must be a linear operator.</p>
 <p><cite>blocks</cite> should be a list of lists describing the blocks row-wise.
@@ -536,63 +578,16 @@ If there is only one block row, it should be specified as
 need be specified, e.g., <cite>[[A,B,C], [D,E], [F]]</cite>, and the blocks on the
 diagonal must be square and symmetric.</p>
 <dl class="attribute">
-<dt id="blkop.BlockLinearOperator.T">
-<tt class="descname">T</tt><a class="headerlink" href="#blkop.BlockLinearOperator.T" title="Permalink to this definition">¶</a></dt>
-<dd><p>The transpose operator.</p>
-</dd></dl>
-
-<dl class="attribute">
 <dt id="blkop.BlockLinearOperator.blocks">
 <tt class="descname">blocks</tt><a class="headerlink" href="#blkop.BlockLinearOperator.blocks" title="Permalink to this definition">¶</a></dt>
 <dd><p>The list of blocks defining the block operator.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="blkop.BlockLinearOperator.dtype">
-<tt class="descname">dtype</tt><a class="headerlink" href="#blkop.BlockLinearOperator.dtype" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="blkop.BlockLinearOperator.nMatvec">
-<tt class="descname">nMatvec</tt><a class="headerlink" href="#blkop.BlockLinearOperator.nMatvec" title="Permalink to this definition">¶</a></dt>
-<dd><p>The number of products with vectors computed so far.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="blkop.BlockLinearOperator.nargin">
-<tt class="descname">nargin</tt><a class="headerlink" href="#blkop.BlockLinearOperator.nargin" title="Permalink to this definition">¶</a></dt>
-<dd><p>The size of an input vector.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="blkop.BlockLinearOperator.nargout">
-<tt class="descname">nargout</tt><a class="headerlink" href="#blkop.BlockLinearOperator.nargout" title="Permalink to this definition">¶</a></dt>
-<dd><p>The size of an output vector.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="blkop.BlockLinearOperator.reset_counters">
-<tt class="descname">reset_counters</tt><big>(</big><big>)</big><a class="headerlink" href="#blkop.BlockLinearOperator.reset_counters" title="Permalink to this definition">¶</a></dt>
-<dd><p>Reset operator/vector product counter to zero.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="blkop.BlockLinearOperator.shape">
-<tt class="descname">shape</tt><a class="headerlink" href="#blkop.BlockLinearOperator.shape" title="Permalink to this definition">¶</a></dt>
-<dd><p>The shape of the operator.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="blkop.BlockLinearOperator.symmetric">
-<tt class="descname">symmetric</tt><a class="headerlink" href="#blkop.BlockLinearOperator.symmetric" title="Permalink to this definition">¶</a></dt>
-<dd><p>Indicates whether the operator is symmetric or not.</p>
 </dd></dl>
 
 </dd></dl>
 
 </div>
 <div class="section" id="block-diagonal-operators">
-<h3>Block Diagonal Operators<a class="headerlink" href="#block-diagonal-operators" title="Permalink to this headline">¶</a></h3>
+<h3>2.3.2. Block Diagonal Operators<a class="headerlink" href="#block-diagonal-operators" title="Permalink to this headline">¶</a></h3>
 <p>Block diagonal operators are a special case of block operators and are defined
 with a list containing the blocks on the diagonal. If the block operator is
 specified as symmetric, each block must be symmetric. For example:</p>
@@ -606,56 +601,9 @@ specified as symmetric, each block must be symmetric. For example:</p>
 <p>A block diagonal linear operator. Each block must be a linear operator.
 The blocks may be specified as one list, e.g., <cite>[A, B, C]</cite>.</p>
 <dl class="attribute">
-<dt id="blkop.BlockDiagonalLinearOperator.T">
-<tt class="descname">T</tt><a class="headerlink" href="#blkop.BlockDiagonalLinearOperator.T" title="Permalink to this definition">¶</a></dt>
-<dd><p>The transpose operator.</p>
-</dd></dl>
-
-<dl class="attribute">
 <dt id="blkop.BlockDiagonalLinearOperator.blocks">
 <tt class="descname">blocks</tt><a class="headerlink" href="#blkop.BlockDiagonalLinearOperator.blocks" title="Permalink to this definition">¶</a></dt>
 <dd><p>The list of blocks defining the block diagonal operator.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="blkop.BlockDiagonalLinearOperator.dtype">
-<tt class="descname">dtype</tt><a class="headerlink" href="#blkop.BlockDiagonalLinearOperator.dtype" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="blkop.BlockDiagonalLinearOperator.nMatvec">
-<tt class="descname">nMatvec</tt><a class="headerlink" href="#blkop.BlockDiagonalLinearOperator.nMatvec" title="Permalink to this definition">¶</a></dt>
-<dd><p>The number of products with vectors computed so far.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="blkop.BlockDiagonalLinearOperator.nargin">
-<tt class="descname">nargin</tt><a class="headerlink" href="#blkop.BlockDiagonalLinearOperator.nargin" title="Permalink to this definition">¶</a></dt>
-<dd><p>The size of an input vector.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="blkop.BlockDiagonalLinearOperator.nargout">
-<tt class="descname">nargout</tt><a class="headerlink" href="#blkop.BlockDiagonalLinearOperator.nargout" title="Permalink to this definition">¶</a></dt>
-<dd><p>The size of an output vector.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="blkop.BlockDiagonalLinearOperator.reset_counters">
-<tt class="descname">reset_counters</tt><big>(</big><big>)</big><a class="headerlink" href="#blkop.BlockDiagonalLinearOperator.reset_counters" title="Permalink to this definition">¶</a></dt>
-<dd><p>Reset operator/vector product counter to zero.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="blkop.BlockDiagonalLinearOperator.shape">
-<tt class="descname">shape</tt><a class="headerlink" href="#blkop.BlockDiagonalLinearOperator.shape" title="Permalink to this definition">¶</a></dt>
-<dd><p>The shape of the operator.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="blkop.BlockDiagonalLinearOperator.symmetric">
-<tt class="descname">symmetric</tt><a class="headerlink" href="#blkop.BlockDiagonalLinearOperator.symmetric" title="Permalink to this definition">¶</a></dt>
-<dd><p>Indicates whether the operator is symmetric or not.</p>
 </dd></dl>
 
 </dd></dl>
@@ -663,7 +611,9 @@ The blocks may be specified as one list, e.g., <cite>[A, B, C]</cite>.</p>
 </div>
 </div>
 <div class="section" id="operations-with-operators">
-<h2>Operations with Operators<a class="headerlink" href="#operations-with-operators" title="Permalink to this headline">¶</a></h2>
+<h2>2.4. Operations with Operators<a class="headerlink" href="#operations-with-operators" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="arithmetic-operations">
+<h3>2.4.1. Arithmetic Operations<a class="headerlink" href="#arithmetic-operations" title="Permalink to this headline">¶</a></h3>
 <p>Linear operators, whether defined by blocks or not, may be added together or
 composed following the usual rules of linear algebra. An operator may be
 multiplied by a scalar or by another operator. Operators of the same shape may
@@ -677,106 +627,81 @@ example:</p>
 <span class="n">G</span>  <span class="o">=</span> <span class="n">E</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">B</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="n">B</span>
 </pre></div>
 </div>
+</div>
+<div class="section" id="indexing-and-iterating">
+<h3>2.4.2. Indexing and Iterating<a class="headerlink" href="#indexing-and-iterating" title="Permalink to this headline">¶</a></h3>
 <p>Block operators also support iteration and indexing. Iterating over a block
 operator amounts to iterating row-wise over its blocks. Iterating over a block
 diagonal operator amounts to iterating over its diagonal blocks. Indexing works
 as expected. Indexing general block operators requires two indices, much as
 when indexing a matrix, while indexing a block diagonal operator requires a
 single indices. For example:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">K2</span> <span class="o">=</span> <span class="n">BlockLinearOperator</span><span class="p">([[</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">],</span> <span class="p">[</span><span class="n">C</span><span class="p">,</span> <span class="n">D</span><span class="p">]])</span>
-<span class="n">K2</span><span class="p">[</span><span class="mi">0</span><span class="p">,:]</span>   <span class="c"># Returns the block operator defined by [[A, B]].</span>
-<span class="n">K2</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span>   <span class="c"># Returns the block operator defined by [[C], [D]].</span>
-<span class="n">K2</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>   <span class="c"># Returns the linear operator D.</span>
+<div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19</pre></div></td><td class="code"><div class="highlight"><pre> <span class="n">K2</span> <span class="o">=</span> <span class="n">BlockLinearOperator</span><span class="p">([[</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">],</span> <span class="p">[</span><span class="n">C</span><span class="p">,</span> <span class="n">D</span><span class="p">]])</span>
+ <span class="n">K2</span><span class="p">[</span><span class="mi">0</span><span class="p">,:]</span>      <span class="c"># Returns the block operator defined by [[A, B]].</span>
+ <span class="n">K2</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span>      <span class="c"># Returns the block operator defined by [[C], [D]].</span>
+ <span class="n">K2</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>      <span class="c"># Returns the linear operator D.</span>
+ <span class="n">C</span><span class="o">.</span><span class="n">T</span> <span class="ow">in</span> <span class="n">K2</span>    <span class="c"># Returns True.</span>
 
-<span class="n">K4</span> <span class="o">=</span> <span class="n">BlockLinearOperator</span><span class="p">([[</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">],</span> <span class="p">[</span><span class="n">E</span><span class="p">]],</span> <span class="n">symmetric</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-<span class="n">K4</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>   <span class="c"># Returns the linear operator B.T.</span>
+ <span class="n">K4</span> <span class="o">=</span> <span class="n">BlockLinearOperator</span><span class="p">([[</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">],</span> <span class="p">[</span><span class="n">E</span><span class="p">]],</span> <span class="n">symmetric</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+ <span class="n">K4</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>      <span class="c"># Returns the linear operator B.T.</span>
+ <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="n">K4</span><span class="p">:</span>
+     <span class="k">print</span> <span class="n">block</span>   <span class="c"># Iterates over all blocks (in both triangles).</span>
 
-<span class="n">K5</span> <span class="o">=</span> <span class="n">BlockDiagonalLinearOperator</span><span class="p">([</span><span class="n">A</span><span class="p">,</span> <span class="n">E</span><span class="p">],</span> <span class="n">symmetric</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-<span class="n">K5</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>     <span class="c"># Returns the linear operator A.</span>
-<span class="n">K5</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>     <span class="c"># Returns the linear operator B.</span>
-<span class="n">K5</span><span class="p">[:]</span>     <span class="c"># Returns the diagonal operator defines by [A, E].</span>
+ <span class="n">K5</span> <span class="o">=</span> <span class="n">BlockDiagonalLinearOperator</span><span class="p">([</span><span class="n">A</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">D</span><span class="p">],</span> <span class="n">symmetric</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+ <span class="n">K5</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>        <span class="c"># Returns the linear operator A.</span>
+ <span class="n">K5</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>        <span class="c"># Returns the linear operator B.</span>
+ <span class="n">K5</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">E</span><span class="o">.</span><span class="n">T</span>  <span class="c"># Updates the middle block.</span>
+ <span class="n">K5</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>       <span class="c"># Returns the diagonal operator defined by [A, E].</span>
+ <span class="n">D</span> <span class="ow">in</span> <span class="n">K5</span>      <span class="c"># Returns True</span>
+ <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="n">K5</span><span class="p">:</span>
+     <span class="k">print</span> <span class="n">block</span>   <span class="c"># Iterates over all diagonal blocks.</span>
 </pre></div>
+</td></tr></table></div>
 </div>
 </div>
 </div>
 
 
-          </div>
-        </div>
-      </div>
-        </div>
-        <div class="sidebar">
-          <h3>Table Of Contents</h3>
-          <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="">Linear Operators</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#introduction">Introduction</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-linop">The <tt class="docutils literal"><span class="pre">linop</span></tt> Module</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#base-class-for-linear-operators">Base Class for Linear Operators</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#linear-operators-defined-by-functions">Linear Operators Defined by Functions</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#simple-common-predefined-linear-operators">Simple Common Predefined Linear Operators</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#convenience-functions">Convenience Functions</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#exceptions">Exceptions</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#block-linear-operators-the-blkop-module">Block Linear Operators: The <tt class="docutils literal"><span class="pre">blkop</span></tt> Module</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#general-block-operators">General Block Operators</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#block-diagonal-operators">Block Diagonal Operators</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#operations-with-operators">Operations with Operators</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="generic.html">Generic Template</a></li>
-<li class="toctree-l1"><a class="reference internal" href="cg.html">Conjugate Gradient</a></li>
-<li class="toctree-l1"><a class="reference internal" href="cgs.html">Conjugate Gradient Squared</a></li>
-<li class="toctree-l1"><a class="reference internal" href="bicgstab.html">Bi-Conjugate Gradient Stabilized</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tfqmr.html">Transpose-Free Quasi-Minimum Residual</a></li>
-<li class="toctree-l1"><a class="reference internal" href="symmlq.html">Symmetric Indefinite Method with Orthogonal Factorization</a></li>
-<li class="toctree-l1"><a class="reference internal" href="bmark.html">Benchmarking Solvers</a></li>
-</ul>
-
-          <h3 style="margin-top: 1.5em;">Search</h3>
-          <form class="search" action="search.html" method="get">
-            <input type="text" name="q" />
-            <input type="submit" value="Go" />
-            <input type="hidden" name="check_keywords" value="yes" />
-            <input type="hidden" name="area" value="default" />
-          </form>
-          <p class="searchtip" style="font-size: 90%">
-            Enter search terms or a module, class or function name.
-          </p>
-        </div>
-        <div class="clearer"></div>
-      </div>
     </div>
-
-    <div class="footer-wrapper">
-      <div class="footer">
-        <div class="left">
-          <a href="introduction.html" title="Introduction to PyKrylov"
-             >previous</a> |
-          <a href="generic.html" title="Generic Template for Krylov Methods"
-             >next</a> |
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |
-          <a href="genindex.html" title="General Index"
-             >index</a>
-            <br/>
-            <a href="_sources/linop.txt"
-               rel="nofollow">Show Source</a>
-        </div>
-
-        <div class="right">
-          
-    <div class="footer">
-        &copy; Copyright 2008, D. Orban.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
-    </div>
-        </div>
-        <div class="clearer"></div>
-      </div>
-    </div>
-
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+<div id="sourcelink">
+  <a href="_sources/linop.txt"
+     rel="nofollow">Source</a>
+</div>
+      
+    </p>
+    <p>
+        &copy; Copyright 2014, D. Orban.<br/>
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.2.1.<br/>
+    </p>
+  </div>
+</footer>
   </body>
 </html>

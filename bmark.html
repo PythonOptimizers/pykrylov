@@ -1,22 +1,21 @@
-
-
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Benchmarking Solvers &mdash; PyKrylov 0.1 documentation</title>
+    <title>9. Benchmarking Solvers &mdash; PyKrylov 0.2 documentation</title>
     
-    <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
+    <link rel="stylesheet" href="_static/basic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bootswatch-3.1.0/spacelab/bootstrap.min.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '',
-        VERSION:     '0.1',
+        URL_ROOT:    './',
+        VERSION:     '0.2',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,35 +25,120 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="PyKrylov 0.1 documentation" href="index.html" />
-    <link rel="prev" title="The Symmetric Indefinite Method with Orthogonal Factorization" href="symmlq.html" /> 
+    <script type="text/javascript" src="_static/js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="_static/js/jquery-fix.js"></script>
+    <script type="text/javascript" src="_static/bootstrap-3.1.0/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="_static/bootstrap-sphinx.js"></script>
+    <link rel="top" title="PyKrylov 0.2 documentation" href="index.html" />
+    <link rel="prev" title="8. The Symmetric Indefinite Method with Orthogonal Factorization" href="symmlq.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
   </head>
   <body>
-    <div class="header-wrapper">
-      <div class="header">
-        <div class="headertitle"><a
-          href="contents.html">PyKrylov 0.1 documentation</a></div>
-        <div class="rel">
-          <a href="symmlq.html" title="The Symmetric Indefinite Method with Orthogonal Factorization"
-             accesskey="P">previous</a> |
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |
-          <a href="genindex.html" title="General Index"
-             accesskey="I">index</a>
-        </div>
-       </div>
-    </div>
+  
+  <a href="https://github.com/dpo/pykrylov"
+     class="visible-desktop"><img
+    style="position: absolute; top: 40px; right: 0; border: 0;"
+    src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png"
+    alt="Fork me on GitHub"></a>
 
-    <div class="content-wrapper">
-      <div class="content">
-        <div class="document">
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="contents.html">
+          PyKrylov</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.2</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            <li class="divider-vertical"></li>
             
-      <div class="documentwrapper">
-        <div class="bodywrapper">
-          <div class="body">
             
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="contents.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"><ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="linop.html">2. Linear Operators</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generic.html">3. Generic Template</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cg.html">4. Conjugate Gradient</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cgs.html">5. Conjugate Gradient Squared</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bicgstab.html">6. Bi-Conjugate Gradient Stabilized</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tfqmr.html">7. Transpose-Free Quasi-Minimum Residual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="symmlq.html">8. Symmetric Indefinite Method with Orthogonal Factorization</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">9. Benchmarking Solvers</a></li>
+</ul>
+</ul>
+</li>
+              
+                <li class="dropdown">
+  <a role="button"
+     id="dLabelLocalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="#">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"
+      role="menu"
+      aria-labelledby="dLabelLocalToc"><ul>
+<li><a class="reference internal" href="#">9. Benchmarking Solvers</a><ul>
+<li><a class="reference internal" href="#example-with-preconditioning">9.1. Example with Preconditioning</a></li>
+</ul>
+</li>
+</ul>
+</ul>
+</li>
+              
+            
+            
+              
+                
+  <li>
+    <a href="symmlq.html" title="Previous Chapter: 8. The Symmetric Indefinite Method with Orthogonal Factorization"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm">&laquo; 8. The Symmetric...</span>
+    </a>
+  </li>
+              
+            
+            
+            
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-12">
+      
   <div class="section" id="benchmarking-solvers">
-<span id="bmark-page"></span><h1>Benchmarking Solvers<a class="headerlink" href="#benchmarking-solvers" title="Permalink to this headline">¶</a></h1>
+<span id="bmark-page"></span><h1>9. Benchmarking Solvers<a class="headerlink" href="#benchmarking-solvers" title="Permalink to this headline">¶</a></h1>
 <p>You may have noticed that in the examples of sections <a class="reference internal" href="cg.html#cg-page"><em>The Conjugate Gradient Method</em></a>,
 <a class="reference internal" href="cgs.html#cgs-page"><em>The Conjugate Gradient Squared Method</em></a>, <a class="reference internal" href="bicgstab.html#bicgstab-page"><em>The Bi-Conjugate Gradient Stabilized Method</em></a> and <a class="reference internal" href="tfqmr.html#tfqmr-page"><em>The Transpose-Free Quasi-Minimal Residual Method</em></a>, the only line that
 differs in the example scripts has the form</p>
@@ -94,13 +178,14 @@ problems.</p>
 </pre></div>
 </div>
 <p>Executing the script above produces the formatted output:</p>
-<div class="highlight-python"><pre>     Name  Matvec    Resid0     Resid     Error
+<div class="highlight-python"><div class="highlight"><pre>     Name  Matvec    Resid0     Resid     Error
       CGS      82  8.64e+03  3.25e-05  2.35e-06
     TFQMR      84  8.64e+03  8.97e-06  1.22e-06
-Bi-CGSTAB      84  8.64e+03  5.57e-05  4.04e-06</pre>
+Bi-CGSTAB      84  8.64e+03  5.57e-05  4.04e-06
+</pre></div>
 </div>
 <div class="section" id="example-with-preconditioning">
-<h2>Example with Preconditioning<a class="headerlink" href="#example-with-preconditioning" title="Permalink to this headline">¶</a></h2>
+<h2>9.1. Example with Preconditioning<a class="headerlink" href="#example-with-preconditioning" title="Permalink to this headline">¶</a></h2>
 <p>A preconditioner can be supplied to any Krylov solver via the <cite>precon</cite> keyword
 argument upon instantiation.</p>
 <p>For example, we could supply a simple (and naive) diagonal preconditioner by
@@ -139,10 +224,11 @@ modifying the benchmarking script as:</p>
 </pre></div>
 </div>
 <p>This time, the output is a bit better than before:</p>
-<div class="highlight-python"><pre>     Name  Matvec    Resid0     Resid     Error
+<div class="highlight-python"><div class="highlight"><pre>     Name  Matvec    Resid0     Resid     Error
       CGS      70  8.64e+03  7.84e-06  2.33e-07
     TFQMR      70  8.64e+03  7.61e-06  2.47e-07
-Bi-CGSTAB      64  8.64e+03  8.54e-05  4.93e-06</pre>
+Bi-CGSTAB      64  8.64e+03  8.54e-05  4.93e-06
+</pre></div>
 </div>
 <p>Much in the same way, a modification of the script above could be used to loop
 through preconditioners with a given solver.</p>
@@ -174,66 +260,28 @@ appropriate size, one solves preconditioning systems by simply calling
 </div>
 
 
-          </div>
-        </div>
-      </div>
-        </div>
-        <div class="sidebar">
-          <h3>Table Of Contents</h3>
-          <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="linop.html">Linear Operators</a></li>
-<li class="toctree-l1"><a class="reference internal" href="generic.html">Generic Template</a></li>
-<li class="toctree-l1"><a class="reference internal" href="cg.html">Conjugate Gradient</a></li>
-<li class="toctree-l1"><a class="reference internal" href="cgs.html">Conjugate Gradient Squared</a></li>
-<li class="toctree-l1"><a class="reference internal" href="bicgstab.html">Bi-Conjugate Gradient Stabilized</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tfqmr.html">Transpose-Free Quasi-Minimum Residual</a></li>
-<li class="toctree-l1"><a class="reference internal" href="symmlq.html">Symmetric Indefinite Method with Orthogonal Factorization</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="">Benchmarking Solvers</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#example-with-preconditioning">Example with Preconditioning</a></li>
-</ul>
-</li>
-</ul>
-
-          <h3 style="margin-top: 1.5em;">Search</h3>
-          <form class="search" action="search.html" method="get">
-            <input type="text" name="q" />
-            <input type="submit" value="Go" />
-            <input type="hidden" name="check_keywords" value="yes" />
-            <input type="hidden" name="area" value="default" />
-          </form>
-          <p class="searchtip" style="font-size: 90%">
-            Enter search terms or a module, class or function name.
-          </p>
-        </div>
-        <div class="clearer"></div>
-      </div>
     </div>
-
-    <div class="footer-wrapper">
-      <div class="footer">
-        <div class="left">
-          <a href="symmlq.html" title="The Symmetric Indefinite Method with Orthogonal Factorization"
-             >previous</a> |
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |
-          <a href="genindex.html" title="General Index"
-             >index</a>
-            <br/>
-            <a href="_sources/bmark.txt"
-               rel="nofollow">Show Source</a>
-        </div>
-
-        <div class="right">
-          
-    <div class="footer">
-        &copy; Copyright 2008, D. Orban.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
-    </div>
-        </div>
-        <div class="clearer"></div>
-      </div>
-    </div>
-
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+<div id="sourcelink">
+  <a href="_sources/bmark.txt"
+     rel="nofollow">Source</a>
+</div>
+      
+    </p>
+    <p>
+        &copy; Copyright 2014, D. Orban.<br/>
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.2.1.<br/>
+    </p>
+  </div>
+</footer>
   </body>
 </html>
