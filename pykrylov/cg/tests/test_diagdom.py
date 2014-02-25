@@ -7,6 +7,7 @@ import numpy as np
 from math import sqrt, sin, pi
 
 from pykrylov.gallery import Poisson1dMatvec, Poisson2dMatvec
+from pykrylov.linop import LinearOperator
 from pykrylov.cg import CG
 
 def macheps():
@@ -40,11 +41,12 @@ class Poisson1dTestCase(unittest.TestCase):
             cond = lmbd_max/lmbd_min
             tol = cond * self.eps
 
+            A = LinearOperator(n, n,
+                               lambda x: Poisson1dMatvec(x),
+                               symmetric=True)
             e = np.ones(n)
-            rhs = Poisson1dMatvec(e)
-            cg = CG(Poisson1dMatvec,
-                    matvec_max=2*n,
-                    outputStream=sys.stderr)
+            rhs = A * e
+            cg = CG(A, matvec_max=2*n, outputStream=sys.stderr)
             cg.solve(rhs)
             err = np.linalg.norm(e-cg.bestSolution)/sqrt(n)
             sys.stderr.write(self.fmt % (n, cg.nMatvec, cg.residNorm, err))
@@ -76,11 +78,12 @@ class Poisson2dTestCase(unittest.TestCase):
             tol = cond * self.eps
 
             n2 = n*n
+            A = LinearOperator(n2, n2,
+                               lambda x: Poisson2dMatvec(x),
+                               symmetric=True)
             e = np.ones(n2)
-            rhs = Poisson2dMatvec(e)
-            cg = CG(Poisson2dMatvec,
-                    matvec_max=2*n2,
-                    outputStream=sys.stderr)
+            rhs = A * e
+            cg = CG(A, matvec_max=2*n2, outputStream=sys.stderr)
             cg.solve(rhs)
             err = np.linalg.norm(e-cg.bestSolution)/n
             sys.stderr.write(self.fmt % (n2, cg.nMatvec, cg.residNorm, err))
