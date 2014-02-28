@@ -502,6 +502,11 @@ class DiagonalOperator(LinearOperator):
                                                dtype=diag.dtype,
                                                **kwargs)
 
+    @property
+    def diag(self):
+        "Return the diagonal of the operator."
+        return self.__diag
+
     def __abs__(self):
         return DiagonalOperator(np.abs(self.__diag))
 
