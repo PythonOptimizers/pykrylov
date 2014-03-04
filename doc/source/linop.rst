@@ -40,6 +40,8 @@ The :mod:`linop` Module
 
 .. automodule:: linop
 
+.. inheritance-diagram:: linop
+
 Base Class for Linear Operators
 -------------------------------
 
@@ -212,6 +214,8 @@ zero, :math:`K` is a block-diagonal operator and the class
 ``BlockDiagonalLinearOperator`` may be used to define it.
 
 .. automodule:: blkop
+
+.. inheritance-diagram:: blkop
 
 General Block Operators
 -----------------------
