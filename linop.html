@@ -187,6 +187,9 @@ operators constructed by blocks.</p>
 </div>
 <div class="section" id="module-linop">
 <span id="the-linop-module"></span><h2>2.2. The <a class="reference internal" href="#module-linop" title="linop"><tt class="xref py py-mod docutils literal"><span class="pre">linop</span></tt></a> Module<a class="headerlink" href="#module-linop" title="Permalink to this headline">¶</a></h2>
+<p class="graphviz">
+<img src="_images/inheritance-5237f00a1197276fdc71a6a0eb01679561a1eb73.svg" alt="Inheritance diagram of linop" class="inheritance"/>
+</p>
 <div class="section" id="base-class-for-linear-operators">
 <h3>2.2.1. Base Class for Linear Operators<a class="headerlink" href="#base-class-for-linear-operators" title="Permalink to this headline">¶</a></h3>
 <p>All linear operators derive from the base class <tt class="docutils literal"><span class="pre">BaseLinearOperator</span></tt>. This
@@ -462,8 +465,17 @@ symmetry as the original operator.</p>
 output to <cite>indices</cite>.</p>
 </dd></dl>
 
-<p>An obvious use case of linear operators is matrices themselves! The two
+<p>An obvious use case of linear operators is matrices themselves! The
 following convenience functions build linear operators from <a class="reference external" href="http://pysparse.sf.net">Pysparse</a> sparse matrices and from Numpy arrays.</p>
+<dl class="function">
+<dt id="linop.CoordLinearOperator">
+<tt class="descclassname">linop.</tt><tt class="descname">CoordLinearOperator</tt><big>(</big><em>vals</em>, <em>rows</em>, <em>cols</em>, <em>nargin=0</em>, <em>nargout=0</em>, <em>symmetric=False</em><big>)</big><a class="headerlink" href="#linop.CoordLinearOperator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a linear operator from a sparse matrix in coordinate format.
+If <cite>nargin</cite> or <cite>nargout</cite> is not specified, it will be inferred from
+<cite>rows</cite> and <cite>cols</cite>. If <cite>symmetric</cite> is <cite>True</cite>, then <cite>vals</cite>, <cite>rows</cite> and
+<cite>cols</cite> are assumed to only represent one triangle of the operator.</p>
+</dd></dl>
+
 <dl class="function">
 <dt id="linop.PysparseLinearOperator">
 <tt class="descclassname">linop.</tt><tt class="descname">PysparseLinearOperator</tt><big>(</big><em>A</em><big>)</big><a class="headerlink" href="#linop.PysparseLinearOperator" title="Permalink to this definition">¶</a></dt>
@@ -510,7 +522,10 @@ example of operator defined by blocks is</p>
 above. If more structure is present, for example if the off-diagonal blocks are
 zero, <span class="math">\(K\)</span> is a block-diagonal operator and the class
 <tt class="docutils literal"><span class="pre">BlockDiagonalLinearOperator</span></tt> may be used to define it.</p>
-<span class="target" id="module-blkop"></span><div class="section" id="general-block-operators">
+<span class="target" id="module-blkop"></span><p class="graphviz">
+<img src="_images/inheritance-eb8ab34d351ef43e8f7efdabdcd245b5a64cf01a.svg" alt="Inheritance diagram of blkop" class="inheritance"/>
+</p>
+<div class="section" id="general-block-operators">
 <h3>2.3.1. General Block Operators<a class="headerlink" href="#general-block-operators" title="Permalink to this headline">¶</a></h3>
 <p>General block operators are defined using a list of lists, each of which
 defines a block row. If the block operator is specified as symmetric, each
