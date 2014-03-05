@@ -630,6 +630,56 @@ class ShapeError(Exception):
         return repr(self.value)
 
 
+def CoordLinearOperator(vals, rows, cols,
+                        nargin=0, nargout=0, symmetric=False):
+    """
+    Return a linear operator from a sparse matrix in coordinate format.
+    If `nargin` or `nargout` is not specified, it will be inferred from
+    `rows` and `cols`. If `symmetric` is `True`, then `vals`, `rows` and
+    `cols` are assumed to only represent one triangle of the operator.
+    """
+    if nargin == 0: nargin = cols.max()
+    if nargout == 0: nargout = rows.max()
+
+    def matvec(x):
+      if x.shape != (nargin,):
+        msg = 'Input has shape ' + str(x.shape)
+        msg += ' instead of (%d,)' % nargin
+        raise ValueError(msg)
+
+      result_type = np.result_type(x.dtype, vals.dtype)
+      y = np.zeros(nargout, dtype=result_type)
+      for k in xrange(len(vals)):
+        row = rows[k]
+        col = cols[k]
+        val = vals[k]
+        y[row] += val * x[col]
+        if symmetric and row != col:
+          y[col] += val * x[row]
+      return y
+
+    def matvec_transp(y):
+      if y.shape != (nargout,):
+        msg = 'Input has shape ' + str(y.shape)
+        msg += ' instead of (%d,)' % nargout
+        raise ValueError(msg)
+
+      result_type = np.result_type(y.dtype, vals.dtype)
+      x = np.zeros(nargin, dtype=result_type)
+      for k in range(len(vals)):
+        row = rows[k]
+        col = cols[k]
+        val = vals[k]
+        x[col] += val * y[row]
+        if symmetric and row != col:
+          x[row] += val * y[col]
+      return x
+
+    return LinearOperator(nargin, nargout, matvec=matvec,
+                          matvec_transp=matvec_transp, symmetric=symmetric,
+                          dtype=vals.dtype)
+
+
 def PysparseLinearOperator(A):
     "Return a linear operator from a Pysparse sparse matrix."
 

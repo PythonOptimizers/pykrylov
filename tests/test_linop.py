@@ -28,6 +28,7 @@
 
 from __future__ import division
 from numpy.testing import TestCase, assert_, assert_equal, assert_raises
+from numpy.testing import assert_almost_equal
 import numpy as np
 import pykrylov.linop as lo
 from pykrylov.linop import ShapeError
@@ -344,3 +345,41 @@ def test_linop_from_ndarray():
 
     init_Aop = lambda s, h: lo.linop_from_ndarray(A, symmetric=s, hermitian=h)
     assert_raises(ValueError, init_Aop, True, False)
+
+
+def test_CoordLinearOperator():
+    n = 7
+    m = 5
+    A = np.random.random((m, n))
+
+    def ndarray_to_coord(A, symmetric=False):
+      m, n = A.shape
+      vals = np.zeros(n * m, dtype=float)
+      rows = np.zeros(n * m, dtype=float)
+      cols = np.zeros(n * m, dtype=float)
+      k = 0
+      for row in range(m):
+        for col in range((row + 1) if symmetric else n):
+          rows[k] = row
+          cols[k] = col
+          vals[k] = A[row, col]
+          k += 1
+      return (vals, rows, cols)
+
+    # Test unsymmetric operator.
+    vals, rows, cols = ndarray_to_coord(A)
+    B = lo.CoordLinearOperator(vals, rows, cols, n, m, symmetric=False)
+    x = np.random.random(n)
+    assert_almost_equal(np.dot(A, x), B * x)
+    y = np.random.random(m)
+    assert_almost_equal(np.dot(A.T, y), B.T * y)
+
+    # Test symmetric operator.
+    A = np.random.random((n, n))
+    A = A + A.T
+    vals, rows, cols = ndarray_to_coord(A, symmetric=True)
+    B = lo.CoordLinearOperator(vals, rows, cols, n, n, symmetric=True)
+    x = np.random.random(n)
+    assert_almost_equal(np.dot(A, x), B * x)
+    y = np.random.random(n)
+    assert_almost_equal(np.dot(A.T, y), B.T * y)
