@@ -32,7 +32,6 @@ import sphinx_bootstrap_theme
 # Import support for ipython console session syntax highlighting (lives
 # in the sphinxext directory defined above)
 import ipython_console_highlighting
-# import inheritance_diagram
 import mathjax
 
 # General configuration
@@ -42,10 +41,15 @@ import mathjax
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest']
 extensions += ['sphinx.ext.todo']
+extensions += ['sphinx.ext.inheritance_diagram']
 extensions += ['ipython_console_highlighting']
-# extensions += ['inheritance_diagram']
 extensions += ['mathjax']
 mathjax_path = 'https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'
+
+graphviz_output_format = 'svg'
+inheritance_node_attrs = dict(shape='box', fontsize=12,
+                              color='gray70', style='rounded')
+inheritance_graph_attrs = dict(rankdir="TB", size='""', bgcolor="transparent")
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['.templates']
