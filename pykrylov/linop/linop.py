@@ -645,7 +645,7 @@ def CoordLinearOperator(vals, rows, cols,
       if x.shape != (nargin,):
         msg = 'Input has shape ' + str(x.shape)
         msg += ' instead of (%d,)' % nargin
-        raise ValueError(msg)
+        raise ShapeError(msg)
 
       result_type = np.result_type(x.dtype, vals.dtype)
       y = np.zeros(nargout, dtype=result_type)
@@ -662,7 +662,7 @@ def CoordLinearOperator(vals, rows, cols,
       if y.shape != (nargout,):
         msg = 'Input has shape ' + str(y.shape)
         msg += ' instead of (%d,)' % nargout
-        raise ValueError(msg)
+        raise ShapeError(msg)
 
       result_type = np.result_type(y.dtype, vals.dtype)
       x = np.zeros(nargin, dtype=result_type)
@@ -693,7 +693,7 @@ def PysparseLinearOperator(A):
         if x.shape != (nargin,):
             msg = 'Input has shape ' + str(x.shape)
             msg += ' instead of (%d,)' % nargin
-            raise ValueError(msg)
+            raise ShapeError(msg)
         if hasattr(A, '__mul__'):
             return A*x
         Ax = np.empty(nargout)
@@ -704,7 +704,7 @@ def PysparseLinearOperator(A):
         if y.shape != (nargout,):
             msg = 'Input has shape ' + str(y.shape)
             msg += ' instead of (%d,)' % nargout
-            raise ValueError(msg)
+            raise ShapeError(msg)
         if hasattr(A, '__rmul__'):
             return y*A
         ATy = np.empty(nargin)
@@ -741,7 +741,11 @@ def linop_from_ndarray(A, symmetric=False, **kwargs):
 
 
 def sqrt(op):
-    "Return the square root of a linear operator, if defined."
+    """
+    Return the square root of a linear operator, if defined. Note that
+    this is not the elementwise square root. The result is a linear operator
+    that, when composed with itself, yields the original operator.
+    """
     return op._sqrt()
 
 if __name__ == '__main__':
