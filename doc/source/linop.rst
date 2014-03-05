@@ -41,6 +41,7 @@ The :mod:`linop` Module
 .. automodule:: linop
 
 .. inheritance-diagram:: linop
+  :parts: 1
 
 Base Class for Linear Operators
 -------------------------------
@@ -168,9 +169,11 @@ symmetry as the original operator.
 
 .. autofunction:: SymmetricallyReducedLinearOperator
 
-An obvious use case of linear operators is matrices themselves! The two
+An obvious use case of linear operators is matrices themselves! The
 following convenience functions build linear operators from `Pysparse
 <http://pysparse.sf.net>`_ sparse matrices and from Numpy arrays.
+
+.. autofunction:: CoordLinearOperator
 
 .. autofunction:: PysparseLinearOperator
 
@@ -216,6 +219,7 @@ zero, :math:`K` is a block-diagonal operator and the class
 .. automodule:: blkop
 
 .. inheritance-diagram:: blkop
+  :parts: 2
 
 General Block Operators
 -----------------------
