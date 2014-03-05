@@ -46,6 +46,11 @@ extensions += ['ipython_console_highlighting']
 extensions += ['mathjax']
 mathjax_path = 'https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'
 
+graphviz_output_format = 'svg'
+inheritance_node_attrs = dict(shape='box', fontsize=12,
+                              color='gray70', style='rounded')
+inheritance_graph_attrs = dict(rankdir="TB", size='""', bgcolor="transparent")
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['.templates']
 
