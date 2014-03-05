@@ -741,7 +741,11 @@ def linop_from_ndarray(A, symmetric=False, **kwargs):
 
 
 def sqrt(op):
-    "Return the square root of a linear operator, if defined."
+    """
+    Return the square root of a linear operator, if defined. Note that
+    this is not the elementwise square root. The result is a linear operator
+    that, when composed with itself, yields the original operator.
+    """
     return op._sqrt()
 
 if __name__ == '__main__':
