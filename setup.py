@@ -63,9 +63,6 @@ def setup_package():
                 "Operating System :: MacOS",
             ],
             platforms=["Windows", "Linux", "Solaris", "Mac OS-X", "Unix"],
-            install_requires=[
-                "Numpy >= 1.7.1",
-            ],
             configuration=configuration)
     finally:
         del sys.path[0]

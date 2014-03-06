@@ -27,7 +27,8 @@
 #SUCH DAMAGE.
 
 from __future__ import division
-from numpy.testing import TestCase, assert_, assert_equal, assert_raises
+import unittest
+from numpy.testing import assert_, assert_equal, assert_raises
 from numpy.testing import assert_almost_equal
 import numpy as np
 import pykrylov.linop as lo
@@ -42,7 +43,22 @@ def get_matvecs(A):
             'matvec_adj': lambda x: np.dot(A.T.conjugate(), x)}
 
 
-class TestLinearOperator(TestCase):
+def ndarray_to_coord(A, symmetric=False):
+  m, n = A.shape
+  vals = np.zeros(n * m, dtype=float)
+  rows = np.zeros(n * m, dtype=float)
+  cols = np.zeros(n * m, dtype=float)
+  k = 0
+  for row in range(m):
+    for col in range((row + 1) if symmetric else n):
+      rows[k] = row
+      cols[k] = col
+      vals[k] = A[row, col]
+      k += 1
+  return (vals, rows, cols)
+
+
+class TestLinearOperator(unittest.TestCase):
     def setUp(self):
         self.A = np.array([[1, 2, 3],
                            [4, 5, 6]])
@@ -226,7 +242,7 @@ class TestLinearOperator(TestCase):
                 assert_((A * x).dtype == dtype_out)
 
 
-class TestIdentityOperator(TestCase):
+class TestIdentityOperator(unittest.TestCase):
     def test_runtime(self):
         A = lo.IdentityOperator(3)
         x = np.array([1, 1, 1])
@@ -243,7 +259,7 @@ class TestIdentityOperator(TestCase):
                 assert_((A * x).dtype == dtype_out)
 
 
-class TestDiagonalOperator(TestCase):
+class TestDiagonalOperator(unittest.TestCase):
     def test_init(self):
         A_diag = [1, 2, 3]
         A = lo.DiagonalOperator(A_diag)
@@ -273,7 +289,7 @@ class TestDiagonalOperator(TestCase):
                 assert_((A * x).dtype == dtype_out)
 
 
-class TestZeroOperator(TestCase):
+class TestZeroOperator(unittest.TestCase):
     def test_runtime(self):
         A = lo.ZeroOperator(2, 3)
         x = np.array([1, 1])
@@ -291,7 +307,7 @@ class TestZeroOperator(TestCase):
                 assert_((A * x).dtype == dtype_out)
 
 
-class TestReducedLinearOperator(TestCase):
+class TestReducedLinearOperator(unittest.TestCase):
     def test_init(self):
         v = np.arange(6)
         A = lo.linop_from_ndarray(np.outer(v, v))
@@ -310,7 +326,7 @@ class TestReducedLinearOperator(TestCase):
         assert_equal(R * v[col_idx], A_mat.dot(v * vmask)[row_idx])
 
 
-class TestSymmetricallyReducedLinearOperator(TestCase):
+class TestSymmetricallyReducedLinearOperator(unittest.TestCase):
     def test_init(self):
         v = np.arange(6)
         A = lo.linop_from_ndarray(np.outer(v, v), symmetric=True)
@@ -332,54 +348,53 @@ class TestSymmetricallyReducedLinearOperator(TestCase):
         assert_equal(R * v[sym_idx], A_mat.dot(v * vmask)[sym_idx])
 
 
-def test_linop_from_ndarray():
-    A = np.array([[1, 2, 3],
-                 [4, 5, 6]])
-    A_as_op = lo.linop_from_ndarray(A)
-    assert_(isinstance(A_as_op, lo.LinearOperator))
-    x = np.array([1, 1, 1])
-    assert_equal(A_as_op * x, A.dot(x))
-    x = np.array([1, 1])
-    assert_equal(A_as_op.T * x, A.T.dot(x))
-    assert_equal(A_as_op.H * x, A.T.dot(x))
+class test_linop_from_ndarray(unittest.TestCase):
+    def setUp(self):
+        self.A = np.array([[1, 2, 3],
+                           [4, 5, 6]])
 
-    init_Aop = lambda s, h: lo.linop_from_ndarray(A, symmetric=s, hermitian=h)
-    assert_raises(ValueError, init_Aop, True, False)
+    def test_init(self):
+
+        A_as_op = lo.linop_from_ndarray(self.A)
+        assert_(isinstance(A_as_op, lo.LinearOperator))
+        x = np.array([1, 1, 1])
+        assert_equal(A_as_op * x, self.A.dot(x))
+        x = np.array([1, 1])
+        assert_equal(A_as_op.T * x, self.A.T.dot(x))
+        assert_equal(A_as_op.H * x, self.A.T.dot(x))
+
+        init_Aop = lambda s, h: lo.linop_from_ndarray(self.A,
+                                                      symmetric=s,
+                                                      hermitian=h)
+        assert_raises(ValueError, init_Aop, True, False)
 
 
-def test_CoordLinearOperator():
-    n = 7
-    m = 5
-    A = np.random.random((m, n))
+class test_CoordLinearOperator(unittest.TestCase):
+    def setUp(self):
+        self.n = 7
+        self.m = 5
+        self.A = np.random.random((self.m, self.n))
+        B = np.random.random((self.n, self.n))
+        self.B = B + B.T
 
-    def ndarray_to_coord(A, symmetric=False):
-      m, n = A.shape
-      vals = np.zeros(n * m, dtype=float)
-      rows = np.zeros(n * m, dtype=float)
-      cols = np.zeros(n * m, dtype=float)
-      k = 0
-      for row in range(m):
-        for col in range((row + 1) if symmetric else n):
-          rows[k] = row
-          cols[k] = col
-          vals[k] = A[row, col]
-          k += 1
-      return (vals, rows, cols)
+    def test_unsymmetric(self):
+        vals, rows, cols = ndarray_to_coord(self.A)
+        C = lo.CoordLinearOperator(vals, rows, cols,
+                                   self.n, self.m, symmetric=False)
+        x = np.random.random(self.n)
+        assert_almost_equal(np.dot(self.A, x), C * x)
+        y = np.random.random(self.m)
+        assert_almost_equal(np.dot(self.A.T, y), C.T * y)
 
-    # Test unsymmetric operator.
-    vals, rows, cols = ndarray_to_coord(A)
-    B = lo.CoordLinearOperator(vals, rows, cols, n, m, symmetric=False)
-    x = np.random.random(n)
-    assert_almost_equal(np.dot(A, x), B * x)
-    y = np.random.random(m)
-    assert_almost_equal(np.dot(A.T, y), B.T * y)
+    def test_symmtric(self):
+        vals, rows, cols = ndarray_to_coord(self.B, symmetric=True)
+        C = lo.CoordLinearOperator(vals, rows, cols,
+                                   self.n, self.n, symmetric=True)
+        x = np.random.random(self.n)
+        assert_almost_equal(np.dot(self.B, x), C * x)
+        y = np.random.random(self.n)
+        assert_almost_equal(np.dot(self.B.T, y), C.T * y)
 
-    # Test symmetric operator.
-    A = np.random.random((n, n))
-    A = A + A.T
-    vals, rows, cols = ndarray_to_coord(A, symmetric=True)
-    B = lo.CoordLinearOperator(vals, rows, cols, n, n, symmetric=True)
-    x = np.random.random(n)
-    assert_almost_equal(np.dot(A, x), B * x)
-    y = np.random.random(n)
-    assert_almost_equal(np.dot(A.T, y), B.T * y)
+
+if __name__ == '__main__':
+    unittest.main()
