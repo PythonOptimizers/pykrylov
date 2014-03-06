@@ -27,14 +27,15 @@
 #SUCH DAMAGE.
 
 from __future__ import division
-from numpy.testing import TestCase, assert_, assert_equal, assert_raises
+import unittest
+from numpy.testing import assert_, assert_equal, assert_raises
 import numpy as np
 import pykrylov.linop as lo
 from pykrylov.linop import blkop as bo
 from pykrylov.linop import ShapeError
 
 
-class TestBlockLinearOperator(TestCase):
+class TestBlockLinearOperator(unittest.TestCase):
     def setUp(self):
         self.A = lo.IdentityOperator(2)
         self.B = lo.linop_from_ndarray(np.arange(1, 7).reshape([2, 3]))
@@ -110,7 +111,7 @@ class TestBlockLinearOperator(TestCase):
         pass
 
 
-class TestBlockDiagonalOperator(TestCase):
+class TestBlockDiagonalOperator(unittest.TestCase):
     def setUp(self):
         self.A = lo.IdentityOperator(2)
         self.B = lo.linop_from_ndarray(np.arange(1, 7).reshape([2, 3]))
@@ -144,3 +145,7 @@ class TestBlockDiagonalOperator(TestCase):
         assert_equal(M * x, np.dot(matrix_M, x))
         x = np.ones(M.T.shape[1])
         assert_equal(M.T * x, np.dot(matrix_M.T, x))
+
+
+if __name__ == '__main__':
+    unittest.main()
