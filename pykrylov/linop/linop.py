@@ -492,7 +492,7 @@ class DiagonalOperator(LinearOperator):
         diag = np.asarray(diag)
         if diag.ndim != 1:
             raise ValueError('Input must be 1-d array')
-        self.__diag = diag
+        self.__diag = diag.copy()
 
         super(DiagonalOperator, self).__init__(diag.shape[0], diag.shape[0],
                                                symmetric=True,
@@ -504,7 +504,7 @@ class DiagonalOperator(LinearOperator):
 
     @property
     def diag(self):
-        "Return the diagonal of the operator."
+        "Return a reference to the diagonal of the operator."
         return self.__diag
 
     def __abs__(self):
