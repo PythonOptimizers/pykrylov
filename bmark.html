@@ -9,7 +9,7 @@
     
     <link rel="stylesheet" href="_static/basic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="_static/bootswatch-3.1.0/spacelab/bootstrap.min.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bootswatch-3.2.0/spacelab/bootstrap.min.css" type="text/css" />
     <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
     
     <script type="text/javascript">
@@ -27,7 +27,7 @@
     <script type="text/javascript" src="https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <script type="text/javascript" src="_static/js/jquery-1.11.0.min.js"></script>
     <script type="text/javascript" src="_static/js/jquery-fix.js"></script>
-    <script type="text/javascript" src="_static/bootstrap-3.1.0/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="_static/bootstrap-3.2.0/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="_static/bootstrap-sphinx.js"></script>
     <link rel="top" title="PyKrylov 0.2 documentation" href="index.html" />
     <link rel="prev" title="8. The Symmetric Indefinite Method with Orthogonal Factorization" href="symmlq.html" />
@@ -62,7 +62,6 @@
 
         <div class="collapse navbar-collapse nav-collapse">
           <ul class="nav navbar-nav">
-            <li class="divider-vertical"></li>
             
             
               <li class="dropdown globaltoc-container">
@@ -109,7 +108,7 @@
               
                 
   <li>
-    <a href="symmlq.html" title="Previous Chapter: 8. The Symmetric Indefinite Method with Orthogonal Factorization"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm">&laquo; 8. The Symmetric...</span>
+    <a href="symmlq.html" title="Previous Chapter: 8. The Symmetric Indefinite Method with Orthogonal Factorization"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; 8. The Symmetric...</span>
     </a>
   </li>
               
@@ -153,6 +152,7 @@ problems.</p>
 <span class="kn">from</span> <span class="nn">pykrylov.cgs</span> <span class="kn">import</span> <span class="n">CGS</span>
 <span class="kn">from</span> <span class="nn">pykrylov.tfqmr</span> <span class="kn">import</span> <span class="n">TFQMR</span>
 <span class="kn">from</span> <span class="nn">pykrylov.bicgstab</span> <span class="kn">import</span> <span class="n">BiCGSTAB</span>
+<span class="kn">from</span> <span class="nn">pykrylov.linop</span> <span class="kn">import</span> <span class="n">PysparseLinearOperator</span>
 <span class="kn">from</span> <span class="nn">pysparse</span> <span class="kn">import</span> <span class="n">spmatrix</span>
 <span class="kn">from</span> <span class="nn">pysparse.pysparseMatrix</span> <span class="kn">import</span> <span class="n">PysparseMatrix</span> <span class="k">as</span> <span class="n">sp</span>
 
@@ -170,7 +170,7 @@ problems.</p>
 
 <span class="c"># Loop through solvers using tighter stopping tolerance</span>
 <span class="k">for</span> <span class="n">KSolver</span> <span class="ow">in</span> <span class="p">[</span><span class="n">CGS</span><span class="p">,</span> <span class="n">TFQMR</span><span class="p">,</span> <span class="n">BiCGSTAB</span><span class="p">]:</span>
-    <span class="n">ks</span> <span class="o">=</span> <span class="n">KSolver</span><span class="p">(</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="n">A</span><span class="o">*</span><span class="n">v</span><span class="p">,</span> <span class="n">reltol</span><span class="o">=</span><span class="mf">1.0e-8</span><span class="p">)</span>
+    <span class="n">ks</span> <span class="o">=</span> <span class="n">KSolver</span><span class="p">(</span><span class="n">PysparseLinearOperator</span><span class="p">(</span><span class="n">A</span><span class="p">),</span> <span class="n">reltol</span><span class="o">=</span><span class="mf">1.0e-8</span><span class="p">)</span>
     <span class="n">ks</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">rhs</span><span class="p">,</span> <span class="n">guess</span> <span class="o">=</span> <span class="mi">1</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">),</span> <span class="n">matvec_max</span><span class="o">=</span><span class="mi">2</span><span class="o">*</span><span class="n">n</span><span class="p">)</span>
 
     <span class="n">err</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">ks</span><span class="o">.</span><span class="n">bestSolution</span><span class="o">-</span><span class="n">e</span><span class="p">)</span><span class="o">/</span><span class="n">sqrt</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
@@ -194,6 +194,7 @@ modifying the benchmarking script as:</p>
 <span class="kn">from</span> <span class="nn">pykrylov.cgs</span> <span class="kn">import</span> <span class="n">CGS</span>
 <span class="kn">from</span> <span class="nn">pykrylov.tfqmr</span> <span class="kn">import</span> <span class="n">TFQMR</span>
 <span class="kn">from</span> <span class="nn">pykrylov.bicgstab</span> <span class="kn">import</span> <span class="n">BiCGSTAB</span>
+<span class="kn">from</span> <span class="nn">pykrylov.linop</span> <span class="kn">import</span> <span class="n">DiagonalOperator</span><span class="p">,</span> <span class="n">PysparseLinearOperator</span>
 <span class="kn">from</span> <span class="nn">pysparse</span> <span class="kn">import</span> <span class="n">spmatrix</span>
 <span class="kn">from</span> <span class="nn">pysparse.pysparseMatrix</span> <span class="kn">import</span> <span class="n">PysparseMatrix</span> <span class="k">as</span> <span class="n">sp</span>
 
@@ -214,8 +215,8 @@ modifying the benchmarking script as:</p>
 
 <span class="c"># Loop through solvers using default stopping tolerance</span>
 <span class="k">for</span> <span class="n">KSolver</span> <span class="ow">in</span> <span class="p">[</span><span class="n">CGS</span><span class="p">,</span> <span class="n">TFQMR</span><span class="p">,</span> <span class="n">BiCGSTAB</span><span class="p">]:</span>
-    <span class="n">ks</span> <span class="o">=</span> <span class="n">KSolver</span><span class="p">(</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="n">A</span><span class="o">*</span><span class="n">v</span><span class="p">,</span>
-                 <span class="n">precon</span><span class="o">=</span><span class="k">lambda</span> <span class="n">u</span><span class="p">:</span> <span class="n">u</span><span class="o">/</span><span class="n">diagA</span><span class="p">,</span>
+    <span class="n">ks</span> <span class="o">=</span> <span class="n">KSolver</span><span class="p">(</span><span class="n">PysparseLinearOperator</span><span class="p">(</span><span class="n">A</span><span class="p">),</span>
+                 <span class="n">precon</span><span class="o">=</span><span class="n">DiagonalOperator</span><span class="p">(</span><span class="mf">1.0</span><span class="o">/</span><span class="n">diagA</span><span class="p">),</span>
                  <span class="n">reltol</span><span class="o">=</span><span class="mf">1.0e-8</span><span class="p">)</span>
     <span class="n">ks</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">rhs</span><span class="p">,</span> <span class="n">guess</span> <span class="o">=</span> <span class="mi">1</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">),</span> <span class="n">matvec_max</span><span class="o">=</span><span class="mi">2</span><span class="o">*</span><span class="n">n</span><span class="p">)</span>
 
@@ -232,30 +233,6 @@ Bi-CGSTAB      64  8.64e+03  8.54e-05  4.93e-06
 </div>
 <p>Much in the same way, a modification of the script above could be used to loop
 through preconditioners with a given solver.</p>
-<p>Note that preconditioners need not be functions but can be more general
-objects. The only requirement is that they should be callable. For example, the
-same effect as above can be achieved by instead defining the preconditioner as:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">DiagonalPrec</span><span class="p">:</span>
-
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s">&#39;Diag&#39;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="n">A</span><span class="o">.</span><span class="n">shape</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">diag</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">takeDiagonal</span><span class="p">()),</span> <span class="mf">1.0</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="s">&quot;Return the result of applying preconditioner to y&quot;</span>
-        <span class="k">return</span> <span class="n">y</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">diag</span>
-</pre></div>
-</div>
-<p>If <cite>dp</cite> is an instance of the <cite>DiagonalPrec</cite> class and <cite>y</cite> is a Numpy array of
-appropriate size, one solves preconditioning systems by simply calling
-<cite>x=dp(y)</cite>. A call to a Krylov solver might thus look like:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="c"># Create diagonal preconditioner</span>
-<span class="n">dp</span> <span class="o">=</span> <span class="n">DiagonalPrec</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
-
-<span class="n">ks</span> <span class="o">=</span> <span class="n">KSolver</span><span class="p">(</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="n">A</span><span class="o">*</span><span class="n">v</span><span class="p">,</span> <span class="n">precon</span><span class="o">=</span><span class="n">dp</span><span class="p">,</span> <span class="n">reltol</span><span class="o">=</span><span class="mf">1.0e-8</span><span class="p">)</span>
-</pre></div>
-</div>
 </div>
 </div>
 
@@ -279,7 +256,7 @@ appropriate size, one solves preconditioning systems by simply calling
     </p>
     <p>
         &copy; Copyright 2014, D. Orban.<br/>
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.2.1.<br/>
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.2.3.<br/>
     </p>
   </div>
 </footer>

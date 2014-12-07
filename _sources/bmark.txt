@@ -21,6 +21,7 @@ Consider the script::
     from pykrylov.cgs import CGS
     from pykrylov.tfqmr import TFQMR
     from pykrylov.bicgstab import BiCGSTAB
+    from pykrylov.linop import PysparseLinearOperator
     from pysparse import spmatrix
     from pysparse.pysparseMatrix import PysparseMatrix as sp
 
@@ -38,7 +39,7 @@ Consider the script::
 
     # Loop through solvers using tighter stopping tolerance
     for KSolver in [CGS, TFQMR, BiCGSTAB]:
-        ks = KSolver(lambda v: A*v, reltol=1.0e-8)
+        ks = KSolver(PysparseLinearOperator(A), reltol=1.0e-8)
         ks.solve(rhs, guess = 1+np.arange(n, dtype=np.float), matvec_max=2*n)
 
         err = np.linalg.norm(ks.bestSolution-e)/sqrt(n)
@@ -66,6 +67,7 @@ modifying the benchmarking script as::
     from pykrylov.cgs import CGS
     from pykrylov.tfqmr import TFQMR
     from pykrylov.bicgstab import BiCGSTAB
+    from pykrylov.linop import DiagonalOperator, PysparseLinearOperator
     from pysparse import spmatrix
     from pysparse.pysparseMatrix import PysparseMatrix as sp
 
@@ -86,8 +88,8 @@ modifying the benchmarking script as::
 
     # Loop through solvers using default stopping tolerance
     for KSolver in [CGS, TFQMR, BiCGSTAB]:
-        ks = KSolver(lambda v: A*v,
-                     precon=lambda u: u/diagA,
+        ks = KSolver(PysparseLinearOperator(A),
+                     precon=DiagonalOperator(1.0/diagA),
                      reltol=1.0e-8)
         ks.solve(rhs, guess = 1+np.arange(n, dtype=np.float), matvec_max=2*n)
 
@@ -104,28 +106,4 @@ This time, the output is a bit better than before::
 
 Much in the same way, a modification of the script above could be used to loop
 through preconditioners with a given solver.
-
-Note that preconditioners need not be functions but can be more general
-objects. The only requirement is that they should be callable. For example, the
-same effect as above can be achieved by instead defining the preconditioner as::
-
-    class DiagonalPrec:
-
-        def __init__(self, A, **kwargs):
-            self.name = 'Diag'
-            self.shape = A.shape
-            self.diag = np.maximum( np.abs(A.takeDiagonal()), 1.0)
-
-        def __call__(self, y, **kwargs):
-            "Return the result of applying preconditioner to y"
-            return y/self.diag
-
-If `dp` is an instance of the `DiagonalPrec` class and `y` is a Numpy array of
-appropriate size, one solves preconditioning systems by simply calling
-`x=dp(y)`. A call to a Krylov solver might thus look like::
-
-    # Create diagonal preconditioner
-    dp = DiagonalPrec(A)
-
-    ks = KSolver(lambda v: A*v, precon=dp, reltol=1.0e-8)
 

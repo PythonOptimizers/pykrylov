@@ -9,7 +9,7 @@
     
     <link rel="stylesheet" href="_static/basic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="_static/bootswatch-3.1.0/spacelab/bootstrap.min.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bootswatch-3.2.0/spacelab/bootstrap.min.css" type="text/css" />
     <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
     
     <script type="text/javascript">
@@ -27,7 +27,7 @@
     <script type="text/javascript" src="https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <script type="text/javascript" src="_static/js/jquery-1.11.0.min.js"></script>
     <script type="text/javascript" src="_static/js/jquery-fix.js"></script>
-    <script type="text/javascript" src="_static/bootstrap-3.1.0/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="_static/bootstrap-3.2.0/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="_static/bootstrap-sphinx.js"></script>
     <link rel="top" title="PyKrylov 0.2 documentation" href="index.html" />
     <link rel="next" title="3. Generic Template for Krylov Methods" href="generic.html" />
@@ -63,7 +63,6 @@
 
         <div class="collapse navbar-collapse nav-collapse">
           <ul class="nav navbar-nav">
-            <li class="divider-vertical"></li>
             
             
               <li class="dropdown globaltoc-container">
@@ -128,11 +127,11 @@
               
                 
   <li>
-    <a href="introduction.html" title="Previous Chapter: 1. Introduction to PyKrylov"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm">&laquo; 1. Introduction ...</span>
+    <a href="introduction.html" title="Previous Chapter: 1. Introduction to PyKrylov"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; 1. Introduction ...</span>
     </a>
   </li>
   <li>
-    <a href="generic.html" title="Next Chapter: 3. Generic Template for Krylov Methods"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm">3. Generic Templ... &raquo;</span>
+    <a href="generic.html" title="Next Chapter: 3. Generic Template for Krylov Methods"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">3. Generic Templ... &raquo;</span>
     </a>
   </li>
               
@@ -425,6 +424,12 @@ example:</p>
 <p>A diagonal linear operator defined by its diagonal <cite>diag</cite> (a Numpy array.)
 The type must be specified in the <cite>diag</cite> argument, e.g.,
 <cite>np.ones(5, dtype=np.complex)</cite> or <cite>np.ones(5).astype(np.complex)</cite>.</p>
+<dl class="attribute">
+<dt id="linop.DiagonalOperator.diag">
+<tt class="descname">diag</tt><a class="headerlink" href="#linop.DiagonalOperator.diag" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a reference to the diagonal of the operator.</p>
+</dd></dl>
+
 </dd></dl>
 
 </div>
@@ -714,7 +719,7 @@ single indices. For example:</p>
     </p>
     <p>
         &copy; Copyright 2014, D. Orban.<br/>
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.2.1.<br/>
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.2.3.<br/>
     </p>
   </div>
 </footer>

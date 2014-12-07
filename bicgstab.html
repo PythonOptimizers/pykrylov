@@ -9,7 +9,7 @@
     
     <link rel="stylesheet" href="_static/basic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="_static/bootswatch-3.1.0/spacelab/bootstrap.min.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bootswatch-3.2.0/spacelab/bootstrap.min.css" type="text/css" />
     <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
     
     <script type="text/javascript">
@@ -27,7 +27,7 @@
     <script type="text/javascript" src="https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <script type="text/javascript" src="_static/js/jquery-1.11.0.min.js"></script>
     <script type="text/javascript" src="_static/js/jquery-fix.js"></script>
-    <script type="text/javascript" src="_static/bootstrap-3.1.0/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="_static/bootstrap-3.2.0/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="_static/bootstrap-sphinx.js"></script>
     <link rel="top" title="PyKrylov 0.2 documentation" href="index.html" />
     <link rel="next" title="7. The Transpose-Free Quasi-Minimal Residual Method" href="tfqmr.html" />
@@ -63,7 +63,6 @@
 
         <div class="collapse navbar-collapse nav-collapse">
           <ul class="nav navbar-nav">
-            <li class="divider-vertical"></li>
             
             
               <li class="dropdown globaltoc-container">
@@ -111,11 +110,11 @@
               
                 
   <li>
-    <a href="cgs.html" title="Previous Chapter: 5. The Conjugate Gradient Squared Method"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm">&laquo; 5. The Conjugate...</span>
+    <a href="cgs.html" title="Previous Chapter: 5. The Conjugate Gradient Squared Method"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; 5. The Conjugate...</span>
     </a>
   </li>
   <li>
-    <a href="tfqmr.html" title="Next Chapter: 7. The Transpose-Free Quasi-Minimal Residual Method"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm">7. The Transpose... &raquo;</span>
+    <a href="tfqmr.html" title="Next Chapter: 7. The Transpose-Free Quasi-Minimal Residual Method"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">7. The Transpose... &raquo;</span>
     </a>
   </li>
               
@@ -207,6 +206,7 @@ method. The vector <cite>rhs</cite> should be a Numpy array.</p>
 read from file in Matrix Market format:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">pykrylov.cgs</span> <span class="kn">import</span> <span class="n">BiCGSTAB</span> <span class="k">as</span> <span class="n">KSolver</span>
+<span class="kn">from</span> <span class="nn">pykrylov.linop</span> <span class="kn">import</span> <span class="n">PysparseLinearOperator</span>
 <span class="kn">from</span> <span class="nn">pysparse</span> <span class="kn">import</span> <span class="n">spmatrix</span>
 <span class="kn">from</span> <span class="nn">pysparse.pysparseMatrix</span> <span class="kn">import</span> <span class="n">PysparseMatrix</span> <span class="k">as</span> <span class="n">sp</span>
 
@@ -215,10 +215,9 @@ read from file in Matrix Market format:</p>
 <span class="n">e</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
 <span class="n">rhs</span> <span class="o">=</span> <span class="n">A</span><span class="o">*</span><span class="n">e</span>
 
-<span class="n">ks</span> <span class="o">=</span> <span class="n">KSolver</span><span class="p">(</span> <span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="n">A</span><span class="o">*</span><span class="n">v</span><span class="p">,</span>
+<span class="n">ks</span> <span class="o">=</span> <span class="n">KSolver</span><span class="p">(</span> <span class="n">PysparseLinearOperator</span><span class="p">(</span><span class="n">A</span><span class="p">),</span>
               <span class="n">matvec_max</span><span class="o">=</span><span class="mi">2</span><span class="o">*</span><span class="n">n</span><span class="p">,</span>
               <span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
-              <span class="n">outputStream</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">,</span>
               <span class="n">reltol</span> <span class="o">=</span> <span class="mf">1.0e-5</span> <span class="p">)</span>
 <span class="n">ks</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">rhs</span><span class="p">,</span> <span class="n">guess</span> <span class="o">=</span> <span class="mi">1</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">))</span>
 
@@ -256,7 +255,7 @@ Direct error: 3.35e-03
     </p>
     <p>
         &copy; Copyright 2014, D. Orban.<br/>
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.2.1.<br/>
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.2.3.<br/>
     </p>
   </div>
 </footer>
