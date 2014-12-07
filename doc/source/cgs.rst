@@ -25,6 +25,7 @@ from file in Matrix Market format::
 
     import numpy as np
     from pykrylov.cgs import CGS as KSolver
+    from pykrylov.linop import PysparseLinearOperator
     from pysparse import spmatrix
     from pysparse.pysparseMatrix import PysparseMatrix as sp
 
@@ -33,10 +34,9 @@ from file in Matrix Market format::
     e = np.ones(n)
     rhs = A*e
 
-    ks = KSolver( lambda v: A*v,
+    ks = KSolver( PysparseLinearOperator(A),
                   matvec_max=2*n,
                   verbose=False,
-                  outputStream=sys.stderr,
                   reltol = 1.0e-5 )
     ks.solve(rhs, guess = 1+np.arange(n, dtype=np.float))
 
