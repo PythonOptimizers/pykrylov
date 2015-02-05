@@ -70,8 +70,6 @@ class CRAIGMRFramework(KrylovMethod):
 
         if itnlim is None: itnlim = minDim
 
-        if N is not None: damp = 1.0
-
         # Initialize the Golub-Kahan bidiagonalization process.
 
         Mu = b.copy()  # Don't want to change input vector.
