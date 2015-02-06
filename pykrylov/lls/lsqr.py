@@ -468,5 +468,5 @@ if __name__ == '__main__':
     B = LinearOperator(1, 1, matvec=lambda x: x.copy(), symmetric=True)
     rhs = np.array([2.0])
     lsqr = LSQRFramework(B)
-    lsqr.solve(rhs, M=A, N=C, show=True)
+    lsqr.solve(rhs, M=A, N=C, damp=1.0, show=True)
     print 'Solution: ', lsqr.x
