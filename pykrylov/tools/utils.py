@@ -85,6 +85,33 @@ def check_symmetric(op, repeats=10):
     return True
 
 
+def check_positive_definite(op, repeats=10, semi=False):
+    """Quick positive (semi-)definiteness check.
+
+    Specify `semi=True` to check positive semi-definiteness. A set of
+    `repeats` random vectors will be generated. This function returns
+    `True` or `False`.
+    """
+    m, n = op.shape
+    if m != n:
+        return False
+    for _ in xrange(repeats):
+        v = np.random.random(n)
+        w = op * v
+        vw = np.dot(v, w)
+        eps = machine_epsilon()
+        if np.imag(vw) > np.sqrt(eps) * np.abs(vw):
+            return False
+        vw = np.real(vw)
+        if semi:
+            if vw < 0:
+                return False
+        else:
+            if vw <= 0:
+                return False
+    return True
+
+
 # if __name__ == '__main__':
 #     roots = roots_quadratic(2.0e+20, .1, -4)
 #     print 'Received: ', roots
