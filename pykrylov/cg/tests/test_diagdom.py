@@ -50,7 +50,7 @@ class Poisson1dTestCase(unittest.TestCase):
             cg.solve(rhs)
             err = np.linalg.norm(e-cg.bestSolution)/sqrt(n)
             sys.stderr.write(self.fmt % (n, cg.nMatvec, cg.residNorm, err))
-            self.failUnless(np.allclose(e, cg.bestSolution, rtol=tol))
+            self.assertTrue(np.allclose(e, cg.bestSolution, rtol=tol))
 
 
 class Poisson2dTestCase(unittest.TestCase):
@@ -89,7 +89,7 @@ class Poisson2dTestCase(unittest.TestCase):
             sys.stderr.write(self.fmt % (n2, cg.nMatvec, cg.residNorm, err))
 
             # Adjust tol because allclose() uses infinity norm
-            self.failUnless(np.allclose(e, cg.bestSolution, rtol=err*n))
+            self.assertTrue(np.allclose(e, cg.bestSolution, rtol=err*n))
 
 
 if __name__ == '__main__':
