@@ -2,7 +2,10 @@
 
 from linop import *
 from blkop import *
-from cholesky import *
+try:
+    from cholesky import *
+except Exception:
+    pass
 from lbfgs import *
 
 __all__ = filter(lambda s:not s.startswith('_'), dir())
