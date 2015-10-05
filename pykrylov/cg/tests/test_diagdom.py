@@ -9,20 +9,14 @@ from math import sqrt, sin, pi
 from pykrylov.gallery import Poisson1dMatvec, Poisson2dMatvec
 from pykrylov.linop import LinearOperator
 from pykrylov.cg import CG
-
-def macheps():
-    "compute machine epsilon"
-    eps = 1.0
-    while (1.0 + eps > 1.0):
-        eps /= 2.0
-    return 2.0 * eps
+from pykrylov.tools import machine_epsilon
 
 
 class Poisson1dTestCase(unittest.TestCase):
 
     def setUp(self):
         self.n = [10, 20, 100, 1000, 5000, 10000]
-        self.eps = macheps()
+        self.eps = machine_epsilon()
         self.fmt = '%6d  %7d  %8.2e  %8.2e\n'
         hdrfmt = '%6s  %7s  %8s  %8s\n'
         hdr = hdrfmt % ('Size', 'Matvec', 'Resid', 'Error')
@@ -57,7 +51,7 @@ class Poisson2dTestCase(unittest.TestCase):
 
     def setUp(self):
         self.n = [10, 20, 100, 500]
-        self.eps = macheps()
+        self.eps = machine_epsilon()
         self.fmt = '%6d  %7d  %8.2e  %8.2e\n'
         hdrfmt = '%6s  %7s  %8s  %8s\n'
         hdr = hdrfmt % ('Size', 'Matvec', 'Resid', 'Error')
