@@ -1,13 +1,13 @@
-"""Test Cholesky linear operator. """
+"""Test Cholesky linear operator."""
 
 from __future__ import division
 import unittest
 import numpy as np
-import scipy as sp
 from pykrylov.tools import check_symmetric, check_positive_definite
 
 try:
     from pykrylov.linop import CholeskyOperator
+    import scipy as sp
 
     class TestCholeskyOperator(unittest.TestCase):
         """Test the Cholesky linear operator."""

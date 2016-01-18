@@ -17,7 +17,7 @@ from pykrylov.generic import KrylovMethod
 import numpy as np
 from numpy.linalg import norm
 from numpy import zeros, dot, empty, sqrt
-from pykrylov.tools.utils import check_symmetric
+from pykrylov.tools.utils import check_symmetric, machine_epsilon
 
 
 class Minres(KrylovMethod):
@@ -107,7 +107,7 @@ class Minres(KrylovMethod):
         self.dir_errors_window = []  # Direct error estimates.
         self.iterates = []
 
-        self.eps = np.finfo(np.double).eps
+        self.eps = machine_epsilon()
 
     def normof2(self, x,y):
         return sqrt(x**2 + y**2)
