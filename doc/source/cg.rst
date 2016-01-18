@@ -27,6 +27,7 @@ ones, and applies the conjugate gradient to each of them. The sparse matrices
 are handled by way of the `Pysparse <http://pysparse.sf.net>`_ package. ::
 
     from pykrylov.cg import CG
+    from pykrylov.linop import PysparseLinearOperator
     from pysparse import spmatrix
     from pysparse.pysparseMatrix import PysparseMatrix as sp
     import numpy as np
@@ -44,7 +45,7 @@ are handled by way of the `Pysparse <http://pysparse.sf.net>`_ package. ::
         n = A.shape[0]
         e = np.ones(n)
         rhs = A * e
-        cg = CG(lambda v: A*v, matvec_max=2*n)
+        cg = CG(PysparseLinearOperator(A), matvec_max=2*n)
         cg.solve(rhs)
         err = np.linalg.norm(cg.bestSolution - e)/sqrt(n)
         print '%15s  %5d  %5d  %8.2e  %8.2e  %8.2e' % (matName, n, cg.nMatvec,

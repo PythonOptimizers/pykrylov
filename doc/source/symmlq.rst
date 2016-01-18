@@ -25,6 +25,7 @@ read from file in Matrix Market format::
 
     import numpy as np
     from pykrylov.symmlq import SYMMLQ as KSolver
+    from pykrylov.linop import PysparseLinearOperator
     from pysparse import spmatrix
     from pysparse.pysparseMatrix import PysparseMatrix as sp
 
@@ -33,7 +34,7 @@ read from file in Matrix Market format::
     e = np.ones(n)
     rhs = A*e
 
-    ks = KSolver( lambda v: A*v, outputStream=sys.stderr)
+    ks = KSolver(PysparseLinearOperator(A))
     ks.solve(rhs, matvec_max=2*n)
 
     print 'Number of matvecs: ', ks.nMatvec

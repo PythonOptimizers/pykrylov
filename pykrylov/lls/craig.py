@@ -180,10 +180,7 @@ class CRAIGFramework(KrylovMethod):
         else:
             var = None
 
-        if N is not None:
-            damp = dampsq = 1.0
-        else:
-            dampsq = damp*damp;
+        dampsq = damp*damp;
 
         itn = istop = 0
         ctol = 0.0

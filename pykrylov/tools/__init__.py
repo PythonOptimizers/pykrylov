@@ -1,6 +1,5 @@
 """Helper tools for PyKrylov"""
 
-from eps import *
 from types import *
 from utils import *
 

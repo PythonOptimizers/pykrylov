@@ -193,8 +193,6 @@ class LSMRFramework(KrylovMethod):
 
         if itnlim is None: itnlim = minDim
 
-        if N is not None: damp = 1.0
-
         if show:
             print ' '
             print 'LSMR            Least-squares solution of  Ax = b'
