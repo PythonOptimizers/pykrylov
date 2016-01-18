@@ -720,6 +720,45 @@ def PysparseLinearOperator(A):
                           matvec_transp=matvec_transp, symmetric=symmetric)
 
 
+def CysparseLinearOperator(A):
+    """
+    Return a linear operator from a CySparse sparse matrix.
+
+    Note: it is intentional that we do not use CySparse syntaxic sugar to avoid
+          having interferences with CySparse proxies. Thus we prefer `A.matvec`,
+          `A.matvec_transp` and `A.matvec_htransp` to `A * x` `A.T * x` and
+          `A.H * x`.
+    """
+
+    nargout, nargin = A.shape
+    symmetric = A.is_symmetric
+
+    def matvec(x):
+        if x.shape != (nargin,):
+            msg = 'Input has shape ' + str(x.shape)
+            msg += ' instead of (%d,)' % nargin
+            raise ShapeError(msg)
+        return A.matvec(x)
+
+    def matvec_transp(y):
+        if y.shape != (nargout,):
+            msg = 'Input has shape ' + str(y.shape)
+            msg += ' instead of (%d,)' % nargout
+            raise ShapeError(msg)
+        return A.matvec_transp(y)
+
+    def matvec_adj(y):
+        if y.shape != (nargout,):
+            msg = 'Input has shape ' + str(y.shape)
+            msg += ' instead of (%d,)' % nargout
+            raise ShapeError(msg)
+        return A.matvec_htransp(y)
+
+    return LinearOperator(nargin, nargout, matvec=matvec,
+                          matvec_transp=matvec_transp,
+                          matvec_adj=matvec_adj, symmetric=symmetric)
+
+
 def linop_from_ndarray(A, symmetric=False, **kwargs):
     "Return a linear operator from a Numpy `ndarray`."
 
