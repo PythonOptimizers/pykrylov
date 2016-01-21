@@ -720,6 +720,17 @@ def PysparseLinearOperator(A):
                           matvec_transp=matvec_transp, symmetric=symmetric)
 
 
+def CysparseLinearOperator(A):
+  """Return a linear operator from a CySparse sparse matrix."""
+
+  nargout, nargin = A.shape
+  return LinearOperator(nargin, nargout,
+                        matvec=lambda x: A * x,
+                        matvec_transp=lambda y: A.T * y,
+                        matvec_adj=lambda y: A.H * y,
+                        symmetric=A.is_symmetric)
+
+
 def linop_from_ndarray(A, symmetric=False, **kwargs):
     "Return a linear operator from a Numpy `ndarray`."
 
