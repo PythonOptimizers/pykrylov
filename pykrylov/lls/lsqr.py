@@ -12,6 +12,7 @@ Dominique Orban, Ecole Polytechnique de Montreal
 """
 
 from pykrylov.generic import KrylovMethod
+from pykrylov.tools import roots_quadratic
 
 from numpy import zeros, dot, inf
 from numpy.linalg import norm
@@ -21,7 +22,10 @@ __docformat__ = 'restructuredtext'
 
 # Simple shortcuts---linalg.norm is too slow for small vectors
 def normof2(x,y): return sqrt(x*x + y*y)
+
+
 def normof4(x1,x2,x3,x4): return sqrt(x1*x1 + x2*x2 + x3*x3 + x4*x4)
+
 
 class LSQRFramework(KrylovMethod):
     r"""
@@ -76,15 +80,16 @@ class LSQRFramework(KrylovMethod):
         self.xnorm = 0.;
         self.r1norm = 0.; self.r2norm = 0.
         self.optimal = False
-        self.resids = []             # Least-squares objective function values.
-        self.normal_eqns_resids = [] # Residuals of normal equations.
-        self.dir_errors_window = []  # Direct error estimates.
-        self.error_upper_bound = []  # Upper bound on direct error.
+        self.resids = []              # Least-squares objective function values.
+        self.normal_eqns_resids = []  # Residuals of normal equations.
+        self.dir_errors_window = []   # Direct error estimates.
+        self.error_upper_bound = []   # Upper bound on direct error.
         self.iterates = []
         return
 
-    def solve(self, rhs, itnlim=0, damp=0.0, M=None, N=None, atol=1.0e-9,
-              btol=1.0e-9, conlim=1.0e+8, show=False, wantvar=False, **kwargs):
+    def solve(self, rhs, itnlim=0, damp=0.0, M=None, N=None,
+              atol=1.0e-9, btol=1.0e-9, conlim=1.0e+8,
+              radius=None, show=False, wantvar=False, **kwargs):
         """
         Solve the linear system, linear least-squares problem or regularized
         linear least-squares problem with specified parameters. All return
@@ -111,6 +116,7 @@ class LSQRFramework(KrylovMethod):
                     than 1.0e+8. Maximum precision can be obtained by setting
                     `atol` = `btol` = `conlim` = zero, but the number of
                     iterations may then be excessive.
+           :radius: an optional trust-region radius (default: None).
            :show:   if set to `True`, gives an iteration log.
                     If set to `False`, suppresses output.
            :store_resids: Store full residual norm history (default: False).
@@ -141,9 +147,9 @@ class LSQRFramework(KrylovMethod):
         store_iterates = kwargs.get('store_iterates', False)
         window = kwargs.get('window', 5)
 
-        self.resids = []             # Least-squares objective function values.
-        self.normal_eqns_resids = [] # Residuals of normal equations.
-        self.dir_errors_window = []  # Direct error estimates.
+        self.resids = []              # Least-squares objective function values.
+        self.normal_eqns_resids = []  # Residuals of normal equations.
+        self.dir_errors_window = []   # Direct error estimates.
         self.iterates = []
 
         A = self.A
@@ -156,7 +162,7 @@ class LSQRFramework(KrylovMethod):
         else:
             var = None
 
-        dampsq = damp*damp;
+        dampsq = damp*damp
 
         itn = istop = 0
         ctol = 0.0
@@ -164,6 +170,10 @@ class LSQRFramework(KrylovMethod):
         Anorm = Acond = 0.
         z = xnorm = xxnorm = ddnorm = res2 = 0.
         cs2 = -1. ; sn2 = 0.
+
+        tr_active = False
+        if radius is None:
+            stepMax = None
 
         if show:
             print ' '
@@ -294,121 +304,143 @@ class LSQRFramework(KrylovMethod):
 
             # Update x and w.
 
-            t1      =   phi   / rho;
-            t2      = - theta / rho;
-            dk      =   (1.0/rho)*w;
+            t1      =   phi   / rho
+            t2      = - theta / rho
+            dk      =   (1.0/rho)*w
 
-            x      += t1*w
-            w      *= t2 ; w += v
-            ddnorm  = ddnorm + norm(dk)**2
-            if wantvar: var += dk*dk
+            if radius is not None:
+                # Calculate distance to trust-region boundary from x along w.
+                xw = dot(x,w)
+                ww = dot(w,w)  # Can be updated at each iter ?
 
-            if store_iterates:
-                self.iterates.append(x.copy())
+                # Obtain roots of quadratic to determine intersection of
+                # the search direction with the trust-region boundary.
+                roots = roots_quadratic(ww, 2*xw, xnorm*xnorm - radius*radius)
 
-            # Update energy norm of x.
-            xNrgNorm2 += phi*phi
-            dErr[itn % window] = phi
-            if itn > window:
-                trncDirErr = norm(dErr)
-                xNrgNorm = sqrt(xNrgNorm2)
-                self.dir_errors_window.append(trncDirErr / xNrgNorm)
-                if trncDirErr < etol * xNrgNorm:
+                # Select largest real root in absolute value with the same
+                # sign as t1.
+                lst = [abs(r) for r in roots if r*t1 > 0]
+                stepMax = max(lst) if len(lst) > 0 else 1.0
+
+                if abs(t1) > abs(stepMax):
+                    x += stepMax * w
+                    xnorm = radius
+                    r1norm = normof2(rho*stepMax*sn, rho*stepMax*cs - phibar)
+                    tr_active = True
                     istop = 8
 
-            # Use a plane rotation on the right to eliminate the
-            # super-diagonal element (theta) of the upper-bidiagonal matrix.
-            # Then use the result to estimate norm(x).
+            if not tr_active:
+                x      += t1*w
+                w      *= t2 ; w += v
+                ddnorm  = ddnorm + norm(dk)**2
+                if wantvar: var += dk*dk
 
-            delta   =   sn2 * rho
-            gambar  = - cs2 * rho
-            rhs     =   phi  -  delta * z
-            zbar    =   rhs / gambar
-            xnorm   =   sqrt(xxnorm + zbar**2)
-            gamma   =   normof2(gambar, theta)
-            cs2     =   gambar / gamma
-            sn2     =   theta  / gamma
-            z       =   rhs    / gamma
-            xxnorm +=   z*z
+                if store_iterates:
+                    self.iterates.append(x.copy())
 
-            # Test for convergence.
-            # First, estimate the condition of the matrix  Abar,
-            # and the norms of  rbar  and  Abar'rbar.
+                # Update energy norm of x.
+                xNrgNorm2 += phi*phi
+                dErr[itn % window] = phi
+                if itn > window:
+                    trncDirErr = norm(dErr)
+                    xNrgNorm = sqrt(xNrgNorm2)
+                    self.dir_errors_window.append(trncDirErr / xNrgNorm)
+                    if trncDirErr < etol * xNrgNorm:
+                        istop = 8
 
-            Acond   =   Anorm * sqrt(ddnorm)
-            res1    =   phibar**2
-            res2    =   res2  +  psi**2
-            rnorm   =   sqrt(res1 + res2)
-            Arnorm  =   alpha * abs(tau)
+                # Use a plane rotation on the right to eliminate the
+                # super-diagonal element (theta) of the upper-bidiagonal matrix.
+                # Then use the result to estimate norm(x).
 
-            # 07 Aug 2002:
-            # Distinguish between
-            #    r1norm = ||b - Ax|| and
-            #    r2norm = rnorm in current code
-            #           = sqrt(r1norm^2 + damp^2*||x||^2).
-            #    Estimate r1norm from
-            #    r1norm = sqrt(r2norm^2 - damp^2*||x||^2).
-            # Although there is cancellation, it might be accurate enough.
+                delta   =   sn2 * rho
+                gambar  = - cs2 * rho
+                rhs     =   phi  -  delta * z
+                zbar    =   rhs / gambar
+                xnorm   =   sqrt(xxnorm + zbar**2)
+                gamma   =   normof2(gambar, theta)
+                cs2     =   gambar / gamma
+                sn2     =   theta  / gamma
+                z       =   rhs    / gamma
+                xxnorm +=   z*z
 
-            r1sq    =   rnorm**2  -  dampsq * xxnorm
-            r1norm  =   sqrt(abs(r1sq))
-            if r1sq < 0: r1norm = - r1norm
-            r2norm  =   rnorm
+                # Test for convergence.
+                # First, estimate the condition of the matrix  Abar,
+                # and the norms of  rbar  and  Abar'rbar.
 
-            # Now use these norms to estimate certain other quantities,
-            # some of which will be small near a solution.
+                Acond   =   Anorm * sqrt(ddnorm)
+                res1    =   phibar**2
+                res2    =   res2  +  psi**2
+                rnorm   =   sqrt(res1 + res2)
+                Arnorm  =   alpha * abs(tau)
 
-            test1 = rnorm / bnorm
-            if Anorm == 0. or rnorm == 0.:
-                test2 = inf
-            else:
-                test2 = Arnorm/(Anorm * rnorm)
-            if Acond == 0.0:
-                test3 = inf
-            else:
-                test3 = 1.0 / Acond
-            t1    = test1 / (1    +  Anorm * xnorm / bnorm)
-            rtol  = btol  +  atol *  Anorm * xnorm / bnorm
+                # 07 Aug 2002:
+                # Distinguish between
+                #    r1norm = ||b - Ax|| and
+                #    r2norm = rnorm in current code
+                #           = sqrt(r1norm^2 + damp^2*||x||^2).
+                #    Estimate r1norm from
+                #    r1norm = sqrt(r2norm^2 - damp^2*||x||^2).
+                # Although there is cancellation, it might be accurate enough.
 
-            if store_resids:
-                self.resids.append(r2norm)
-                self.normal_eqns_resids.append(Arnorm)
+                r1sq    =   rnorm**2  -  dampsq * xxnorm
+                r1norm  =   sqrt(abs(r1sq))
+                if r1sq < 0: r1norm = - r1norm
+                r2norm  =   rnorm
 
-            # The following tests guard against extremely small values of
-            # atol, btol  or  ctol.  (The user may have set any or all of
-            # the parameters  atol, btol, conlim  to 0.)
-            # The effect is equivalent to the normal tests using
-            # atol = eps,  btol = eps,  conlim = 1/eps.
+                # Now use these norms to estimate certain other quantities,
+                # some of which will be small near a solution.
 
-            if itn >= itnlim:  istop = 7
-            if 1 + test3 <= 1: istop = 6
-            if 1 + test2 <= 1: istop = 5
-            if 1 + t1    <= 1: istop = 4
+                test1 = rnorm / bnorm
+                if Anorm == 0. or rnorm == 0.:
+                    test2 = inf
+                else:
+                    test2 = Arnorm/(Anorm * rnorm)
+                if Acond == 0.0:
+                    test3 = inf
+                else:
+                    test3 = 1.0 / Acond
+                t1    = test1 / (1    +  Anorm * xnorm / bnorm)
+                rtol  = btol  +  atol *  Anorm * xnorm / bnorm
 
-            # Allow for tolerances set by the user.
+                if store_resids:
+                    self.resids.append(r2norm)
+                    self.normal_eqns_resids.append(Arnorm)
 
-            if test3 <= ctol: istop = 3
-            if test2 <= atol: istop = 2
-            if test1 <= rtol: istop = 1
+                # The following tests guard against extremely small values of
+                # atol, btol  or  ctol.  (The user may have set any or all of
+                # the parameters  atol, btol, conlim  to 0.)
+                # The effect is equivalent to the normal tests using
+                # atol = eps,  btol = eps,  conlim = 1/eps.
 
-            # See if it is time to print something.
+                if itn >= itnlim:  istop = 7
+                if 1 + test3 <= 1: istop = 6
+                if 1 + test2 <= 1: istop = 5
+                if 1 + t1    <= 1: istop = 4
 
-            prnt = False;
-            if n     <= 40       : prnt = True
-            if itn   <= 10       : prnt = True
-            if itn   >= itnlim-10: prnt = True
-            if itn % 10 == 0     : prnt = True
-            if test3 <=  2*ctol  : prnt = True
-            if test2 <= 10*atol  : prnt = True
-            if test1 <= 10*rtol  : prnt = True
-            if istop !=  0       : prnt = True
+                # Allow for tolerances set by the user.
 
-            if prnt and show:
-                str1 = '%6g %12.5e'     % (  itn,   x[0])
-                str2 = ' %10.3e %10.3e' % (r1norm, r2norm)
-                str3 = '  %8.1e %8.1e'  % (test1,  test2)
-                str4 = ' %8.1e %8.1e'   % (Anorm,  Acond)
-                print str1+str2+str3+str4
+                if test3 <= ctol: istop = 3
+                if test2 <= atol: istop = 2
+                if test1 <= rtol: istop = 1
+
+                # See if it is time to print something.
+
+                prnt = False;
+                if n     <= 40       : prnt = True
+                if itn   <= 10       : prnt = True
+                if itn   >= itnlim-10: prnt = True
+                if itn % 10 == 0     : prnt = True
+                if test3 <=  2*ctol  : prnt = True
+                if test2 <= 10*atol  : prnt = True
+                if test1 <= 10*rtol  : prnt = True
+                if istop !=  0       : prnt = True
+
+                if prnt and show:
+                    str1 = '%6g %12.5e'     % (  itn,   x[0])
+                    str2 = ' %10.3e %10.3e' % (r1norm, r2norm)
+                    str3 = '  %8.1e %8.1e'  % (test1,  test2)
+                    str4 = ' %8.1e %8.1e'   % (Anorm,  Acond)
+                    print str1+str2+str3+str4
 
             if istop > 0: break
 
@@ -422,11 +454,11 @@ class LSQRFramework(KrylovMethod):
             print ' '
             str1 = 'istop =%8g   r1norm =%8.1e'   % (istop, r1norm)
             str2 = 'Anorm =%8.1e   Arnorm =%8.1e' % (Anorm, Arnorm)
-            str3 = 'itn   =%8g   r2norm =%8.1e'   % ( itn, r2norm)
-            str4 = 'Acond =%8.1e   xnorm  =%8.1e' % (Acond, xnorm )
-            str5 = '                  bnorm  =%8.1e'    % bnorm
+            str3 = 'itn   =%8g   r2norm =%8.1e'   % (itn, r2norm)
+            str4 = 'Acond =%8.1e   xnorm  =%8.1e' % (Acond, xnorm)
+            str5 = '                  bnorm  =%8.1e' % bnorm
             str6 = 'xNrgNorm2 = %7.1e   trnDirErr = %7.1e' % \
-                    (xNrgNorm2, trncDirErr)
+                   (xNrgNorm2, trncDirErr)
             print str1 + '   ' + str2
             print str3 + '   ' + str4
             print str5
@@ -438,6 +470,7 @@ class LSQRFramework(KrylovMethod):
         if istop in [3,6]: self.status = 'ill-conditioned operator'
         if istop == 7: self.status = 'max iterations'
         if istop == 8: self.status = 'direct error small'
+        self.onBoundary = tr_active
         self.optimal = istop in [1,2,4,5,8]
         self.x = self.bestSolution = x
         self.istop = istop
