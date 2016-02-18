@@ -1,65 +1,79 @@
-# An example using a linear system arising from the
-# discretization of a partial differential equation.
-# The PDE is modeled and discretized with FEniCS.
-# See http://www.fenics-project.org
+"""Iterative solution of a discretized PDE.
+
+An example using a linear system arising from the
+discretization of a partial differential equation.
+The PDE is modeled and discretized with FEniCS.
+See http://www.fenics-project.org
+"""
 
 from dolfin import *
 import numpy as np
 
 # Import a Krylov subspace solver.
-#from pykrylov.cg import CG as KSolver
-#from pykrylov.bicgstab import BiCGSTAB as KSolver
-#from pykrylov.tfqmr import TFQMR as KSolver
-from pykrylov.cgs import CGS as KSolver
+# from pykrylov.cg import CG as KSolver
+from pykrylov.bicgstab import BiCGSTAB as KSolver
+# from pykrylov.tfqmr import TFQMR as KSolver
+# from pykrylov.cgs import CGS as KSolver
+from pykrylov.linop import LinearOperator, DiagonalOperator
 
-class AllBoundary(SubDomain):
+
+class LeftRightBoundary(SubDomain):
+    """Define Dirichlet boundary conditions."""
+
     def inside(self, x, on_boundary):
-        return on_boundary
+        """Boundary conditions at x = 0 or x = 1."""
+        return x[0] < DOLFIN_EPS or x[0] > 1.0 - DOLFIN_EPS
 
 
-def setup_problem(nx, ny, degree=1, verbose=False):
+def setup_problem(nx, ny, degree=1):
+    """Setup variational problem."""
     # Define domain.
-    mesh = UnitSquare(nx, ny)
-    V = FunctionSpace(mesh, 'CG', degree=degree)  # degree=1: Lagrange elements.
+    mesh = UnitSquareMesh(nx, ny)
+    V = FunctionSpace(mesh, "Lagrange", degree=degree)
 
-    # Define BCs. u0 is the exact final solution.
-    u0 = Expression('1 + x[0]*x[0] + 2*x[1]*x[1]')
-    bc = DirichletBC(V, u0, AllBoundary())
+    # Define BCs.
+    u0 = Constant(0.0)
+    bc = DirichletBC(V, u0, LeftRightBoundary())
 
     # Define variational problem.
     v = TestFunction(V)
-    u = TrialFunction(V) # "trial function" = "unknown".
-    f = Expression('-8*x[0] - 10*x[1]') #Constant(-6.0)
-    a = dot(grad(u), grad(v))*dx   # dx = integration over whole domain.
-    L = f*v*dx
-
+    u = TrialFunction(V)  # "trial function" = "unknown".
+    f = Expression("10*exp(-(pow(x[0] - 0.5, 2) + pow(x[1] - 0.5, 2)) / 0.02)")
+    g = Expression("sin(5 * x[0])")
+    a = inner(grad(u), grad(v)) * dx
+    L = f * v * dx + g * v * ds
     return (mesh, a, L, bc, u0, V)
 
 
 def setup_system(a, L, bc):
+    """Assemble variational problem and apply boundary conditions."""
     A = assemble(a)
     b = assemble(L)
     bc.apply(A, b)
-
     return (A, b)
 
 
 if __name__ == '__main__':
 
     # Assemble linear system.
-    (mesh, a, L, bc, u0, V) = setup_problem(10, 10, degree=1, verbose=False)
+    (mesh, a, L, bc, u0, V) = setup_problem(32, 32, degree=1)
     (A, b) = setup_system(a, L, bc)
 
-    # Build diagonal preconditioner.
-    diagA = np.diag(A.array())
+    # Define operator and diagonal preconditioner.
+    Aop = LinearOperator(A.size(0), A.size(1),
+                         lambda v: A * v,
+                         matvec_transp=lambda u: A.transpmult(u),
+                         symmetric=False)
+    D = DiagonalOperator(1 / np.diag(A.array()))
 
     # Solve with preconditioned CG.
-    ksolver = KSolver(lambda v: A*v, precon=lambda u: u/diagA)
+    ksolver = KSolver(Aop, precon=D)
     ksolver.solve(b.array())
 
     print 'Using ' + ksolver.name
+    print 'System size: ', Aop.shape[0]
     print 'Converged: ', ksolver.converged
-    print 'Initial/Final Residual:  %7.1e/%7.1e' % (ksolver.residNorm0,ksolver.residNorm)
+    print 'Initial/Final Residual:  %7.1e/%7.1e' % (ksolver.residNorm0, ksolver.residNorm)
     print 'Matvecs:   ', ksolver.nMatvec
 
     # Plot solution
