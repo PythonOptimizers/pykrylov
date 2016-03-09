@@ -4,9 +4,9 @@ PyKrylov
 
 PyKrylov is a pure Python package implementing common Krylov methods.
 
-.. image:: https://travis-ci.org/dpo/pykrylov.png?branch=master
+.. image:: https://travis-ci.org/PythonOptimizers/pykrylov.svg?branch=develop
     :alt: Travis-CI badge
-    :target: https://travis-ci.org/dpo/pykrylov
+    :target: https://travis-ci.org/PythonOptimizers/pykrylov
 
 .. image:: https://ci.appveyor.com/api/projects/status/5fqbbvhanhwslq5w?svg=true
     :alt: Appveyor badge
