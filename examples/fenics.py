@@ -73,7 +73,8 @@ if __name__ == '__main__':
     print 'Using ' + ksolver.name
     print 'System size: ', Aop.shape[0]
     print 'Converged: ', ksolver.converged
-    print 'Initial/Final Residual:  %7.1e/%7.1e' % (ksolver.residNorm0, ksolver.residNorm)
+    print 'Initial/Final Residual:  %7.1e/%7.1e' \
+        % (ksolver.residNorm0, ksolver.residNorm)
     print 'Matvecs:   ', ksolver.nMatvec
 
     # Plot solution
