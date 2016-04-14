@@ -240,20 +240,16 @@ class InverseLSR1Operator(LSR1Operator):
                 paircount += 1
 
         # Populate small matrix to be inverted
-        k_ind = 0
         for i in range(npairs):
             k = (self.insert + i) % npairs
             if ys[k] is not None:
                 minimat[k, k] = ys[k] - np.dot(y[:, k], y[:, k]) * self.gamma
-                l_ind = 0
                 for j in range(i):
                     l = (self.insert + j) % npairs
                     if ys[l] is not None:
                         minimat[k, l] = np.dot(y[:, k], s[:, l]) - \
                             np.dot(y[:, k], y[:, l]) * self.gamma
                         minimat[l, k] = minimat[k, l]
-                        l_ind += 1
-                k_ind += 1
 
         if paircount > 0:
             rng = paircount
