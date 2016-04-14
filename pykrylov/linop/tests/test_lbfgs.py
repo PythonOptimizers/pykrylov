@@ -1,4 +1,4 @@
-"""Test LBFGS linear operators. """
+"""Test LBFGS linear operators."""
 
 from __future__ import division
 import unittest
@@ -15,6 +15,7 @@ class TestLBFGSOperator(unittest.TestCase):
         self.n = 10
         self.npairs = 5
         self.B = lbfgs.LBFGSOperator(self.n, self.npairs)
+        self.B_compact = lbfgs.CompactLBFGSOperator(self.n, self.npairs)
         self.H = lbfgs.InverseLBFGSOperator(self.n, self.npairs)
 
     def test_init(self):
@@ -42,6 +43,7 @@ class TestLBFGSOperator(unittest.TestCase):
             s = np.random.random(self.n)
             y = np.random.random(self.n)
             self.B.store(s, y)
+            self.B_compact.store(s, y)
             self.H.store(s, y)
 
         assert self.B.insert == 2
@@ -54,3 +56,5 @@ class TestLBFGSOperator(unittest.TestCase):
 
         C = self.B * self.H
         assert np.allclose(C.full(), np.eye(self.n))
+        C_compact = self.B_compact * self.H
+        assert np.allclose(C_compact.full(), np.eye(self.n))

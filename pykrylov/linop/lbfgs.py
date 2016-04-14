@@ -1,20 +1,19 @@
 # -*- coding: utf-8 -*-
 """Limited-Memory BFGS Operators.
 
-Linear operators to represent limited-memory BFGS matrices
-and their inverses.
+Linear operators to represent limited-memory BFGS matrices and their inverses.
 """
 
-from pykrylov.linop import LinearOperator
+from pykrylov.linop import LQNLinearOperator, StructuredLQNLinearOperator
 import numpy as np
 
 __docformat__ = 'restructuredtext'
 
 
-class InverseLBFGSOperator(LinearOperator):
+class InverseLBFGSOperator(LQNLinearOperator):
     """Store and manipulate inverse L-BFGS approximations.
 
-    InverseLBFGSOperator may be used, e.g., in a LBFGS solver for
+    :class: `InverseLBFGSOperator` may be used, e.g., in a L-BFGS solver for
     unconstrained minimization or as a preconditioner. The limited-memory
     matrix that is implicitly stored is a positive definite approximation to
     the inverse Hessian. Therefore, search directions may be obtained by
@@ -23,84 +22,37 @@ class InverseLBFGSOperator(LinearOperator):
     """
 
     def __init__(self, n, npairs=5, **kwargs):
-        """InverseLBFGSOperator with `npairs` {s,y} pairs in `n` variables.
+        u"""Instantiate a :class: `InverseLBFGSOperator`.
 
-        InverseLBFGSOperator(n)
-
-        where n is the number of variables of the problem.
+        :parameters:
+            :n: the number of variables.
+            :npairs: the number of {s, y} pairs stored (default: 5).
 
         :keywords:
-
-            :npairs:     the number of {s,y} pairs stored (default: 5)
-            :scaling:    enable scaling of the 'initial matrix'. Scaling is
+            :scaling: enable scaling of the 'initial matrix'. Scaling is
                          done as 'method M3' in the LBFGS paper by Zhou and
-                         Nocedal; the scaling factor is s'y/y'y (default: False).
+                         Nocedal; the scaling factor is sᵀy/yᵀy
+                         (default: False).
         """
-        # Mandatory arguments
-        self.n = n
-        self._npairs = npairs
+        super(InverseLBFGSOperator, self).__init__(n, npairs, **kwargs)
 
-        # Optional arguments
-        self.scaling = kwargs.pop('scaling', False)
+    def _storing_test(self, new_s, new_y, ys):
+        u"""Test if new pair {s, y} is to be stored.
 
-        # insert to points to the location where the *next* (s,y) pair
-        # is to be inserted in self.s and self.y.
-        self.insert = 0
-
-        # Threshold on dot product s'y to accept a new pair (s,y).
-        self.accept_threshold = 1.0e-20
-
-        # Storage of the (s,y) pairs
-        self.s = np.empty((self.n, self.npairs), 'd')
-        self.y = np.empty((self.n, self.npairs), 'd')
-
-        self.alpha = np.empty(self.npairs, 'd')    # multipliers
-        self.ys = [None] * self.npairs             # dot products si'yi
-        self.gamma = 1.0
-
-        super(InverseLBFGSOperator, self).__init__(n, n,
-                                                   matvec=self.lbfgs_matvec,
-                                                   symmetric=True, **kwargs)
-
-    @property
-    def npairs(self):
-        """Return the maximum number of {s,y} pairs stored."""
-        return self._npairs
-
-    def store(self, new_s, new_y):
-        """Store the new pair {new_s,new_y}.
-
-        A new pair is only accepted if the dot product <new_s, new_y> is over
-        the threshold `self.accept_threshold`. The oldest pair is discarded in
-        case the storage limit has been reached.
+        A new pair is only accepted if the dot product yᵀs is over the
+        threshold `self.accept_threshold`. The oldest pair is discarded in case
+        the storage limit has been reached.
         """
-        ys = np.dot(new_s, new_y)
-        if ys <= self.accept_threshold:
-            self.logger.debug('Rejecting (s,y) pair')
-            return
+        return ys > self.accept_threshold
 
-        insert = self.insert
-        self.s[:, insert] = new_s.copy()
-        self.y[:, insert] = new_y.copy()
-        self.ys[insert] = ys
-        self.insert += 1
-        self.insert = self.insert % self.npairs
-
-    def restart(self):
-        """Restart the approximation by clearing all data on past updates."""
-        self.ys = [None] * self.npairs
-        self.s = np.empty((self.n, self.npairs), 'd')
-        self.y = np.empty((self.n, self.npairs), 'd')
-        self.insert = 0
-        return
-
-    def lbfgs_matvec(self, v):
+    def qn_matvec(self, v):
         """Compute matrix-vector product with inverse L-BFGS approximation.
 
         Compute a matrix-vector product between the current limited-memory
         positive-definite approximation to the inverse Hessian matrix and the
-        vector v using the LBFGS two-loop recursion formula.
+        vector v using the L-BFGS two-loop recursion formula.
         """
+        self.n_matvec += 1
         q = v.copy()
         s = self.s
         y = self.y
@@ -130,14 +82,30 @@ class InverseLBFGSOperator(LinearOperator):
 class LBFGSOperator(InverseLBFGSOperator):
     """Store and manipulate forward L-BFGS approximations.
 
-    LBFGSOperator is similar to InverseLBFGSOperator, except that
-    an approximation to the direct Hessian, not its inverse, is maintained.
+    :class: `LBFGSOperator` is similar to :class: `InverseLBFGSOperator`,
+    except that an approximation to the direct Hessian, not its inverse, is
+    maintained.
 
     This form is useful in trust region methods, where the approximate Hessian
     is used in the model problem.
     """
 
-    def lbfgs_matvec(self, v):
+    def __init__(self, n, npairs=5, **kwargs):
+        u"""Instantiate a :class: `LBFGSOperator`.
+
+        :parameters:
+            :n: the number of variables.
+            :npairs: the number of {s, y} pairs stored (default: 5).
+
+        :keywords:
+            :scaling: enable scaling of the 'initial matrix'. Scaling is
+                         done as 'method M3' in the LBFGS paper by Zhou and
+                         Nocedal; the scaling factor is sᵀy/yᵀy
+                         (default: False).
+        """
+        super(LBFGSOperator, self).__init__(n, npairs, **kwargs)
+
+    def qn_matvec(self, v):
         """Compute matrix-vector product with forward L-BFGS approximation.
 
         Compute a matrix-vector product between the current limited-memory
@@ -147,6 +115,7 @@ class LBFGSOperator(InverseLBFGSOperator):
         Note: there is probably some optimization that could be done in this
         function with respect to memory use and storing key dot products.
         """
+        self.n_matvec += 1
         q = v.copy()
         s = self.s
         y = self.y
@@ -176,16 +145,31 @@ class LBFGSOperator(InverseLBFGSOperator):
 class CompactLBFGSOperator(InverseLBFGSOperator):
     """Store and manipulate forward L-BFGS approximations in compact form.
 
-    LBFGSOperator is similar bto InverseLBFGSOperator, except that it operates
-    on the Hessian approximation directly, rather than the inverse.
-    The so-called compact representation is used to compute this approximation
-    efficiently.
+    :class: `CompactLBFGSOperator` is similar to :class:
+    `InverseLBFGSOperator`, except that it operates on the Hessian
+    approximation directly, rather than the inverse. The so-called compact
+    representation is used to compute this approximation efficiently.
 
     This form is useful in trust region methods, where the approximate Hessian
     is used in the model problem.
     """
 
-    def lbfgs_matvec(self, v):
+    def __init__(self, n, npairs=5, **kwargs):
+        u"""Instantiate a :class: `CompactLBFGSOperator`.
+
+        :parameters:
+            :n: the number of variables.
+            :npairs: the number of {s, y} pairs stored (default: 5).
+
+        :keywords:
+            :scaling: enable scaling of the 'initial matrix'. Scaling is
+                         done as 'method M3' in the LBFGS paper by Zhou and
+                         Nocedal; the scaling factor is sᵀy/yᵀy
+                         (default: False).
+        """
+        super(CompactLBFGSOperator, self).__init__(n, npairs, **kwargs)
+
+    def qn_matvec(self, v):
         """Compute matrix-vector product with forward L-BFGS approximation.
 
         Compute a matrix-vector product between the current limited-memory
@@ -195,6 +179,8 @@ class CompactLBFGSOperator(InverseLBFGSOperator):
         Note: there is probably some optimization that could be done in this
         function with respect to memory use and caching key dot products.
         """
+        self.n_matvec += 1
+
         q = v.copy()
         r = v.copy()
         s = self.s
@@ -235,9 +221,13 @@ class CompactLBFGSOperator(InverseLBFGSOperator):
                 for j in range(i):
                     l = (self.insert + j) % self.npairs
                     if ys[l] is not None:
-                        minimat[k_ind, paircount + l_ind] = np.dot(s[:, k], y[:, l])
-                        minimat[paircount + l_ind, k_ind] = minimat[k_ind, paircount + l_ind]
-                        minimat[k_ind, l_ind] = np.dot(s[:, k], s[:, l]) / self.gamma
+                        minimat[k_ind, paircount + l_ind] = np.dot(s[:, k],
+                                                                   y[:, l])
+                        minimat[paircount + l_ind, k_ind] = minimat[k_ind,
+                                                                    (paircount +
+                                                                     l_ind)]
+                        minimat[k_ind, l_ind] = np.dot(s[:, k],
+                                                       s[:, l]) / self.gamma
                         minimat[l_ind, k_ind] = minimat[k_ind, l_ind]
                         l_ind += 1
                 k_ind += 1
@@ -254,31 +244,42 @@ class CompactLBFGSOperator(InverseLBFGSOperator):
         return r
 
 
-class StructuredLBFGSOperator(InverseLBFGSOperator):
+class StructuredLBFGSOperator(StructuredLQNLinearOperator):
     """Store and manipulate structured forward L-BFGS approximations.
 
-    For this procedure see [Nocedal06].
+    For this procedure see[Nocedal06].
     """
 
     def __init__(self, n, npairs=5, **kwargs):
-        """InverseLBFGSOperator with `npairs` {s,y} pairs in `n` variables.
+        u"""Instantiate a :class: `StructuredLBFGSOperator`.
 
-        StructuredLBFGSOperator(n)
-
-        where n is the number of variables of the problem.
+        :parameters:
+            :n: the number of variables.
+            :npairs: the number of {s,y, yd} pairs stored (default: 5).
 
         :keywords:
-
-            :npairs:     the number of {s,y} pairs stored (default: 5)
-            :scaling:    enable scaling of the 'initial matrix'. Scaling is
+            :scaling: enable scaling of the 'initial matrix'. Scaling is
                          done as 'method M3' in the LBFGS paper by Zhou and
-                         Nocedal; the scaling factor is s'y/y'y (default: False).
+                         Nocedal; the scaling factor is sᵀy/yᵀy
+                         (default: False).
         """
-        super(StructuredLBFGSOperator, self).__init__(self, n, npairs, **kwargs)
-        self.yd = np.empty((self.n, self.npairs))
+        super(StructuredLBFGSOperator, self).__init__(self, n, npairs,
+                                                      **kwargs)
         self.accept_threshold = 1e-8
 
-    def lbfgs_matvec(self, v):
+    def _storing_test(self, new_s, new_y, new_yd, ys):
+        u"""Test if new pair {s, y, yd} is to be stored.
+
+        A new pair {s, y, yd} is only accepted if
+
+            ∣yᵀs + √(yᵀs sᵀBs)∣ ⩾ 1e-8.
+        """
+        Bs = self.matvec(new_s)
+        ypBs = ys + (ys * np.dot(new_s, Bs))**0.5
+
+        return ypBs >= self.accept_threshold
+
+    def qn_matvec(self, v):
         """Compute matrix-vector product with forward L-BFGS approximation.
 
         Compute a matrix-vector product between the current limited-memory
@@ -288,6 +289,7 @@ class StructuredLBFGSOperator(InverseLBFGSOperator):
         Note: there is probably some optimization that could be done in this
         function with respect to memory use and storing key dot products.
         """
+        self.n_matvec += 1
         q = v.copy()
         s = self.s
         y = self.y
@@ -317,34 +319,14 @@ class StructuredLBFGSOperator(InverseLBFGSOperator):
                     if ys[l] is not None:
                         alTs = np.dot(a[:, l], s[:, k]) / aTs[l]
                         adlTs = np.dot(ad[:, l], s[:, k])
-                        update = alTs / aTs[l] * ad[:, l] + adlTs / aTs[l] * a[:, l] - adTs[l] / aTs[l] * alTs * a[:, l]
+                        update = alTs / aTs[l] * ad[:, l] + adlTs / aTs[l] * \
+                            a[:, l] - adTs[l] / aTs[l] * alTs * a[:, l]
                         a[:, k] += coef * update
                         ad[:, k] -= update
                 aTs[k] = np.dot(a[:, k], s[:, k])
                 adTs[k] = np.dot(ad[:, k], s[:, k])
                 aTv = np.dot(a[:, k], v[:])
                 adTv = np.dot(ad[:, k], v[:])
-                q += aTv / aTs[k] * ad[:, k] + adTv / aTs[k] * a[:, k] - aTv * adTs[k] / aTs[k]**2 * a[:, k]
+                q += aTv / aTs[k] * ad[:, k] + adTv / aTs[k] * \
+                    a[:, k] - aTv * adTs[k] / aTs[k]**2 * a[:, k]
         return q
-
-    def store(self, new_s, new_y, new_yd):
-        """Store the new pair {new_s, new_y, new_yd}.
-
-        A new pair is only accepted if
-        | y_k' s_k + (y's s_k' B_k s_k)**.5 | >= 1e-8.
-        """
-        ys = np.dot(new_s, new_y)
-        Bs = self.matvec(new_s)
-        ypBs = ys + (ys * np.dot(new_s, Bs))**0.5
-
-        if ypBs >= self.accept_threshold:
-            insert = self.insert
-            self.s[:, insert] = new_s.copy()
-            self.y[:, insert] = new_y.copy()
-            self.yd[:, insert] = new_yd.copy()
-            self.ys[insert] = ys
-            self.insert += 1
-            self.insert = self.insert % self.npairs
-        else:
-            self.log.debug('Rejecting (s,y) pair')
-        return
