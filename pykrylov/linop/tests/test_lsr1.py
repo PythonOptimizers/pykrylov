@@ -23,6 +23,7 @@ class TestLSR1Operator(unittest.TestCase):
         assert self.B.insert == 0
         assert self.H.insert == 0
         assert np.allclose(self.B.full(), np.eye(self.n))
+        assert np.allclose(self.B_compact.full(), np.eye(self.n))
         assert np.allclose(self.H.full(), np.eye(self.n))
 
     def test_structure(self):
