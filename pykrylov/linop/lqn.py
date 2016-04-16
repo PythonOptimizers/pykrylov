@@ -97,6 +97,19 @@ class LQNLinearOperator(LinearOperator):
 
 
 class StructuredLQNLinearOperator(LQNLinearOperator):
+    u"""Store and manipulate structured limited-memory Quasi-Newton approximations.
+
+    Structured quasi-Newton approximations may be used, e.g., in augmented Lagrangian methods or in nonlinear least-squares, where Hessian has a special structure.
+
+    If Φ(x;λ,ρ) is the augmented Lagrangian function of an equality constrained optimization problem,
+        ∇ₓₓΦ(x;λ,ρ) = ∇ₓₓL(x,λ+ρc(x)) + ρJ(x)ᵀJ(x).
+    The structured quasi-Newton update takes the form
+        B_{k+1} := S_{k+1} + ρJᵀ J
+    where S_{k+1} ≈ ∇ₓₓL(x,λ+ρc(x)).
+    See [Arreckx15]_ for more details.
+
+    [Arreckx15] A matrix-free augmented lagrangian algorithm with application to large-scale structural design optimization, S. Arreckx, A. Lambe, J. R. R. A. Martins and D. Orban, Optimization and Engineering, 2015, 1--26.
+    """
 
     def __init__(self, n, npairs=5, **kwargs):
         """Instantiate a :class: `StructuredLQNLinearOperator`.
