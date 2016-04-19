@@ -108,6 +108,8 @@ class LSQRFramework(KrylovMethod):
 
             `minimize ‖b - Ax‖_D + damp * ‖x‖_N`
 
+        where `D` and `N` are positive-definite matrices.
+
         Optionally, a trust-region constraint may be added (if :keyword: radius
         is specified)
 
