@@ -34,11 +34,18 @@ class TestLSQR(unittest.TestCase):
         # trust-region constraint is not active
         lsqr.solve(self.rhs, radius=5, show=True)
         np.allclose(lsqr.x, np.array([1., 4.]))
+        assert(lsqr.status != 'trust-region boundary active')
+        assert(lsqr.istop != 9)
 
         # trust-region constraint is active
         lsqr.solve(self.rhs, radius=np.sqrt(17), show=True)
         np.allclose(lsqr.x, np.array([1., 4.]))
+        assert(lsqr.status=='trust-region boundary active')
+        assert(lsqr.istop == 9)
 
         # trust-region constraint is active
         lsqr.solve(self.rhs, radius=50. / 13, show=True)
         np.allclose(lsqr.x, np.array([14. / 13, 48. / 13]))
+        assert(lsqr.status=='trust-region boundary active')
+        assert(lsqr.istop == 9)
+

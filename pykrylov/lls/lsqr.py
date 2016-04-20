@@ -76,7 +76,8 @@ class LSQRFramework(KrylovMethod):
                     'The least-squares solution is good enough for this machine',
                     'Cond(Abar) seems to be too large for this machine       ',
                     'The iteration limit has been reached                    ',
-                    'The truncated direct error is small enough, given etol  ']
+                    'The truncated direct error is small enough, given etol  ',
+                    'The trust-region boundary has been hit                    ']
 
         self.A = A
         self.x = None
@@ -372,7 +373,7 @@ class LSQRFramework(KrylovMethod):
                     r1norm = normof2(rho * stepMax * sn,
                                      rho * stepMax * cs - phibar)
                     tr_active = True
-                    istop = 8
+                    istop = 9
 
             if not tr_active:
                 x += t1 * w
@@ -538,6 +539,8 @@ class LSQRFramework(KrylovMethod):
             self.status = 'max iterations'
         if istop == 8:
             self.status = 'direct error small'
+        if istop == 9:
+            self.status = 'trust-region boundary active'
         self.onBoundary = tr_active
         self.optimal = istop in [1, 2, 4, 5, 8]
         self.x = self.bestSolution = x
