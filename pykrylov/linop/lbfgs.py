@@ -263,8 +263,7 @@ class StructuredLBFGSOperator(StructuredLQNLinearOperator):
                          Nocedal; the scaling factor is sᵀy/yᵀy
                          (default: False).
         """
-        super(StructuredLBFGSOperator, self).__init__(self, n, npairs,
-                                                      **kwargs)
+        super(StructuredLBFGSOperator, self).__init__(n, npairs, **kwargs)
         self.accept_threshold = 1e-8
 
     def _storing_test(self, new_s, new_y, new_yd, ys):
@@ -274,7 +273,7 @@ class StructuredLBFGSOperator(StructuredLQNLinearOperator):
 
             ∣yᵀs + √(yᵀs sᵀBs)∣ ⩾ 1e-8.
         """
-        Bs = self.matvec(new_s)
+        Bs = self.qn_matvec(new_s)
         ypBs = ys + (ys * np.dot(new_s, Bs))**0.5
 
         return ypBs >= self.accept_threshold
