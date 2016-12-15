@@ -310,22 +310,29 @@ class StructuredLBFGSOperator(StructuredLQNLinearOperator):
         for i in range(npairs):
             k = (self.insert + i) % npairs
             if ys[k] is not None:
-                coef = (self.gamma * ys[k] / np.dot(s[:, k], s[:, k]))**0.5
-                a[:, k] = y[:, k] + coef * s[:, k] / self.gamma
-                ad[:, k] = yd[:, k] - s[:, k] / self.gamma
+                # Form a[] and ad[] vectors for current step
+                a[:, k] = y[:, k].copy()
+                ad[:, k] = yd[:, k].copy()
+                Bs = s[:, k] / self.gamma
                 for j in range(i):
                     l = (self.insert + j) % npairs
                     if ys[l] is not None:
-                        alTs = np.dot(a[:, l], s[:, k]) / aTs[l]
-                        adlTs = np.dot(ad[:, l], s[:, k])
-                        update = alTs / aTs[l] * ad[:, l] + adlTs / aTs[l] * \
-                            a[:, l] - adTs[l] / aTs[l] * alTs * a[:, l]
-                        a[:, k] += coef * update
-                        ad[:, k] -= update
+                        aTsk = np.dot(a[:, l], s[:, k])
+                        adTsk = np.dot(ad[:, l], s[:, k])
+                        aTsl = np.dot(a[:, l], s[:, l])
+                        adTsl = np.dot(ad[:, l], s[:, l])
+                        Bs += (aTsk / aTsl) * ad[:, l] + (adTsk / aTsl) * a[:, l] - \
+                            (aTsk * adTsl / aTsl**2) * a[:, l]
+                a[:, k] += (ys[k] / np.dot(s[:, k], Bs))**0.5 * Bs
+                ad[:, k] -= Bs
+
+                # Form inner products with current s[] and input vector
                 aTs[k] = np.dot(a[:, k], s[:, k])
                 adTs[k] = np.dot(ad[:, k], s[:, k])
                 aTv = np.dot(a[:, k], v[:])
                 adTv = np.dot(ad[:, k], v[:])
-                q += aTv / aTs[k] * ad[:, k] + adTv / aTs[k] * \
-                    a[:, k] - aTv * adTs[k] / aTs[k]**2 * a[:, k]
+
+                q += (aTv / aTs[k]) * ad[:, k] + (adTv / aTs[k]) * a[:, k] - \
+                    (aTv * adTs[k] / aTs[k]**2) * a[:, k]
+
         return q
