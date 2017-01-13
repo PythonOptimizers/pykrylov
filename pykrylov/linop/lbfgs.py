@@ -264,18 +264,23 @@ class StructuredLBFGSOperator(StructuredLQNLinearOperator):
                          (default: False).
         """
         super(StructuredLBFGSOperator, self).__init__(n, npairs, **kwargs)
-        self.accept_threshold = 1e-8
+        self.accept_threshold = 1e-10
 
     def _storing_test(self, new_s, new_y, new_yd, ys):
         u"""Test if new pair {s, y, yd} is to be stored.
 
         A new pair {s, y, yd} is only accepted if
 
-            ∣yᵀs + √(yᵀs sᵀBs)∣ ⩾ 1e-8.
+            ∣yᵀs + √(yᵀs sᵀBs)∣ ⩾ self.accept_threshold
         """
         Bs = self.qn_matvec(new_s)
-        ypBs = ys + (ys * np.dot(new_s, Bs))**0.5
+        sBs = np.dot(new_s, Bs)
 
+        # Supress python runtime warnings
+        if ys < 0.0 or sBs < 0.0:
+            return False
+
+        ypBs = ys + (ys * sBs)**0.5
         return ypBs >= self.accept_threshold
 
     def qn_matvec(self, v):
