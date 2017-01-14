@@ -316,9 +316,8 @@ class StructuredLBFGSOperator(StructuredLQNLinearOperator):
             k = (self.insert + i) % npairs
             if ys[k] is not None:
                 # Form a[] and ad[] vectors for current step
-                a[:, k] = y[:, k].copy()
-                ad[:, k] = yd[:, k].copy()
-                Bs = s[:, k] / self.gamma
+                ad[:, k] = yd[:, k] - s[:, k] / self.gamma
+                Bsk = s[:, k] / self.gamma
                 for j in range(i):
                     l = (self.insert + j) % npairs
                     if ys[l] is not None:
@@ -326,10 +325,11 @@ class StructuredLBFGSOperator(StructuredLQNLinearOperator):
                         adTsk = np.dot(ad[:, l], s[:, k])
                         aTsl = np.dot(a[:, l], s[:, l])
                         adTsl = np.dot(ad[:, l], s[:, l])
-                        Bs += (aTsk / aTsl) * ad[:, l] + (adTsk / aTsl) * a[:, l] - \
+                        update = (aTsk / aTsl) * ad[:, l] + (adTsk / aTsl) * a[:, l] - \
                             (aTsk * adTsl / aTsl**2) * a[:, l]
-                a[:, k] += (ys[k] / np.dot(s[:, k], Bs))**0.5 * Bs
-                ad[:, k] -= Bs
+                        Bsk += update.copy()
+                        ad[:, k] -= update.copy()
+                a[:, k] = y[:, k] + (ys[k] / np.dot(s[:, k], Bsk))**0.5 * Bsk
 
                 # Form inner products with current s[] and input vector
                 aTs[k] = np.dot(a[:, k], s[:, k])
