@@ -349,21 +349,27 @@ class StructuredLSR1Operator(StructuredLQNLinearOperator):
         for i in range(npairs):
             k = (self.insert + i) % npairs
             if ys[k] is not None:
+                # Form all a[] and ad[] vectors for the current step
                 a[:, k] = y[:, k] - s[:, k] / self.gamma
                 ad[:, k] = yd[:, k] - s[:, k] / self.gamma
                 for j in range(i):
                     l = (self.insert + j) % npairs
                     if ys[l] is not None:
-                        alTs = np.dot(a[:, l], s[:, k])
-                        adlTs = np.dot(ad[:, l], s[:, k])
-                        update = -alTs / aTs[l] * ad[:, l] - adlTs / aTs[l] * \
-                            a[:, l] + adTs[l] / aTs[l] * alTs * a[:, l]
-                        a[:, k] += update.copy()
-                        ad[:, k] += update.copy()
+                        aTsk = np.dot(a[:, l], s[:, k])
+                        adTsk = np.dot(ad[:, l], s[:, k])
+                        aTsl = np.dot(a[:, l], s[:, l])
+                        adTsl = np.dot(ad[:, l], s[:, l])
+                        update = (aTsk / aTsl) * ad[:, l] + (adTsk / aTsl) * a[:, l] - \
+                            (aTsk * adTsl / aTsl**2) * a[:, l]
+                        a[:, k] -= update.copy()
+                        ad[:, k] -= update.copy()
+
+                # Form inner products with current s[] and input vector
                 aTs[k] = np.dot(a[:, k], s[:, k])
                 adTs[k] = np.dot(ad[:, k], s[:, k])
                 aTv = np.dot(a[:, k], v[:])
                 adTv = np.dot(ad[:, k], v[:])
-                q += aTv / aTs[k] * ad[:, k] + adTv / aTs[k] * \
-                    a[:, k] - aTv * adTs[k] / aTs[k]**2 * a[:, k]
+
+                q += (aTv / aTs[k]) * ad[:, k] + (adTv / aTs[k]) * a[:, k] - \
+                    (aTv * adTs[k] / aTs[k]**2) * a[:, k]
         return q
