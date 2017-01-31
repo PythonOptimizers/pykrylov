@@ -263,20 +263,24 @@ class StructuredLBFGSOperator(StructuredLQNLinearOperator):
                          Nocedal; the scaling factor is sᵀy/yᵀy
                          (default: False).
         """
-        super(StructuredLBFGSOperator, self).__init__(self, n, npairs,
-                                                      **kwargs)
-        self.accept_threshold = 1e-8
+        super(StructuredLBFGSOperator, self).__init__(n, npairs, **kwargs)
+        self.accept_threshold = 1e-10
 
     def _storing_test(self, new_s, new_y, new_yd, ys):
         u"""Test if new pair {s, y, yd} is to be stored.
 
         A new pair {s, y, yd} is only accepted if
 
-            ∣yᵀs + √(yᵀs sᵀBs)∣ ⩾ 1e-8.
+            ∣yᵀs + √(yᵀs sᵀBs)∣ ⩾ self.accept_threshold
         """
-        Bs = self.matvec(new_s)
-        ypBs = ys + (ys * np.dot(new_s, Bs))**0.5
+        Bs = self.qn_matvec(new_s)
+        sBs = np.dot(new_s, Bs)
 
+        # Supress python runtime warnings
+        if ys < 0.0 or sBs < 0.0:
+            return False
+
+        ypBs = ys + (ys * sBs)**0.5
         return ypBs >= self.accept_threshold
 
     def qn_matvec(self, v):
@@ -311,22 +315,29 @@ class StructuredLBFGSOperator(StructuredLQNLinearOperator):
         for i in range(npairs):
             k = (self.insert + i) % npairs
             if ys[k] is not None:
-                coef = (self.gamma * ys[k] / np.dot(s[:, k], s[:, k]))**0.5
-                a[:, k] = y[:, k] + coef * s[:, k] / self.gamma
+                # Form a[] and ad[] vectors for current step
                 ad[:, k] = yd[:, k] - s[:, k] / self.gamma
+                Bsk = s[:, k] / self.gamma
                 for j in range(i):
                     l = (self.insert + j) % npairs
                     if ys[l] is not None:
-                        alTs = np.dot(a[:, l], s[:, k]) / aTs[l]
-                        adlTs = np.dot(ad[:, l], s[:, k])
-                        update = alTs / aTs[l] * ad[:, l] + adlTs / aTs[l] * \
-                            a[:, l] - adTs[l] / aTs[l] * alTs * a[:, l]
-                        a[:, k] += coef * update
-                        ad[:, k] -= update
+                        aTsk = np.dot(a[:, l], s[:, k])
+                        adTsk = np.dot(ad[:, l], s[:, k])
+                        aTsl = np.dot(a[:, l], s[:, l])
+                        adTsl = np.dot(ad[:, l], s[:, l])
+                        update = (aTsk / aTsl) * ad[:, l] + (adTsk / aTsl) * a[:, l] - \
+                            (aTsk * adTsl / aTsl**2) * a[:, l]
+                        Bsk += update.copy()
+                        ad[:, k] -= update.copy()
+                a[:, k] = y[:, k] + (ys[k] / np.dot(s[:, k], Bsk))**0.5 * Bsk
+
+                # Form inner products with current s[] and input vector
                 aTs[k] = np.dot(a[:, k], s[:, k])
                 adTs[k] = np.dot(ad[:, k], s[:, k])
                 aTv = np.dot(a[:, k], v[:])
                 adTv = np.dot(ad[:, k], v[:])
-                q += aTv / aTs[k] * ad[:, k] + adTv / aTs[k] * \
-                    a[:, k] - aTv * adTs[k] / aTs[k]**2 * a[:, k]
+
+                q += (aTv / aTs[k]) * ad[:, k] + (adTv / aTs[k]) * a[:, k] - \
+                    (aTv * adTs[k] / aTs[k]**2) * a[:, k]
+
         return q
