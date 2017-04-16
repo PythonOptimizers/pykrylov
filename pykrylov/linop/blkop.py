@@ -119,6 +119,22 @@ class BlockLinearOperator(LinearOperator):
         "The list of blocks defining the block operator."
         return self._blocks
 
+    def update_block(self, row, column, new_block):
+        if new_block.shape != self._blocks[row][column].shape:
+            raise ShapeError('The new block should have the same shape as the block you are trying to replace')
+        self._blocks[row][column] = new_block
+        if self.symmetric:
+            self._blocks[column][row] = new_block.T
+        return
+
+
+    def __setitem__(self, idx, new_block):
+        row = idx[0]; column = idx[1]        
+        self._blocks[row][column] = new_block
+        if self.symmetric:
+            self._blocks[column][row] = new_block.T
+        return
+
     def __getitem__(self, indices):
         blks_mat = np.matrix(self._blocks, dtype=object)
         blks = blks_mat.__getitem__(indices)
